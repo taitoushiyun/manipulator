@@ -6,7 +6,7 @@ import numpy as np
 VREP_Config = {
     'max_torque': np.ones(24)*10000000,                    # maximum torque exerted on each joint.
     'T': 20,
-    'distance_threshold': 0.02,
+    'distance_threshold': 0.01,
     'buffer_type': 'HER',
     'reward_type': 'dense',
     'max_angles_vel': 10,  # 10degree/s

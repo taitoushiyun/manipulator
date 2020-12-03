@@ -195,23 +195,17 @@ if __name__ == '__main__':
     obses = []
     obses.append(obs[:10])
 
-    for i in range(1, 20):
+    for i in range(1, 80):
 
-        a = [0] * 5
-        a[0] = 1
-        a[2] = 1
-        a[4] = 1
+        a = [-1] * 5
         obs, reward, info, done = env.step(a)
         obses.append(obs[:10])
 
-    for j in range(3):
+    for j in range(4):
         obs = env.reset()
         time.sleep(3)
-        for i in range(1, 20):
-            a = [0] * 5
-            a[0] = 1
-            a[2] = 1
-            a[4] = 1
+        for i in range(1, 80):
+            a = [1] * 5
             obs, reward, info, done = env.step(a)
             obses.append(obs[:10])
     import matplotlib.pyplot as plt

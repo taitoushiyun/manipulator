@@ -41,7 +41,7 @@ class PPO_agent(object):
 
         self.clip_epsilon, self.gamma, self.ppo_epoch, self.weight_epsilon = clip_epsilon, gamma, ppo_epoch, weight_epsilon
         self.optimizer = optim.Adam(self.actor_critic.parameters(), lr=lr)
-        self.vis = visdom.Visdom(port=6016, env='mani_0')
+        self.vis = visdom.Visdom(port=6016, env='mani_1')
         self.vis.line(
             X=np.array([0]),
             Y=np.array([0]),
