@@ -71,6 +71,7 @@ class SamplerWorker(AbstractEnvWorker):
             path_len += 1
             self.obs = cur_obs = next_obs
             if done:
+                print(episode_reward)
                 if len(self.reward_record) > self.reward_record_size:
                     self.reward_record.pop(0)
                 self.reward_record.append(episode_reward)

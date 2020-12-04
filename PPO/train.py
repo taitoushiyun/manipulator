@@ -1,23 +1,22 @@
 from PPO.ppo_agent import PPO_agent, ReplayBuffer
 from PPO.actor_critic import Actor_critic
-
+import gym
 import torch
 import matplotlib.pyplot as plt
 from vrep_con.vrep_utils import ManipulatorEnv
 
 
 def training_process():
-    env = ManipulatorEnv(0)
+    env = gym.make('LunarLanderContinuous-v2')  # LunarLanderContinuous-v2
     obs_dims = env.observation_space.shape[0]
     act_dims = env.action_space.shape[0]
-    print(f'obs_dims is {obs_dims}')
-    print(f'act_dims is {act_dims}')
+
     buffer_config = {
         'buffer_size': 256,
         'batch_size': 32,
     }
     ppo_config = {
-        'num_episodes': 10000,
+        'num_episodes': 2000,
         'max_length_per_episode': 100,
         'ppo_epoch': 4,
         'clip_epsilon': 0.2,
@@ -26,11 +25,11 @@ def training_process():
         'lr': 3e-4,
     }
     actor_config = {
-        'hidden_sizes': [64, 64],
+        'hidden_sizes': [128, 128],
         'hidden_activation': torch.tanh,
     }
     critic_config = {
-        'hidden_sizes': [64, 64],
+        'hidden_sizes': [128, 128],
         'hidden_activation': torch.tanh
     }
     pooling = ReplayBuffer(buffer_size=buffer_config['buffer_size'],
@@ -45,8 +44,8 @@ def training_process():
                     clip_epsilon=ppo_config['clip_epsilon'], gamma=ppo_config['gamma'], lr=ppo_config['lr'],
                     ppo_epoch=ppo_config['ppo_epoch'], weight_epsilon=ppo_config['weight_epsilon'])
     ppo.train()
-    # plt.plot(ppo.rewards_learning_prcoess)
-    # plt.show()
+    plt.plot(ppo.rewards_learning_prcoess)
+    plt.show()
 
 
 if __name__ == '__main__':

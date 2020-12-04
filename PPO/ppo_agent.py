@@ -94,26 +94,26 @@ class PPO_agent(object):
                     break
             self.rewards_learning_prcoess.append(path_rewards)
             print("Episode: %d,          Path length: %d       Reward: %f" % (episode_t + 1, path_length, path_rewards))
-            if len(self.reward_cnt) >= 10:
-                self.reward_cnt.pop(0)
-                self.reward_cnt.append(path_rewards)
-            else:
-                self.reward_cnt.append(path_rewards)
-            self.vis.line(
-                X=np.array([episode_t + 1]),
-                Y=np.array([sum(self.reward_cnt) / len(self.reward_cnt) if len(self.reward_cnt) else 0]),
-                win='mean rewards',
-                update='append')
-            self.vis.line(
-                X=np.array([episode_t + 1]),
-                Y=np.array([path_length]),
-                win="path len",
-                update='append')
-            self.vis.line(
-                X=np.array([episode_t + 1]),
-                Y=np.array([path_rewards]),
-                win="rewards",
-                update='append')
+            # if len(self.reward_cnt) >= 10:
+            #     self.reward_cnt.pop(0)
+            #     self.reward_cnt.append(path_rewards)
+            # else:
+            #     self.reward_cnt.append(path_rewards)
+            # self.vis.line(
+            #     X=np.array([episode_t + 1]),
+            #     Y=np.array([sum(self.reward_cnt) / len(self.reward_cnt) if len(self.reward_cnt) else 0]),
+            #     win='mean rewards',
+            #     update='append')
+            # self.vis.line(
+            #     X=np.array([episode_t + 1]),
+            #     Y=np.array([path_length]),
+            #     win="path len",
+            #     update='append')
+            # self.vis.line(
+            #     X=np.array([episode_t + 1]),
+            #     Y=np.array([path_rewards]),
+            #     win="rewards",
+            #     update='append')
 
 
     def compute_gae(self, next_obs, rewards, values, dones, lammbda=0.95):

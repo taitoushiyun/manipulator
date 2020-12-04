@@ -55,8 +55,9 @@ class Model(nn.Module):
         return actor_mean, actor_std, critic_v
 
 
-class ActorCritic(object):
+class ActorCritic(nn.Module):
     def __init__(self, obs_dim, actor_hidden, critic_hidden, action_dim, network):
+        super(ActorCritic, self).__init__()
         self.model = Model(obs_dim, actor_hidden, critic_hidden, action_dim, network)
 
     def select_action(self, cur_obs_tensor, max_action=1.0):

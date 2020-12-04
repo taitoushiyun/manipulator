@@ -21,7 +21,6 @@ class ManipulatorEnv(gym.Env):
         self.running = False
         self.connected = False
 
-        self.step_cnt = 0
         self.num_episodes = 0
         self.T = config['T']
         self.max_torque = config['max_torque']
@@ -48,6 +47,8 @@ class ManipulatorEnv(gym.Env):
         self.observation[self.b_pos_idx] = np.asarray([0.2, -index, 1])
         self.initial_angle = [0] * 10
         self._init_vrep()
+        self._elapsed_steps = None
+        self._max_episode_steps = config['max_episode_steps']
 
     def _init_vrep(self):
         vrep.simxFinish(-1)
@@ -106,6 +107,7 @@ class ManipulatorEnv(gym.Env):
         self.running = False
 
     def reset(self):
+        self._elapsed_steps = 0
         if self.running:
             self.stop_sim()
         # set initial state
@@ -126,23 +128,25 @@ class ManipulatorEnv(gym.Env):
         # first synchronous step
         vrep.simxSynchronousTrigger(self.clientID)
         vrep.simxGetPingTime(self.clientID)
-        self.step_cnt = 0
         self.running = True
         observation = self.get_state(vrep.simx_opmode_buffer)
         return observation
 
     def step(self, action):
+        assert self._elapsed_steps is not None
         action = self.max_angles_vel * DEG2RAD * np.asarray(action)
         action = action[:, np.newaxis]
         action = np.concatenate((np.zeros((self.action_dim, 1)), action), axis=-1).flatten()
         self.set_joint_effect(action)
         vrep.simxSynchronousTrigger(self.clientID)
         vrep.simxGetPingTime(self.clientID)
-        self.step_cnt += 1
         observation = self.get_state(vrep.simx_opmode_buffer)
         reward = self.cal_reward(observation[self.e_pos_idx], self.goal)
         done = self.cal_termination(observation[self.e_pos_idx], self.goal)
         info = {}
+        self._elapsed_steps += 1
+        if self._elapsed_steps >= self._max_episode_steps:
+            done = True
         return observation, reward, done, info
 
     def goal_distance(self, goal_a, goal_b):

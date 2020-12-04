@@ -33,8 +33,9 @@ class PPOLearner(AbstractLearner):
         self.optimizer = optim.Adam(self.policy.model.parameters(), lr=lr)
 
     def learn(self, observations, actions, values, returns, old_log_probs):
+        data_size = observations.shape[0]
         for _ in range(self.epochs):
-            for index in BatchSampler(SubsetRandomSampler(range(self.batch_size)), self.minibatch_size, True):
+            for index in BatchSampler(SubsetRandomSampler(range(data_size)), self.minibatch_size, True):
                 new_dists, policy_entropys, new_values = self.policy.compute_action(observations[index])
                 new_log_probs = new_dists.log_prob(actions[index]).sum(1, keepdim=True)
                 ratios = torch.exp(new_log_probs - old_log_probs[index])

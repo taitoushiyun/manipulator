@@ -25,4 +25,4 @@ def save_model(model, filename='model.pth'):
     )
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
