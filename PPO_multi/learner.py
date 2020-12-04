@@ -30,7 +30,7 @@ class PPOLearner(AbstractLearner):
         self.entropy_coef = entropy_coef
         self.max_grad_norm = max_grad_norm
         self.c = 3
-        self.optimizer = optim.Adam(self.policy.model.parameters(), lr=lr)
+        self.optimizer = optim.Adam(self.policy.parameters(), lr=lr)
 
     def learn(self, observations, actions, values, returns, old_log_probs):
         data_size = observations.shape[0]
@@ -40,7 +40,8 @@ class PPOLearner(AbstractLearner):
                 new_log_probs = new_dists.log_prob(actions[index]).sum(1, keepdim=True)
                 ratios = torch.exp(new_log_probs - old_log_probs[index])
                 advantages = returns[index] - values[index]
-                advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-5)
+                # advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-5)
+
                 # print(observations.shape, old_log_probs.shape, new_log_probs.shape,
                 #       returns.shape, new_values.shape, policy_entropys.shape)
                 surr1 = ratios * advantages
@@ -60,7 +61,7 @@ class PPOLearner(AbstractLearner):
                 # TODO: planning to use learning rate
                 self.optimizer.zero_grad()
                 loss.backward()
-                nn.utils.clip_grad_norm_(self.policy.model.parameters(), max_norm=self.max_grad_norm)
+                # nn.utils.clip_grad_norm_(self.policy.model.parameters(), max_norm=self.max_grad_norm)
                 self.optimizer.step()
 
 def constfn(val):

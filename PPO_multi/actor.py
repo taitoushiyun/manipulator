@@ -45,7 +45,8 @@ class ReplayBuffer(object):
 
 class SamplerWorker(AbstractEnvWorker):
     def __init__(self, *, env, policy, gamma, lammbda, batch_size, act_dim, obs_dim,
-                 reward_record, reward_record_size, path_len_record, path_len_record_size):
+                 reward_record, reward_record_size, path_len_record, path_len_record_size, max_episode_steps,
+                 num_episodes, num_episodes_lock):
         super(SamplerWorker, self).__init__(env=env, policy=policy)
         self.batch_size = batch_size
         self.gamma = gamma
@@ -55,10 +56,13 @@ class SamplerWorker(AbstractEnvWorker):
         self.reward_record_size = reward_record_size
         self.path_len_record = path_len_record
         self.path_len_record_size = path_len_record_size
+        self.max_episode_steps = max_episode_steps
+        self.num_episodes = num_episodes
+        self.num_episodes_lock = num_episodes_lock
+        self.episode_reward = 0.
+        self.path_len = 0
 
     def run(self):
-        episode_reward = 0
-        path_len = 0
         if self.obs is None:
             self.obs = cur_obs = self.env.reset()
         else:
@@ -67,19 +71,22 @@ class SamplerWorker(AbstractEnvWorker):
             action, old_log_prob, value = self.policy.select_action(torch.tensor(cur_obs[None], dtype=torch.float))
             next_obs, reward, done, infos = self.env.step(action)
             self.pooling.store_data(cur_obs, action, reward, done, old_log_prob, value)
-            episode_reward += reward
-            path_len += 1
+            self.episode_reward += reward
+            self.path_len += 1
             self.obs = cur_obs = next_obs
-            if done:
-                print(episode_reward)
+            if done or self.path_len == self.max_episode_steps:
+                with self.num_episodes_lock:
+                    self.num_episodes.value += 1
+                print("Episode: %d,          Path length: %d       Reward: %f"
+                      % (self.num_episodes.value, self.path_len, self.episode_reward))
                 if len(self.reward_record) > self.reward_record_size:
                     self.reward_record.pop(0)
-                self.reward_record.append(episode_reward)
+                self.reward_record.append(self.episode_reward)
                 if len(self.path_len_record) > self.path_len_record_size:
                     self.path_len_record.pop(0)
-                self.path_len_record.append(path_len)
-                episode_reward = 0
-                path_len = 0
+                self.path_len_record.append(self.path_len)
+                self.episode_reward = 0
+                self.path_len = 0
                 self.obs = cur_obs = self.env.reset()
         observations, actions = self.pooling.observations, self.pooling.actions
         rewards, dones = self.pooling.rewards, self.pooling.dones

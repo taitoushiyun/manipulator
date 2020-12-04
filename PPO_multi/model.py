@@ -16,11 +16,11 @@ class Model(nn.Module):
             actor_hidden_ = [obs_dim] + actor_hidden
             critic_hidden_ = [obs_dim] + critic_hidden
             actor = [nn.Linear(actor_hidden_[i], actor_hidden_[i+1]) for i in range(len(actor_hidden))]
-            self.actor = [nn.Sequential(i, nn.ReLU()) for i in actor]
+            self.actor = nn.ModuleList([nn.Sequential(i, nn.ReLU()) for i in actor])
             self.actor_mean = nn.Linear(actor_hidden[-1], action_dim)
             self.actor_log_std = nn.Linear(actor_hidden[-1], action_dim)
             critic = [nn.Linear(critic_hidden_[i], critic_hidden_[i+1]) for i in range(len(critic_hidden))]
-            self.critic = [nn.Sequential(i, nn.ReLU()) for i in critic]
+            self.critic = nn.ModuleList([nn.Sequential(i, nn.ReLU()) for i in critic])
             self.critic_v = nn.Linear(critic_hidden[-1], 1)
         else:
             self.actor = [get_network_builder(network)(),
@@ -63,7 +63,7 @@ class ActorCritic(nn.Module):
     def select_action(self, cur_obs_tensor, max_action=1.0):
         m, std, v = self.model(cur_obs_tensor)
         dist = Normal(m, std)
-        action = dist.sample().clamp(-max_action, max_action)
+        action = dist.sample()   # TODO .clamp(-max_action, max_action)
         log_prob = dist.log_prob(action).sum(1)
         return action[0].numpy(), log_prob.detach(), v.detach().item()
 
@@ -72,3 +72,9 @@ class ActorCritic(nn.Module):
         dist = Normal(m, std)
         entropy = dist.entropy().sum(1, keepdim=True)
         return dist, entropy, v
+
+
+if __name__ == '__main__':
+    ac = ActorCritic(8, [128, 128], [128, 128], 2, None)
+    for i in ac.named_parameters():
+        print(i)

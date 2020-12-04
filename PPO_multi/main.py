@@ -13,9 +13,11 @@ import multiprocessing as mp
 from vrep_con.vrep_utils import ManipulatorEnv
 
 import gym
+import time
 
 
-def run_worker(index, worker_config, remote, shared_policy, reward_record, path_len_record):
+def run_worker(index, worker_config, remote, shared_policy, reward_record, path_len_record,
+               num_episodes, num_episodes_lock):
     # env = ManipulatorEnv(index, num_joints=10)
     env = gym.make('LunarLanderContinuous-v2')
     policy = ActorCritic(obs_dim=worker_config['obs_dim'],
@@ -33,8 +35,10 @@ def run_worker(index, worker_config, remote, shared_policy, reward_record, path_
                             reward_record=reward_record,
                             reward_record_size=worker_config['reward_record_size'],
                             path_len_record=path_len_record,
-                            path_len_record_size=worker_config['path_len_record_size']
-                            )
+                            path_len_record_size=worker_config['path_len_record_size'],
+                            max_episode_steps=worker_config['max_episode_steps'],
+                            num_episodes=num_episodes,
+                            num_episodes_lock=num_episodes_lock)
     while True:
         cmd = remote.recv()
         if cmd == 'step':
@@ -47,6 +51,7 @@ def run_worker(index, worker_config, remote, shared_policy, reward_record, path_
 
 
 def main(args):
+    torch.set_num_threads(1)
     main_dir = os.path.abspath(os.path.dirname(__file__))
     checkpoints_dir = os.path.join(main_dir, 'checkpoints')
     os.makedirs(checkpoints_dir, exist_ok=True)
@@ -77,6 +82,8 @@ def main(args):
     mp.set_start_method('spawn')
     mp_manager = mp.Manager()
     iter_step = mp.Value('f', 0)
+    num_episodes = mp.Value('i', 0)
+    num_episodes_lock = mp.Lock()
     reward = mp_manager.list()
     path_len = mp_manager.list()
     worker_config = mp_manager.dict({'num_joints': args.num_joints,
@@ -87,6 +94,7 @@ def main(args):
                                      'batch_size': args.batch_size,
                                      'gamma': args.gamma,
                                      'lammbda': args.lammbda,
+                                     'max_episode_steps': args.max_episode_steps,
                                      'reward_record_size': args.reward_record_size,
                                      'path_len_record_size': args.path_len_record_size
                                      })
@@ -94,13 +102,15 @@ def main(args):
     processes = []
     for i in range(args.num_envs):
         processes.append(mp.Process(target=run_worker, args=(i, worker_config, remote_workers[i],
-                                                             shared_policy, reward, path_len)))
-    processes.append(mp.Process(target=plot, args=(args, iter_step, reward, path_len)))
+                                                             shared_policy, reward, path_len,
+                                                             num_episodes, num_episodes_lock)))
+    # processes.append(mp.Process(target=plot, args=(args, iter_step, reward, path_len)))
     for process in processes:
         process.start()
     for remote_worker in remote_workers:
         remote_worker.close()
 
+    time_b = 0
     assert args.batch_size % args.minibatch_size == 0
     for update_step in range(args.total_update):
         # logger.info(f'update step {update_step}')
@@ -114,13 +124,16 @@ def main(args):
             return x.reshape(shape[0]*shape[1], *shape[2:])
 
         returns, values, old_log_probs, observations, actions = map(transfer, zip(*sample_data))
+        time_a = time.time()
+        print(f'env time is {time_a - time_b}')
         ppo_learner.learn(observations=torch.tensor(observations, dtype=torch.float, device=args.device),
                           actions=torch.tensor(actions, dtype=torch.float, device=args.device),
                           values=torch.tensor(values, dtype=torch.float, device=args.device),
                           returns=torch.tensor(returns, dtype=torch.float, device=args.device),
                           old_log_probs=torch.tensor(old_log_probs, dtype=torch.float, device=args.device))
         iter_step.value += 1
-
+        time_b = time.time()
+        print(f'training time is {time_b - time_a}')
         if update_step % args.save_interval == 0:
             save_file_name = os.path.join(checkpoints_dir, '%.5i' % update_step + '.pt')
             save_model(shared_policy, save_file_name)
@@ -146,11 +159,12 @@ if __name__ == '__main__':
     parser.add_argument('--minibatch-size', type=int, default=8)
     parser.add_argument('--lr', type=float, default=0.0003)
     parser.add_argument('--lammbda', type=float, default=0.95)
-    parser.add_argument('--ent-coef', type=float, default=0.001)
+    parser.add_argument('--ent-coef', type=float, default=0.000)
     parser.add_argument('--gamma', type=float, default=0.99)
     parser.add_argument('--clip-range', type=float, default=0.2)
     parser.add_argument('--max-grad-norm', type=float, default=5)
 
+    parser.add_argument('--max-episode-steps', type=int, default=500)
     parser.add_argument('--reward-record-size', type=int, default=10)
     parser.add_argument('--path-len-record-size', type=int, default=10)
     parser.add_argument('--log-interval', type=int, default=1)

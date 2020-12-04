@@ -17,7 +17,7 @@ def training_process():
     }
     ppo_config = {
         'num_episodes': 2000,
-        'max_length_per_episode': 100,
+        'max_length_per_episode': 500,
         'ppo_epoch': 4,
         'clip_epsilon': 0.2,
         'gamma': 0.99,

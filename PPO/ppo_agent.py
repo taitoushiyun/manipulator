@@ -3,6 +3,7 @@ import torch.optim as optim
 import numpy as np
 from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 import visdom
+import time
 
 
 class ReplayBuffer(object):
@@ -67,8 +68,10 @@ class PPO_agent(object):
                 ylabel='rewards',
                 title='rewards'))
         self.reward_cnt = []
+        self.time_last = 0
 
     def train(self):
+        time_b = 0
         for episode_t in range(self.num_episodes):
             cur_obs = self.env.reset()
             path_length, path_rewards = 0, 0.
@@ -85,10 +88,13 @@ class PPO_agent(object):
                     values, old_log_probs = self.pooling.values, self.pooling.old_log_probs
                     self.pooling.clear_data()
                     returns = self.compute_gae(next_obs, rewards, values, dones)
-
+                    time_a = time.time()
+                    print(f'env time is {time_a - time_b}')
                     self._do_training(torch.FloatTensor(returns), torch.FloatTensor(values),
                                       torch.FloatTensor(old_log_probs), torch.FloatTensor(observations),
                                       torch.FloatTensor(actions))
+                    time_b = time.time()
+                    print(f'training time is {time_b - time_a}')
                 path_rewards += reward
                 if done or self.max_steps_per_episodes == path_length:
                     break
