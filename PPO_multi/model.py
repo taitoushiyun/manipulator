@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.distributions import Categorical
 from torch.distributions import Normal
-from PPO_multi.model_base import get_network_builder, device, put_on_device
+from PPO_multi.model_base import get_network_builder, put_on_device
 MAX_LOG_STD = 2
 MIN_LOG_STD = -5
 
@@ -76,5 +76,7 @@ class ActorCritic(nn.Module):
 
 if __name__ == '__main__':
     ac = ActorCritic(8, [128, 128], [128, 128], 2, None)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    ac.to(device)
     for i in ac.named_parameters():
         print(i)

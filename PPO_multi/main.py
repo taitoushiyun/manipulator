@@ -11,9 +11,10 @@ from PPO_multi.monitor import plot
 from PPO_multi.utils import save_model
 import multiprocessing as mp
 from vrep_con.vrep_utils import ManipulatorEnv
-
 import gym
 import time
+import torch
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def run_worker(index, worker_config, remote, shared_policy, reward_record, path_len_record,
@@ -61,14 +62,14 @@ def main(args):
     for key, item in vars(args).items():
         param += str(key) + ': ' + str(item) + '\n'
     logger.info(param)
-
     set_global_seed(args.seed)
 
     shared_policy = ActorCritic(obs_dim=args.obs_dim,
                                 actor_hidden=args.actor_hidden,
                                 critic_hidden=args.critic_hidden,
                                 action_dim=args.act_dim,
-                                network=None)
+                                network=None).to(device)
+    shared_policy.share_memory()
     ppo_learner = PPOLearner(policy=shared_policy,
                              batch_size=args.batch_size,
                              minibatch_size=args.minibatch_size,
@@ -126,11 +127,11 @@ def main(args):
         returns, values, old_log_probs, observations, actions = map(transfer, zip(*sample_data))
         time_a = time.time()
         print(f'env time is {time_a - time_b}')
-        ppo_learner.learn(observations=torch.tensor(observations, dtype=torch.float, device=args.device),
-                          actions=torch.tensor(actions, dtype=torch.float, device=args.device),
-                          values=torch.tensor(values, dtype=torch.float, device=args.device),
-                          returns=torch.tensor(returns, dtype=torch.float, device=args.device),
-                          old_log_probs=torch.tensor(old_log_probs, dtype=torch.float, device=args.device))
+        ppo_learner.learn(observations=torch.tensor(observations, dtype=torch.float, device=device),
+                          actions=torch.tensor(actions, dtype=torch.float, device=device),
+                          values=torch.tensor(values, dtype=torch.float, device=device),
+                          returns=torch.tensor(returns, dtype=torch.float, device=device),
+                          old_log_probs=torch.tensor(old_log_probs, dtype=torch.float, device=device))
         iter_step.value += 1
         time_b = time.time()
         print(f'training time is {time_b - time_a}')
