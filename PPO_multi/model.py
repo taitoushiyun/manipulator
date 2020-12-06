@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.distributions import Categorical
 from torch.distributions import Normal
-from PPO_multi.model_base import get_network_builder, put_on_device
+from model_base import get_network_builder, put_on_device
 MAX_LOG_STD = 2
 MIN_LOG_STD = -5
 

@@ -64,6 +64,7 @@ class PPOLearner(AbstractLearner):
                 # nn.utils.clip_grad_norm_(self.policy.model.parameters(), max_norm=self.max_grad_norm)
                 self.optimizer.step()
 
+
 def constfn(val):
     def f(_):
         return val

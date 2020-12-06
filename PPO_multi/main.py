@@ -1,3 +1,4 @@
+import importmagic
 import os
 import numpy as np
 import torch
@@ -10,7 +11,7 @@ from PPO_multi.model import ActorCritic
 from PPO_multi.monitor import plot
 from PPO_multi.utils import save_model
 import multiprocessing as mp
-from vrep_con.vrep_utils import ManipulatorEnv
+# from vrep_con.vrep_utils import ManipulatorEnv
 import gym
 import time
 import torch
@@ -52,7 +53,7 @@ def run_worker(index, worker_config, remote, shared_policy, reward_record, path_
 
 
 def main(args):
-    torch.set_num_threads(1)
+    # torch.set_num_threads(1)
     main_dir = os.path.abspath(os.path.dirname(__file__))
     checkpoints_dir = os.path.join(main_dir, 'checkpoints')
     os.makedirs(checkpoints_dir, exist_ok=True)
@@ -80,7 +81,7 @@ def main(args):
                              max_grad_norm=args.max_grad_norm,
                              entropy_coef=args.ent_coef,
                              vf_coef=0.5)
-    mp.set_start_method('spawn')
+    mp.set_start_method('forkserver')
     mp_manager = mp.Manager()
     iter_step = mp.Value('f', 0)
     num_episodes = mp.Value('i', 0)
@@ -105,7 +106,7 @@ def main(args):
         processes.append(mp.Process(target=run_worker, args=(i, worker_config, remote_workers[i],
                                                              shared_policy, reward, path_len,
                                                              num_episodes, num_episodes_lock)))
-    # processes.append(mp.Process(target=plot, args=(args, iter_step, reward, path_len)))
+    processes.append(mp.Process(target=plot, args=(args, iter_step, reward, path_len)))
     for process in processes:
         process.start()
     for remote_worker in remote_workers:
@@ -146,7 +147,7 @@ if __name__ == '__main__':
     parser.add_argument('--network', type=str, default='mlp',          # TODO: change here if use mlp to test
                         choices=['cnn', 'lstm', 'mlp', 'impala_cnn', 'gfootball_impala_cnn'])
     parser.add_argument('--seed', type=int, default=19940208)
-    parser.add_argument('--device', type=str, default='cpu')
+    parser.add_argument('--device', type=str, default='cuda')
     parser.add_argument('--num-envs', type=int, default=8)
     parser.add_argument('--num-joints', type=int, default=10)
     parser.add_argument('--obs-dim', type=int, default=8)
@@ -157,7 +158,7 @@ if __name__ == '__main__':
     parser.add_argument('--total-update', type=int, default=10000)
     parser.add_argument('--epochs', type=int, default=4)
     parser.add_argument('--batch-size', type=int, default=256)
-    parser.add_argument('--minibatch-size', type=int, default=8)
+    parser.add_argument('--minibatch-size', type=int, default=64)
     parser.add_argument('--lr', type=float, default=0.0003)
     parser.add_argument('--lammbda', type=float, default=0.95)
     parser.add_argument('--ent-coef', type=float, default=0.000)
@@ -172,7 +173,7 @@ if __name__ == '__main__':
     parser.add_argument('--save-interval', type=int, default=10)
     parser.add_argument('--plot-interval', type=int, default=5)
     parser.add_argument('--vis-port', type=int, default=6016)
-    parser.add_argument('--code-version', type=str, default='mani_ppo_multi_0')
+    parser.add_argument('--code-version', type=str, default='mani_ppo_multi_1')
     args = parser.parse_args()
     main(args)
 
