@@ -12,5 +12,5 @@ VREP_Config = {
     'max_angles_vel': 10,  # 10degree/s
     'state_dim': 22,
     'num_joints': 10,
-    'max_episode_steps': 100
+    'max_episode_steps': 50
 }

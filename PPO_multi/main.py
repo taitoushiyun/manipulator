@@ -166,7 +166,7 @@ if __name__ == '__main__':
     parser.add_argument('--clip-range', type=float, default=0.2)
     parser.add_argument('--max-grad-norm', type=float, default=5)
 
-    parser.add_argument('--max-episode-steps', type=int, default=500)
+    parser.add_argument('--max-episode-steps', type=int, default=100)
     parser.add_argument('--reward-record-size', type=int, default=10)
     parser.add_argument('--path-len-record-size', type=int, default=10)
     parser.add_argument('--log-interval', type=int, default=1)

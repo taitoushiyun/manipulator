@@ -16,11 +16,11 @@ class Model(nn.Module):
             actor_hidden_ = [obs_dim] + actor_hidden
             critic_hidden_ = [obs_dim] + critic_hidden
             actor = [nn.Linear(actor_hidden_[i], actor_hidden_[i+1]) for i in range(len(actor_hidden))]
-            self.actor = nn.ModuleList([nn.Sequential(i, nn.ReLU()) for i in actor])
+            self.actor = nn.ModuleList([nn.Sequential(i, nn.Tanh()) for i in actor])
             self.actor_mean = nn.Linear(actor_hidden[-1], action_dim)
             self.actor_log_std = nn.Linear(actor_hidden[-1], action_dim)
             critic = [nn.Linear(critic_hidden_[i], critic_hidden_[i+1]) for i in range(len(critic_hidden))]
-            self.critic = nn.ModuleList([nn.Sequential(i, nn.ReLU()) for i in critic])
+            self.critic = nn.ModuleList([nn.Sequential(i, nn.Tanh()) for i in critic])
             self.critic_v = nn.Linear(critic_hidden[-1], 1)
         else:
             self.actor = [get_network_builder(network)(),
@@ -48,11 +48,11 @@ class Model(nn.Module):
         for module in self.actor:
             actor_h = module(actor_h)
         actor_mean = self.actor_mean(actor_h)
-        actor_std = self.actor_log_std(actor_h).clamp(MIN_LOG_STD, MAX_LOG_STD).exp()
+        actor_std = self.actor_log_std(actor_h).clamp(MIN_LOG_STD, MAX_LOG_STD)
         for module in self.critic:
             critic_h = module(critic_h)
         critic_v = self.critic_v(critic_h)
-        return actor_mean, actor_std, critic_v
+        return actor_mean, actor_std.exp(), critic_v
 
 
 class ActorCritic(nn.Module):
@@ -61,10 +61,13 @@ class ActorCritic(nn.Module):
         self.model = Model(obs_dim, actor_hidden, critic_hidden, action_dim, network)
 
     def select_action(self, cur_obs_tensor, max_action=1.0):
+        print(cur_obs_tensor)
         m, std, v = self.model(cur_obs_tensor)
         dist = Normal(m, std)
+        print(m, std)
         action = dist.sample().clamp(-max_action, max_action)
         log_prob = dist.log_prob(action).sum(1)
+        print(action[0].numpy())
         return action[0].numpy(), log_prob.detach(), v.detach().item()
 
     def compute_action(self, cur_obs_tensor):
