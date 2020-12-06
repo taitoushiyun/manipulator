@@ -1,0 +1,73 @@
+// python -m grpc_tools.protoc -I=./ --python_out=./rpc_package --grpc_python_out=./rpc_package ./data.proto
+syntax = "proto3";
+
+package rpc_package;
+// 心跳
+service HeartbeatService {
+  rpc HeartBeat (CommonRequest) returns (CommonReply) {}
+}
+
+message CommonRequest {
+  int32 signal = 1;
+}
+
+message CommonReply {
+  int32 signal = 1;
+}
+
+service ResetService {
+  rpc get_reset_param (CommonRequest) returns (ResetReply) {}
+}
+
+message ResetReply{
+  int32 worker_id = 1;
+}
+
+service SamplerInitParamService {
+    rpc get_init_param (CommonRequest) returns (SamplerInitParamReply) {}
+}
+
+message SamplerInitParamReply {
+    int32 num_joints = 1;
+    int32 obs_dim = 2;
+    int32 act_dim = 3;
+    repeated int32 actor_hidden = 4;
+    repeated int32 critic_hidden = 5;
+    int32 batch_size = 6;
+    float gamma = 7;
+    float lammbda = 8;
+    int32 max_episode_steps = 9;
+}
+
+service Sampler2LearnerModelService {
+    rpc get_model (Sampler2LearnerModelRequest) returns (Sampler2LearnerModelReply) {}
+}
+
+message Sampler2LearnerModelRequest {
+    int32 actor_index = 1;
+    int32 time_stamp = 2;
+}
+
+message Sampler2LearnerModelReply {
+    int32 time_stamp = 1;
+    bytes model = 2;
+}
+
+service SamplerDataService {
+    rpc send_data (SamplerDataRequest) returns (CommonReply) {}
+}
+
+message SamplerDataRequest {
+    int32 worker_id = 1;
+    int32 time_stamp = 2;
+    bytes compressed_data = 3;
+}
+
+service SamplerResultService {
+    rpc send_result (SamplerResultRequest) returns (CommonReply) {}
+}
+
+message SamplerResultRequest {
+    repeated float rewards = 1;
+    repeated float path_len = 2;
+}

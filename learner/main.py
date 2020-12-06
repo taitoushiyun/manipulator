@@ -1,15 +1,13 @@
-import importmagic
 import os
 import numpy as np
-import torch
 import argparse
-from PPO_multi.logger_utility import logger
-from PPO_multi.utils import set_global_seed
-from PPO_multi.learner import PPOLearner
-from PPO_multi.actor import SamplerWorker
+from learner.logger_utility import logger
+from learner.utils import set_global_seed
+from learner.learner import PPOLearner
+from actor.actor import SamplerWorker
 from PPO_multi.model import ActorCritic
-from PPO_multi.monitor import plot
-from PPO_multi.utils import save_model
+from learner.monitor import plot
+from learner.utils import save_model
 import multiprocessing as mp
 # from vrep_con.vrep_utils import ManipulatorEnv
 import gym
