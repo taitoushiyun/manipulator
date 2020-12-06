@@ -1,3 +1,4 @@
+import importmagic
 import time
 import numpy as np
 import copy

@@ -63,7 +63,7 @@ class ActorCritic(nn.Module):
     def select_action(self, cur_obs_tensor, max_action=1.0):
         m, std, v = self.model(cur_obs_tensor)
         dist = Normal(m, std)
-        action = dist.sample()   # TODO .clamp(-max_action, max_action)
+        action = dist.sample().clamp(-max_action, max_action)
         log_prob = dist.log_prob(action).sum(1)
         return action[0].numpy(), log_prob.detach(), v.detach().item()
 

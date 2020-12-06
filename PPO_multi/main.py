@@ -11,7 +11,7 @@ from PPO_multi.model import ActorCritic
 from PPO_multi.monitor import plot
 from PPO_multi.utils import save_model
 import multiprocessing as mp
-# from vrep_con.vrep_utils import ManipulatorEnv
+from vrep_con.vrep_utils import ManipulatorEnv
 import gym
 import time
 import torch
@@ -20,8 +20,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def run_worker(index, worker_config, remote, shared_policy, reward_record, path_len_record,
                num_episodes, num_episodes_lock):
-    # env = ManipulatorEnv(index, num_joints=10)
-    env = gym.make('LunarLanderContinuous-v2')
+    env = ManipulatorEnv(index)
+    # env = gym.make('LunarLanderContinuous-v2')
     policy = ActorCritic(obs_dim=worker_config['obs_dim'],
                          actor_hidden=worker_config['actor_hidden'],
                          critic_hidden=worker_config['critic_hidden'],
@@ -148,17 +148,17 @@ if __name__ == '__main__':
                         choices=['cnn', 'lstm', 'mlp', 'impala_cnn', 'gfootball_impala_cnn'])
     parser.add_argument('--seed', type=int, default=19940208)
     parser.add_argument('--device', type=str, default='cuda')
-    parser.add_argument('--num-envs', type=int, default=8)
+    parser.add_argument('--num-envs', type=int, default=1)
     parser.add_argument('--num-joints', type=int, default=10)
-    parser.add_argument('--obs-dim', type=int, default=8)
-    parser.add_argument('--act-dim', type=int, default=2)
+    parser.add_argument('--obs-dim', type=int, default=22)
+    parser.add_argument('--act-dim', type=int, default=5)
     parser.add_argument('--actor-hidden', type=list,  default=[128, 128])
     parser.add_argument('--critic-hidden', type=list, default=[128, 128])
 
     parser.add_argument('--total-update', type=int, default=10000)
     parser.add_argument('--epochs', type=int, default=4)
     parser.add_argument('--batch-size', type=int, default=256)
-    parser.add_argument('--minibatch-size', type=int, default=64)
+    parser.add_argument('--minibatch-size', type=int, default=8)
     parser.add_argument('--lr', type=float, default=0.0003)
     parser.add_argument('--lammbda', type=float, default=0.95)
     parser.add_argument('--ent-coef', type=float, default=0.000)
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     parser.add_argument('--save-interval', type=int, default=10)
     parser.add_argument('--plot-interval', type=int, default=5)
     parser.add_argument('--vis-port', type=int, default=6016)
-    parser.add_argument('--code-version', type=str, default='mani_ppo_multi_1')
+    parser.add_argument('--code-version', type=str, default='mani_ppo_multi_3')
     args = parser.parse_args()
     main(args)
 
