@@ -6,10 +6,11 @@ MIN_LOG_STD = -5
 
 
 class Actor_critic(nn.Module):
-    def __init__(self, actor_obs_dims, actor_hidden_sizes, actor_action_dims,
+    def __init__(self, env, actor_obs_dims, actor_hidden_sizes, actor_action_dims,
                  critic_obs_dims, critic_hidden_sizes, critic_output_size=1,
                  actor_hidden_activation=torch.tanh, critic_hidden_activation=torch.tanh):
         super(Actor_critic, self).__init__()
+        self.env = env
         self.actor_hidden_activation = actor_hidden_activation
         self.critic_hidden_activation = critic_hidden_activation
         self.actor_fcs, self.critic_fcs = [], []
@@ -22,6 +23,7 @@ class Actor_critic(nn.Module):
             self.actor_fcs.append(actor_fc)
         self.actor_mean = nn.Linear(actor_in_size, actor_action_dims)
         self.actor_log_std = nn.Linear(actor_in_size, actor_action_dims)
+        # self.actor_log_std = nn.Parameter(torch.zeros((1, actor_action_dims)), requires_grad=True)
 
         for i, critic_next_size in enumerate(critic_hidden_sizes):
             critic_fc = nn.Linear(critic_in_size, critic_next_size)
@@ -34,7 +36,7 @@ class Actor_critic(nn.Module):
         actor_h = cur_obs_tensor
         for i, actor_fc in enumerate(self.actor_fcs):
             actor_h = self.actor_hidden_activation(actor_fc(actor_h))
-        mean = self.actor_mean(actor_h)
+        mean = nn.Tanh()(self.actor_mean(actor_h))
         log_std = self.actor_log_std(actor_h).clamp(MIN_LOG_STD, MAX_LOG_STD)
 
         critic_h = cur_obs_tensor

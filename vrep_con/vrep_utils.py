@@ -34,7 +34,7 @@ class ManipulatorEnv(gym.Env):
         self.state_dim = self.num_joints + 12       # EE_point_position, EE_point_vel, goal_position, base_position
         self.action_dim = self.num_joints // 2
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_dim,), dtype=np.float32)
-        self.action_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.action_dim,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1.0, high=1, shape=(self.action_dim,), dtype=np.float32)
         self.j_ang_idx = range(self.num_joints // 2)
         self.j_vel_idx = range(self.num_joints // 2, self.num_joints)
         self.e_pos_idx = range(self.num_joints,  self.num_joints + 3)
@@ -48,6 +48,8 @@ class ManipulatorEnv(gym.Env):
         self.observation[self.b_pos_idx] = np.asarray([0.2, -index, 1])
         self.initial_angle = [0] * 10
         self._init_vrep()
+        self._elapsed_steps = None
+        self._max_episode_steps = 100
 
     def _init_vrep(self):
         vrep.simxFinish(-1)
@@ -106,6 +108,7 @@ class ManipulatorEnv(gym.Env):
         self.running = False
 
     def reset(self):
+        self._elapsed_steps = 0
         if self.running:
             self.stop_sim()
         # set initial state
@@ -132,17 +135,20 @@ class ManipulatorEnv(gym.Env):
         return observation
 
     def step(self, action):
+        assert self._elapsed_steps is not None
+        self._elapsed_steps += 1
         action = self.max_angles_vel * DEG2RAD * np.asarray(action)
         action = action[:, np.newaxis]
         action = np.concatenate((np.zeros((self.action_dim, 1)), action), axis=-1).flatten()
         self.set_joint_effect(action)
         vrep.simxSynchronousTrigger(self.clientID)
         vrep.simxGetPingTime(self.clientID)
-        self.step_cnt += 1
         observation = self.get_state(vrep.simx_opmode_buffer)
         reward = self.cal_reward(observation[self.e_pos_idx], self.goal)
         done = self.cal_termination(observation[self.e_pos_idx], self.goal)
         info = {}
+        if self._elapsed_steps >= self._max_episode_steps:
+            done = True
         return observation, reward, done, info
 
     def goal_distance(self, goal_a, goal_b):

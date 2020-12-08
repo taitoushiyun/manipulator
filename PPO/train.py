@@ -36,7 +36,8 @@ def training_process():
     pooling = ReplayBuffer(buffer_size=buffer_config['buffer_size'],
                            act_dims=act_dims, obs_dims=obs_dims,
                            batch_size=buffer_config['batch_size'])
-    actor_critic = Actor_critic(actor_obs_dims=obs_dims, actor_hidden_sizes=actor_config['hidden_sizes'],
+    actor_critic = Actor_critic(env=env,
+                                actor_obs_dims=obs_dims, actor_hidden_sizes=actor_config['hidden_sizes'],
                                 actor_action_dims=act_dims, critic_obs_dims=obs_dims,
                                 critic_hidden_sizes=critic_config['hidden_sizes'])
 
