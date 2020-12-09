@@ -81,7 +81,7 @@ class ManipulatorEnv(gym.Env):
 
     def _sample_goal(self):
         # theta = np.random.randn(self.num_joints)
-        theta = np.asarray([0, 20, 0, 15, 0, 20, 0, -10, 0, -30]) * DEG2RAD
+        theta = np.asarray([0, 20, 0, 15, 0, 20, 0, 20, 0, 20]) * DEG2RAD
         goal_theta = np.clip(theta, -3, 3)
         print(f'goal sample for joints is {goal_theta}')
         goal = self.dh_model.forward_kinematics(goal_theta)

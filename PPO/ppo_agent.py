@@ -44,7 +44,7 @@ class PPO_agent(object):
         self.iter_steps = 0
         import os
         os.makedirs('PPO/checkpoints', exist_ok=True)
-        self.vis = visdom.Visdom(port=6016, env='mani_7')
+        self.vis = visdom.Visdom(port=6016, env='mani_9')
         self.vis.line(
             X=np.array([0]),
             Y=np.array([0]),
@@ -94,7 +94,7 @@ class PPO_agent(object):
                                       torch.FloatTensor(actions))
                     self.iter_steps += 1
                     # if self.iter_steps % 5 == 0:
-                    torch.save(self.actor_critic.state_dict(), f'PPO/checkpoints/{self.iter_steps}.pth')
+                    torch.save(self.actor_critic.state_dict(), f'checkpoints/{self.iter_steps}.pth')
                 path_rewards += reward
                 if done or self.max_steps_per_episodes == path_length:
                     break
