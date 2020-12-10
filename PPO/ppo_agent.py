@@ -43,8 +43,8 @@ class PPO_agent(object):
         self.optimizer = optim.Adam(self.actor_critic.parameters(), lr=lr)
         self.iter_steps = 0
         import os
-        os.makedirs('PPO/checkpoints', exist_ok=True)
-        self.vis = visdom.Visdom(port=6016, env='mani_9')
+        os.makedirs('checkpoints', exist_ok=True)
+        self.vis = visdom.Visdom(port=6016, env='mani_17')
         self.vis.line(
             X=np.array([0]),
             Y=np.array([0]),

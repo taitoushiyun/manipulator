@@ -46,7 +46,6 @@ class ManipulatorEnv(gym.Env):
         self.observation = np.zeros((self.state_dim, ))
         self.observation[self.g_pos_idx] = np.asarray(self.goal)
         self.observation[self.b_pos_idx] = np.asarray([0.2, -index, 1])
-        self.initial_angle = [0] * 10
         self._init_vrep()
         self._elapsed_steps = None
         self._max_episode_steps = 100
@@ -81,7 +80,7 @@ class ManipulatorEnv(gym.Env):
 
     def _sample_goal(self):
         # theta = np.random.randn(self.num_joints)
-        theta = np.asarray([0, 20, 0, 15, 0, 20, 0, 20, 0, 20]) * DEG2RAD
+        theta = np.asarray([0, 20, 0, 10]) * DEG2RAD
         goal_theta = np.clip(theta, -3, 3)
         print(f'goal sample for joints is {goal_theta}')
         goal = self.dh_model.forward_kinematics(goal_theta)
@@ -198,40 +197,13 @@ if __name__ == '__main__':
     print('env created success')
     obs = env.reset()
     print('reset success')
-    obses = []
-    obses.append(obs[:10])
-
-    for i in range(1, 20):
-
-        a = [0] * 5
-        a[0] = 1
-        a[2] = 1
-        a[4] = 1
-        obs, reward, info, done = env.step(a)
-        obses.append(obs[:10])
-
-    for j in range(3):
-        obs = env.reset()
-        time.sleep(3)
-        for i in range(1, 20):
-            a = [0] * 5
-            a[0] = 1
-            a[2] = 1
-            a[4] = 1
-            obs, reward, info, done = env.step(a)
-            obses.append(obs[:10])
-    import matplotlib.pyplot as plt
-    obses = np.asarray(obses)
-    plt.plot(obses[:, 0], color='r')
-    plt.plot(obses[:, 1], color='black')
-    plt.plot(obses[:, 2], color='g')
-    plt.plot(obses[:, 3], color='blue')
-    plt.plot(obses[:, 4], color='y')
-
-    plt.show()
-    env.end_simulation()
-    print('env closed')
-
+    action = [0, -25, 0, -25, 0, -25, 0, -25, 0, -25, 0, -25, 0, -25, 0, -25, 0, -25, 0, -25]
+    vrep.simxPauseCommunication(env.clientID, True)
+    for i in range(env.num_joints):
+        vrep.simxSetJointPosition(env.clientID, env.handles['joint'][i],
+                                        action[i]*DEG2RAD, vrep.simx_opmode_oneshot)
+    vrep.simxPauseCommunication(env.clientID, False)
+    time.sleep(100)
 
 
 
