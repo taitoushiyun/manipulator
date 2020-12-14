@@ -10,6 +10,6 @@ VREP_Config = {
     'buffer_type': 'HER',
     'reward_type': 'dense',
     'max_angles_vel': 10,  # 10degree/s
-    'state_dim': 16,
-    'num_joints': 4,
+    'state_dim': 22,
+    'num_joints': 10,
 }

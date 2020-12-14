@@ -18,13 +18,13 @@ from matplotlib import pyplot as plt
 if __name__ == '__main__':
     env = ManipulatorEnv(0)
     policy = actor_critic = Actor_critic(env=env,
-                                         actor_obs_dims=16, actor_hidden_sizes=[64, 64],
-                                         actor_action_dims=2, critic_obs_dims=16,
+                                         actor_obs_dims=22, actor_hidden_sizes=[64, 64],
+                                         actor_action_dims=5, critic_obs_dims=22,
                                          critic_hidden_sizes=[64, 64])
-    model = torch.load('42.pth')
+    model = torch.load('44.pth')
     actor_critic.load_state_dict(model)
     action_records = [[] for _ in range(5)]
-    for i in range(5):
+    for i in range(1):
         print(f'episode {i}')
         action_record = []
         cur_obs = env.reset()
@@ -38,18 +38,21 @@ if __name__ == '__main__':
                 for j in range(5):
                     action_records[j].append(list(action_record[:, j]))
                 break
-    plt.figure(figsize=(8, 4))
-    for j in range(2):
-        plt.subplot(1, 2, j + 1)
-        for i in range(5):
-            plt.plot(action_records[j][i], label=f'episode {i}')
-            plt.xlabel('stimulation steps')
-            if j == 0:
-                plt.ylabel('angle')
-            plt.legend(loc='lower right')
-            plt.title(f'joint_{j}')
-    plt.show()
+    time.sleep(1000)
+    # plt.figure(figsize=(20, 4))
+    # for j in range(1):
+    #     plt.subplot(1, 5, j + 1)
+    #     for i in range(5):
+    #         plt.plot(action_records[j][i], label=f'episode {i}')
+    #         plt.xlabel('stimulation steps')
+    #         if j == 0:
+    #             plt.ylabel('angle')
+    #         plt.legend(loc='lower right')
+    #         plt.title(f'joint_{j}')
+    #
+    # plt.savefig('5dof.eps')
+    # plt.show()
 
 
-    env.end_simulation()
+    # env.end_simulation()
 

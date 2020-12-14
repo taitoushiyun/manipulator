@@ -3,7 +3,7 @@ import torch.optim as optim
 import numpy as np
 from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 import visdom
-
+from PPO.logger import logger
 
 class ReplayBuffer(object):
     def __init__(self, buffer_size, act_dims, obs_dims, batch_size=32):
@@ -99,7 +99,8 @@ class PPO_agent(object):
                 if done or self.max_steps_per_episodes == path_length:
                     break
             self.rewards_learning_prcoess.append(path_rewards)
-            print("Episode: %d,          Path length: %d       Reward: %f" % (episode_t + 1, path_length, path_rewards))
+            logger.info("Episode: %d,          Path length: %d       Reward: %f" % (episode_t + 1, path_length, path_rewards))
+            # print("Episode: %d,          Path length: %d       Reward: %f" % (episode_t + 1, path_length, path_rewards))
             if len(self.reward_cnt) >= 10:
                 self.reward_cnt.pop(0)
                 self.reward_cnt.append(path_rewards)

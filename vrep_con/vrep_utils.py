@@ -80,7 +80,7 @@ class ManipulatorEnv(gym.Env):
 
     def _sample_goal(self):
         # theta = np.random.randn(self.num_joints)
-        theta = np.asarray([0, 20, 0, 10]) * DEG2RAD
+        theta = np.asarray([0, -50, 0, -50, 0, -50, 0, 0, -20, -10]) * DEG2RAD
         goal_theta = np.clip(theta, -3, 3)
         print(f'goal sample for joints is {goal_theta}')
         goal = self.dh_model.forward_kinematics(goal_theta)
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     print('env created success')
     obs = env.reset()
     print('reset success')
-    action = [0, -25, 0, -25, 0, -25, 0, -25, 0, -25, 0, -25, 0, -25, 0, -25, 0, -25, 0, -25]
+    action = [0, 45, 0, -45, 0, -45, 0, 45, 0, 0]
     vrep.simxPauseCommunication(env.clientID, True)
     for i in range(env.num_joints):
         vrep.simxSetJointPosition(env.clientID, env.handles['joint'][i],
