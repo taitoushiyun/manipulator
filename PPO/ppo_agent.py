@@ -33,8 +33,9 @@ class ReplayBuffer(object):
 
 
 class PPO_agent(object):
-    def __init__(self, env, actor_critic, num_episodes, max_steps_per_episodes, pooling,
+    def __init__(self, args, env, actor_critic, num_episodes, max_steps_per_episodes, pooling,
                  clip_epsilon=0.2, gamma=0.99, lr=3e-4, ppo_epoch=4, weight_epsilon=0.001):
+        self.args = args
         self.env, self.actor_critic = env, actor_critic
         self.num_episodes, self.max_steps_per_episodes, self.pooling = num_episodes, max_steps_per_episodes, pooling
         self.rewards_learning_prcoess = []
@@ -44,7 +45,7 @@ class PPO_agent(object):
         self.iter_steps = 0
         import os
         os.makedirs('checkpoints', exist_ok=True)
-        self.vis = visdom.Visdom(port=6016, env='mani_17')
+        self.vis = visdom.Visdom(port=self.args.visdom_port, env=self.args.code_version)
         self.vis.line(
             X=np.array([0]),
             Y=np.array([0]),
@@ -108,7 +109,7 @@ class PPO_agent(object):
                 self.reward_cnt.append(path_rewards)
             self.vis.line(
                 X=np.array([episode_t + 1]),
-                Y=np.array([sum(self.reward_cnt) / len(self.reward_cnt) if len(self.reward_cnt) else 0]),
+                Y=np.array([100 * (sum(self.reward_cnt) / len(self.reward_cnt) if len(self.reward_cnt) else 0) - 50]),
                 win='mean rewards',
                 update='append')
             self.vis.line(
@@ -118,7 +119,7 @@ class PPO_agent(object):
                 update='append')
             self.vis.line(
                 X=np.array([episode_t + 1]),
-                Y=np.array([path_rewards]),
+                Y=np.array([100 * path_rewards - 50]),
                 win="rewards",
                 update='append')
 

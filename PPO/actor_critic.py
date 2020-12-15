@@ -59,3 +59,8 @@ class Actor_critic(nn.Module):
         entropy = dist.entropy().sum(1, keepdim=True)
         return dist, entropy, v
 
+    def eval_action(self, cur_obs_tensor, max_action=1.0):
+        m, std, v = self.forward(cur_obs_tensor)
+        action = m.clamp(-max_action, max_action)
+        return action[0].detach().numpy()
+

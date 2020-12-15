@@ -12,9 +12,9 @@ RAD2DEG = 180. / np.pi
 
 
 class ManipulatorEnv(gym.Env):
-    def __init__(self, index):
+    def __init__(self, index, env_config):
         super(ManipulatorEnv, self).__init__()
-        config = copy.deepcopy(VREP_Config)
+        self.env_config = env_config
         self.port = 20000 + index
         self.handles = {}
         self.clientID = None
@@ -23,14 +23,11 @@ class ManipulatorEnv(gym.Env):
 
         self.step_cnt = 0
         self.num_episodes = 0
-        self.T = config['T']
-        self.max_torque = config['max_torque']
-        self.max_angles_vel = config['max_angles_vel']
-        self.distance_threshold = config['distance_threshold']
-        self.reward_type = config['reward_type']
-        self.buffer_type = config['buffer_type']
+        self.max_angles_vel = env_config['max_angles_vel']
+        self.distance_threshold = env_config['distance_threshold']
+        self.reward_type = env_config['reward_type']
+        self.num_joints = env_config['num_joints']
 
-        self.num_joints = config['num_joints']
         self.state_dim = self.num_joints + 12       # EE_point_position, EE_point_vel, goal_position, base_position
         self.action_dim = self.num_joints // 2
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_dim,), dtype=np.float32)
@@ -46,7 +43,9 @@ class ManipulatorEnv(gym.Env):
         self.observation = np.zeros((self.state_dim, ))
         self.observation[self.g_pos_idx] = np.asarray(self.goal)
         self.observation[self.b_pos_idx] = np.asarray([0.2, -index, 1])
+        self.last_obs = None
         self._init_vrep()
+        time.sleep(2)
         self._elapsed_steps = None
         self._max_episode_steps = 100
 
@@ -80,7 +79,7 @@ class ManipulatorEnv(gym.Env):
 
     def _sample_goal(self):
         # theta = np.random.randn(self.num_joints)
-        theta = np.asarray([0, -50, 0, -50, 0, -50, 0, 0, -20, -10]) * DEG2RAD
+        theta = np.asarray([0, 20, 0, 15, 0, 20, 0, 20, 0, 20]) * DEG2RAD
         goal_theta = np.clip(theta, -3, 3)
         print(f'goal sample for joints is {goal_theta}')
         goal = self.dh_model.forward_kinematics(goal_theta)
@@ -125,12 +124,12 @@ class ManipulatorEnv(gym.Env):
         vrep.simxGetObjectVelocity(self.clientID, self.handles['point'][0], vrep.simx_opmode_streaming)
         vrep.simxGetObjectPosition(self.clientID, self.handles['point'][1], -1, vrep.simx_opmode_streaming)
         vrep.simxGetObjectPosition(self.clientID, self.handles['point'][2], -1, vrep.simx_opmode_streaming)
-        # first synchronous step
-        vrep.simxSynchronousTrigger(self.clientID)
-        vrep.simxGetPingTime(self.clientID)
+        time.sleep(0.5)
         self.step_cnt = 0
         self.running = True
         observation = self.get_state(vrep.simx_opmode_buffer)
+        self.last_obs = observation
+        # print('reset')
         return observation
 
     def step(self, action):
@@ -144,26 +143,25 @@ class ManipulatorEnv(gym.Env):
         vrep.simxGetPingTime(self.clientID)
         observation = self.get_state(vrep.simx_opmode_buffer)
         reward = self.cal_reward(observation[self.e_pos_idx], self.goal)
-        done = self.cal_termination(observation[self.e_pos_idx], self.goal)
+        done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
         info = {}
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
+        self.last_obs = observation
         return observation, reward, done, info
 
-    def goal_distance(self, goal_a, goal_b):
-        assert goal_a.shape == goal_b.shape
-        return np.linalg.norm(goal_a - goal_b, axis=-1)
-
     def cal_reward(self, achieved_goal, goal):
-        d = self.goal_distance(achieved_goal, goal)
+
+        def dense_reward(d):
+            return -d
+        d = np.linalg.norm(achieved_goal - goal, axis=-1)
+
         if self.reward_type == 'sparse':
             return -(d > self.distance_threshold).astype(np.float32)
         else:
-            return -d
-
-    def cal_termination(self, achieved_goal, goal):
-        d = self.goal_distance(achieved_goal, goal)
-        return d <= self.distance_threshold
+            d_last = np.linalg.norm(self.last_obs[self.e_pos_idx] - self.goal, axis=-1)
+            # print(f'reward now is {dense_reward(d)}, reward last is {dense_reward(d_last)}')
+            return dense_reward(d) - dense_reward(d_last)
 
     def set_joint_effect(self, action):
         assert len(action) == self.num_joints, 'action dimension wrong'
@@ -197,11 +195,11 @@ if __name__ == '__main__':
     print('env created success')
     obs = env.reset()
     print('reset success')
-    action = [0, 45, 0, -45, 0, -45, 0, 45, 0, 0]
+    action_ = [0, 45, 0, -45, 0, -45, 0, 45, 0, 0]
     vrep.simxPauseCommunication(env.clientID, True)
     for i in range(env.num_joints):
         vrep.simxSetJointPosition(env.clientID, env.handles['joint'][i],
-                                        action[i]*DEG2RAD, vrep.simx_opmode_oneshot)
+                                        action_[i]*DEG2RAD, vrep.simx_opmode_oneshot)
     vrep.simxPauseCommunication(env.clientID, False)
     time.sleep(100)
 
