@@ -5,6 +5,7 @@ from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 import visdom
 from PPO.logger import logger
 
+
 class ReplayBuffer(object):
     def __init__(self, buffer_size, act_dims, obs_dims, batch_size=32):
         self.buffer_size = buffer_size
@@ -46,37 +47,14 @@ class PPO_agent(object):
         import os
         os.makedirs('checkpoints', exist_ok=True)
         self.vis = visdom.Visdom(port=self.args.visdom_port, env=self.args.code_version)
-        self.vis.line(
-            X=np.array([0]),
-            Y=np.array([0]),
-            win='mean rewards',
-            opts=dict(
-                xlabel='episodes',
-                ylabel='mean rewards',
-                title='mean rewards'))
-        self.vis.line(
-            X=np.array([0]),
-            Y=np.array([0]),
-            win="path len",
-            opts=dict(
-                xlabel='episodes',
-                ylabel='path len',
-                title='path len'))
-        self.vis.line(
-            X=np.array([0]),
-            Y=np.array([0]),
-            win="rewards",
-            opts=dict(
-                xlabel='episodes',
-                ylabel='rewards',
-                title='rewards'))
+
         self.reward_cnt = []
 
     def train(self):
         for episode_t in range(self.num_episodes):
             cur_obs = self.env.reset()
             path_length, path_rewards = 0, 0.
-            while(True):
+            while True:
                 path_length += 1
                 action, old_log_prob, value = self.actor_critic.select_action(torch.FloatTensor(cur_obs[None]))
                 next_obs, reward, done, _ = self.env.step(action)
@@ -93,9 +71,8 @@ class PPO_agent(object):
                     self._do_training(torch.FloatTensor(returns), torch.FloatTensor(values),
                                       torch.FloatTensor(old_log_probs), torch.FloatTensor(observations),
                                       torch.FloatTensor(actions))
-                    self.iter_steps += 1
-                    # if self.iter_steps % 5 == 0:
                     torch.save(self.actor_critic.state_dict(), f'checkpoints/{self.iter_steps}.pth')
+                    self.iter_steps += 1
                 path_rewards += reward
                 if done or self.max_steps_per_episodes == path_length:
                     break
@@ -107,22 +84,71 @@ class PPO_agent(object):
                 self.reward_cnt.append(path_rewards)
             else:
                 self.reward_cnt.append(path_rewards)
-            self.vis.line(
-                X=np.array([episode_t + 1]),
-                Y=np.array([100 * (sum(self.reward_cnt) / len(self.reward_cnt) if len(self.reward_cnt) else 0) - 50]),
-                win='mean rewards',
-                update='append')
-            self.vis.line(
-                X=np.array([episode_t + 1]),
-                Y=np.array([path_length]),
-                win="path len",
-                update='append')
-            self.vis.line(
-                X=np.array([episode_t + 1]),
-                Y=np.array([100 * path_rewards - 50]),
-                win="rewards",
-                update='append')
-
+            if episode_t == 0:
+                self.vis.line(
+                    X=np.array([0]),
+                    Y=np.array([100 * path_rewards - 50]),
+                    win='mean rewards',
+                    opts=dict(
+                        xlabel='episodes',
+                        ylabel='mean rewards',
+                        title='mean rewards'))
+                self.vis.line(
+                    X=np.array([0]),
+                    Y=np.array([path_length]),
+                    win="path len",
+                    opts=dict(
+                        xlabel='episodes',
+                        ylabel='path len',
+                        title='path len'))
+                self.vis.line(
+                    X=np.array([0]),
+                    Y=np.array([100 * path_rewards - 50]),
+                    win="rewards",
+                    opts=dict(
+                        xlabel='episodes',
+                        ylabel='rewards',
+                        title='rewards'))
+            else:
+                self.vis.line(
+                    X=np.array([episode_t + 1]),
+                    Y=np.array([100 * (sum(self.reward_cnt) / len(self.reward_cnt) if len(self.reward_cnt) else 0) - 50]),
+                    win='mean rewards',
+                    update='append')
+                self.vis.line(
+                    X=np.array([episode_t + 1]),
+                    Y=np.array([path_length]),
+                    win="path len",
+                    update='append')
+                self.vis.line(
+                    X=np.array([episode_t + 1]),
+                    Y=np.array([100 * path_rewards - 50]),
+                    win="rewards",
+                    update='append')
+            if episode_t % 3 == 0:
+                eval_path_len, eval_rewards = self.eval(num_episodes=1)
+                if episode_t == 0:
+                    self.vis.line(X=np.array([episode_t]),
+                                  Y=np.array([eval_path_len]),
+                                  win='eval_path_len',
+                                  opts=dict(xlabel='iter steps',
+                                            ylabel='path length',
+                                            title='path length'))
+                    self.vis.line(X=np.array([episode_t]),
+                                  Y=np.array([100 * eval_rewards - 50]),
+                                  win='eval_rewards',
+                                  opts=dict(xlabel='iter steps',
+                                            ylabel='eval rewards',
+                                            title='eval rewards'))
+                else:
+                    self.vis.line(X=np.array([episode_t]),
+                                  Y=np.array([eval_path_len]),
+                                  win='eval_path_len',
+                                  update='append')
+                    self.vis.line(X=np.array([episode_t]),
+                                  Y=np.array([100 * eval_rewards - 50]),
+                                  win='eval_rewards',
+                                  update='append')
 
     def compute_gae(self, next_obs, rewards, values, dones, lammbda=0.95):
 
@@ -155,6 +181,20 @@ class PPO_agent(object):
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
+
+    def eval(self, num_episodes=1):
+        path_len = 0
+        rewards = 0
+        cur_obs = self.env.reset()
+        while True:
+            action = self.actor_critic.eval_action(torch.FloatTensor(cur_obs[None]))
+            next_obs, reward, done, info = self.env.step(action)
+            rewards += reward
+            path_len += 1
+            cur_obs = next_obs
+            if done:
+                break
+        return path_len, rewards
 
 
 

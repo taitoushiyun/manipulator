@@ -27,6 +27,7 @@ class ManipulatorEnv(gym.Env):
         self.distance_threshold = env_config['distance_threshold']
         self.reward_type = env_config['reward_type']
         self.num_joints = env_config['num_joints']
+        self.goal_set = env_config['goal_set']
 
         self.state_dim = self.num_joints + 12       # EE_point_position, EE_point_vel, goal_position, base_position
         self.action_dim = self.num_joints // 2
@@ -79,7 +80,10 @@ class ManipulatorEnv(gym.Env):
 
     def _sample_goal(self):
         # theta = np.random.randn(self.num_joints)
-        theta = np.asarray([0, 20, 0, 15, 0, 20, 0, 20, 0, 20]) * DEG2RAD
+        if self.goal_set is not None and isinstance(self.goal_set, list):
+            theta = np.asarray(self.goal_set) * DEG2RAD
+        else:
+            raise ValueError
         goal_theta = np.clip(theta, -3, 3)
         print(f'goal sample for joints is {goal_theta}')
         goal = self.dh_model.forward_kinematics(goal_theta)

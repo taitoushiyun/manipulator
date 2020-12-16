@@ -7,11 +7,15 @@ from vrep_con.vrep_utils import ManipulatorEnv
 
 
 def main(args_):
+    goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
+                  'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
+                  'super hard': [0, -50, 0, -50, 0, -50, 0, 0, -20, -10]}
     env_config = {
         'distance_threshold': args_.distance_threshold,
         'reward_type': args_.reward_type,
         'max_angles_vel': args_.max_angles_vel,  # 10degree/s
-        'num_joints': args.num_joints,
+        'num_joints': args_.num_joints,
+        'goal_set': goal_index[args_.goal_set],
     }
     env = ManipulatorEnv(0, env_config)
     obs_dims = env.observation_space.shape[0]
@@ -45,7 +49,7 @@ def main(args_):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--code-version', type=str, default='main_22')
+    parser.add_argument('--code-version', type=str, default='main_23')
     parser.add_argument('--visdom-port', type=int, default=6016)
     parser.add_argument('--actor-hidden-dim', type=list, default=[64, 64])
     parser.add_argument('--critic-hidden-dim', type=list, default=[64, 64])
@@ -65,5 +69,6 @@ if __name__ == '__main__':
     parser.add_argument('--reward-type', type=str, default='dense')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
     parser.add_argument('--num-joints', type=int, default=10)
+    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard'], default='hard')
     args = parser.parse_args()
     main(args)
