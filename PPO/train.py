@@ -53,6 +53,7 @@ if __name__ == '__main__':
     parser.add_argument('--visdom-port', type=int, default=6016)
     parser.add_argument('--actor-hidden-dim', type=list, default=[64, 64])
     parser.add_argument('--critic-hidden-dim', type=list, default=[64, 64])
+    parser.add_argument('--eval_times', type=int, default=1)
     # ppo config
     parser.add_argument('--num_episodes', type=int, default=10000)
     parser.add_argument('--max-episode-steps', type=int, default=100)

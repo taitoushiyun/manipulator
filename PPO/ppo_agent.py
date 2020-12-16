@@ -126,7 +126,7 @@ class PPO_agent(object):
                     win="rewards",
                     update='append')
             if episode_t % 3 == 0:
-                eval_path_len, eval_rewards = self.eval(num_episodes=1)
+                eval_path_len, eval_rewards = self.eval(num_episodes=self.args.eval_times)
                 if episode_t == 0:
                     self.vis.line(X=np.array([episode_t]),
                                   Y=np.array([eval_path_len]),
@@ -185,16 +185,17 @@ class PPO_agent(object):
     def eval(self, num_episodes=1):
         path_len = 0
         rewards = 0
-        cur_obs = self.env.reset()
-        while True:
-            action = self.actor_critic.eval_action(torch.FloatTensor(cur_obs[None]))
-            next_obs, reward, done, info = self.env.step(action)
-            rewards += reward
-            path_len += 1
-            cur_obs = next_obs
-            if done:
-                break
-        return path_len, rewards
+        for i in range(num_episodes):
+            cur_obs = self.env.reset()
+            while True:
+                action = self.actor_critic.eval_action(torch.FloatTensor(cur_obs[None]))
+                next_obs, reward, done, info = self.env.step(action)
+                rewards += reward
+                path_len += 1
+                cur_obs = next_obs
+                if done:
+                    break
+        return path_len / num_episodes, rewards / num_episodes
 
 
 
