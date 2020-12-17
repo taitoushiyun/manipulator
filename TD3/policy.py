@@ -36,14 +36,17 @@ class QFun(nn.Module):
         super(QFun, self).__init__()
         self.obs_dim = obs_dim
         self.act_dim = act_dim
-        self.mlp = nn.Sequential(nn.Linear(self.obs_dim, 64),
+        self.mlp = nn.Sequential(nn.Linear(self.obs_dim + self.act_dim, 64),
                                  nn.ReLU(),
                                  nn.Linear(64, 64),
                                  nn.ReLU(),
                                  nn.Linear(64, self.act_dim))
 
-    def forward(self, cur_obs_tensor):
-        return self.mlp(cur_obs_tensor).detach().numpy()
+    def forward(self, cur_obs_tensor, actions_tensor):
+        input_ = torch.cat([cur_obs_tensor, actions_tensor], -1)
+        return self.mlp(input_).detach().numpy()
+
+
 
 
 

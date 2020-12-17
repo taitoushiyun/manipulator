@@ -9,7 +9,7 @@ from vrep_con.vrep_utils import ManipulatorEnv
 def main(args_):
     goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
                   'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
-                  'super hard': [0, -50, 0, -50, 0, -50, 0, 0, -20, -10]}
+                  'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
     env_config = {
         'distance_threshold': args_.distance_threshold,
         'reward_type': args_.reward_type,
