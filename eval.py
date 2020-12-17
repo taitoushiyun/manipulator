@@ -11,7 +11,7 @@ if __name__ == '__main__':
                   'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
                   'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
     env_config = {
-        'distance_threshold': .02,
+        'distance_threshold': 0.02,
         'reward_type': 'dense',
         'max_angles_vel': 10,  # 10degree/s
         'num_joints': 10,
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     action_records = [[] for _ in range(5)]
 
-    for i in range(200, 223):
+    for i in range(210, 224):
         model = torch.load(f'PPO/checkpoints/{i}.pth')  # 'PPO/checkpoints/40.pth'
         actor_critic.load_state_dict(model)
         print(f'episode {i}')

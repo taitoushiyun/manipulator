@@ -1,3 +1,4 @@
+import importmagic
 from vrep_con.vrep_utils import ManipulatorEnv
 from TD3.td3_agent import TD3Agent, td3_torcs
 import visdom
@@ -74,7 +75,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--episodes', type=int, default=2000)
-    parser.add_argument('--tag', type=str, required=True)
+
     args = parser.parse_args()
     # write the selected car to configuration file
-    playGame(args.train, args.episodes)
+    playGame(args, args.train, args.episodes)

@@ -1,9 +1,9 @@
+import importmagic
 import torch
 import torch.optim as optim
 import numpy as np
 from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 import visdom
-import importmagic
 from PPO.logger import logger
 
 
@@ -88,7 +88,7 @@ class PPO_agent(object):
             if episode_t == 0:
                 self.vis.line(
                     X=np.array([0]),
-                    Y=np.array([100 * path_rewards - 50]),
+                    Y=np.array([100 * (path_rewards - self.env.max_rewards)]),
                     win='mean rewards',
                     opts=dict(
                         xlabel='episodes',
@@ -104,7 +104,7 @@ class PPO_agent(object):
                         title='path len'))
                 self.vis.line(
                     X=np.array([0]),
-                    Y=np.array([100 * path_rewards - 50]),
+                    Y=np.array([100 * (path_rewards - self.env.max_rewards)]),
                     win="rewards",
                     opts=dict(
                         xlabel='episodes',
@@ -113,7 +113,7 @@ class PPO_agent(object):
             else:
                 self.vis.line(
                     X=np.array([episode_t + 1]),
-                    Y=np.array([100 * (sum(self.reward_cnt) / len(self.reward_cnt) if len(self.reward_cnt) else 0) - 50]),
+                    Y=np.array([100 * ((sum(self.reward_cnt) / len(self.reward_cnt) if len(self.reward_cnt) else 0) - self.env.max_rewards)]),
                     win='mean rewards',
                     update='append')
                 self.vis.line(
@@ -123,10 +123,10 @@ class PPO_agent(object):
                     update='append')
                 self.vis.line(
                     X=np.array([episode_t + 1]),
-                    Y=np.array([100 * path_rewards - 50]),
+                    Y=np.array([100 * (path_rewards - self.env.max_rewards)]),
                     win="rewards",
                     update='append')
-            if episode_t % 3 == 0:
+            if episode_t % self.args.eval_freq == 0:
                 eval_path_len, eval_rewards = self.eval(num_episodes=self.args.eval_times)
                 if episode_t == 0:
                     self.vis.line(X=np.array([episode_t]),
@@ -136,7 +136,7 @@ class PPO_agent(object):
                                             ylabel='path length',
                                             title='path length'))
                     self.vis.line(X=np.array([episode_t]),
-                                  Y=np.array([100 * eval_rewards - 50]),
+                                  Y=np.array([100 * (eval_rewards - self.env.max_rewards)]),
                                   win='eval_rewards',
                                   opts=dict(xlabel='iter steps',
                                             ylabel='eval rewards',
@@ -147,7 +147,7 @@ class PPO_agent(object):
                                   win='eval_path_len',
                                   update='append')
                     self.vis.line(X=np.array([episode_t]),
-                                  Y=np.array([100 * eval_rewards - 50]),
+                                  Y=np.array([100 * (eval_rewards - self.env.max_rewards)]),
                                   win='eval_rewards',
                                   update='append')
 
