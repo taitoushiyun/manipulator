@@ -1,39 +1,11 @@
-# This file is part of the REMOTE API
-#
-# Copyright 2006-2017 Coppelia Robotics GmbH. All rights reserved.
-# marc@coppeliarobotics.com
-# www.coppeliarobotics.com
-#
-# The REMOTE API is licensed under the terms of GNU GPL:
-#
-# -------------------------------------------------------------------
-# The REMOTE API is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# THE REMOTE API IS DISTRIBUTED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
-# WARRANTY. THE USER WILL USE IT AT HIS/HER OWN RISK. THE ORIGINAL
-# AUTHORS AND COPPELIA ROBOTICS GMBH WILL NOT BE LIABLE FOR DATA LOSS,
-# DAMAGES, LOSS OF PROFITS OR ANY OTHER KIND OF LOSS WHILE USING OR
-# MISUSING THIS SOFTWARE.
-#
-# See the GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with the REMOTE API.  If not, see <http://www.gnu.org/licenses/>.
-# -------------------------------------------------------------------
-#
-# This file was automatically created for V-REP release V3.4.0 rev. 1 on April 5th 2017
-
 import platform
 import struct
 import sys
 import os
 import ctypes as ct
+import sys
+sys.path.append('/home/wangyw/cq/code/manipulator')
 from vrep_con.vrepConst import *
-
-from vrep_con.version import VERSION, ARCH
 
 #load library
 libsimx = None
@@ -47,7 +19,7 @@ try:
         file_extension = '.dylib'
     else:
         file_extension = '.so'
-    libfullpath = os.path.join(os.path.dirname(__file__), 'remoteApi-{}-{}{}'.format(VERSION, ARCH, file_extension))
+    libfullpath = os.path.join(os.path.dirname(__file__), 'remoteApi' + file_extension)
     libsimx = ct.CDLL(libfullpath)
 except:
     print ('----------------------------------------------------')
@@ -94,8 +66,10 @@ c_AuxiliaryConsoleClose     = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct
 c_AuxiliaryConsolePrint     = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct.POINTER(ct.c_char), ct.c_int32)(("simxAuxiliaryConsolePrint", libsimx))
 c_AuxiliaryConsoleShow      = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct.c_ubyte, ct.c_int32)(("simxAuxiliaryConsoleShow", libsimx))
 c_GetObjectOrientation      = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct.c_int32, ct.POINTER(ct.c_float), ct.c_int32)(("simxGetObjectOrientation", libsimx))
+c_GetObjectQuaternion       = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct.c_int32, ct.POINTER(ct.c_float), ct.c_int32)(("simxGetObjectQuaternion", libsimx))
 c_GetObjectPosition         = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct.c_int32, ct.POINTER(ct.c_float), ct.c_int32)(("simxGetObjectPosition", libsimx))
 c_SetObjectOrientation      = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct.c_int32, ct.POINTER(ct.c_float), ct.c_int32)(("simxSetObjectOrientation", libsimx))
+c_SetObjectQuaternion       = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct.c_int32, ct.POINTER(ct.c_float), ct.c_int32)(("simxSetObjectQuaternion", libsimx))
 c_SetObjectPosition         = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct.c_int32, ct.POINTER(ct.c_float), ct.c_int32)(("simxSetObjectPosition", libsimx))
 c_SetObjectParent           = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct.c_int32, ct.c_ubyte, ct.c_int32)(("simxSetObjectParent", libsimx))
 c_SetUIButtonLabel          = ct.CFUNCTYPE(ct.c_int32,ct.c_int32, ct.c_int32, ct.c_int32, ct.POINTER(ct.c_char), ct.POINTER(ct.c_char), ct.c_int32)(("simxSetUIButtonLabel", libsimx))
@@ -551,6 +525,17 @@ def simxGetObjectOrientation(clientID, objectHandle, relativeToObjectHandle, ope
         arr.append(eulerAngles[i])
     return ret, arr
 
+def simxGetObjectQuaternion(clientID, objectHandle, relativeToObjectHandle, operationMode):
+    '''
+    Please have a look at the function description/documentation in the V-REP user manual
+    '''
+    quaternion = (ct.c_float*4)()
+    ret = c_GetObjectQuaternion(clientID, objectHandle, relativeToObjectHandle, quaternion, operationMode)
+    arr = []
+    for i in range(4):
+        arr.append(quaternion[i])
+    return ret, arr
+
 def simxGetObjectPosition(clientID, objectHandle, relativeToObjectHandle, operationMode):
     '''
     Please have a look at the function description/documentation in the V-REP user manual
@@ -569,6 +554,14 @@ def simxSetObjectOrientation(clientID, objectHandle, relativeToObjectHandle, eul
 
     angles = (ct.c_float*3)(*eulerAngles)
     return c_SetObjectOrientation(clientID, objectHandle, relativeToObjectHandle, angles, operationMode)
+
+def simxSetObjectQuaternion(clientID, objectHandle, relativeToObjectHandle, quaternion, operationMode):
+    '''
+    Please have a look at the function description/documentation in the V-REP user manual
+    '''
+
+    quat = (ct.c_float*4)(*quaternion)
+    return c_SetObjectQuaternion(clientID, objectHandle, relativeToObjectHandle, quat, operationMode)
 
 def simxSetObjectPosition(clientID, objectHandle, relativeToObjectHandle, position, operationMode):
     '''

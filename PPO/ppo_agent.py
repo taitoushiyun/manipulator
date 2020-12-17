@@ -3,6 +3,7 @@ import torch.optim as optim
 import numpy as np
 from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 import visdom
+import importmagic
 from PPO.logger import logger
 
 
