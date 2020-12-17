@@ -32,7 +32,7 @@ class ManipulatorEnv(gym.Env):
         self.state_dim = self.num_joints + 12       # EE_point_position, EE_point_vel, goal_position, base_position
         self.action_dim = self.num_joints // 2
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_dim,), dtype=np.float32)
-        self.action_space = spaces.Box(low=-1.0, high=1, shape=(self.action_dim,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1.0, high=1., shape=(self.action_dim,), dtype=np.float32)
         self.j_ang_idx = range(self.num_joints // 2)
         self.j_vel_idx = range(self.num_joints // 2, self.num_joints)
         self.e_pos_idx = range(self.num_joints,  self.num_joints + 3)
