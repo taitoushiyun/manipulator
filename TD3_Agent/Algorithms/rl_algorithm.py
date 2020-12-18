@@ -5,7 +5,7 @@ import abc
 import numpy as np
 import torch
 from pytorch_core.pytorch_util import np_to_pytorch_batch
-abs_path = '/'.join(str.split(__file__, '/')[:-2]) + '/checkpoint_parameters/policy_'
+abs_path = '/'.join(str.split(__file__, '/')[:-2]) + '/checkpoints/policy_'
 
 
 class RLAlgorithm(object):

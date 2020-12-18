@@ -46,8 +46,8 @@ def playGame(args_, train=True, episode_count=2000):
         best = -np.inf
 
         if train:
-            vis = visdom.Visdom(port=6016, env='td3_1')
-            td3_torcs(env, agent, episode_count, 1000, 'checkpoints', vis)
+            vis = visdom.Visdom(port=args.vis_port, env=args.code_version)
+            td3_torcs(env, agent, episode_count, args.max_episode_steps, 'checkpoints', vis)
         else:
             state = env.reset()
             total_reward = 0
@@ -68,6 +68,9 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
+    parser.add_argument('--code_version', type=str, default='td3_3')
+    parser.add_argument('--vis-port', type=int, default=6016)
+
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='dense')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
@@ -76,6 +79,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--episodes', type=int, default=2000)
+    parser.add_argument('--max_episode_steps', type=int, default=500)
 
     args = parser.parse_args()
     # write the selected car to configuration file

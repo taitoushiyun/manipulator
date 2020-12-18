@@ -15,14 +15,14 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from itertools import count
 
-BUFFER_SIZE = int(1e6)  # replay buffer size
+BUFFER_SIZE = int(1e7)  # replay buffer size
 BATCH_SIZE = 64  # minibatch size
 GAMMA = 0.99  # discount factor
-TAU = 1e-3  # for soft update of target parameters
+TAU = 5e-3  # for soft update of target parameters
 LR_ACTOR = 1e-3  # learning rate of the actor
 LR_CRITIC = 1e-3  # learning rate of the critic
 UPDATE_EVERY_STEP = 2  # how often to update the target and actor networks
-RAND_START = 20  # number of random exploration episodes at the start
+RAND_START = 2000  # number of random exploration episodes at the start
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -70,7 +70,7 @@ class ReplayBuffer:
 class Actor(nn.Module):
     """Actor (Policy) Model."""
 
-    def __init__(self, state_size, action_size, max_action, fc1_units=64, fc2_units=64):
+    def __init__(self, state_size, action_size, max_action, fc1_units=100, fc2_units=100):
         """Initialize parameters and build model.
         Params
         ======
@@ -96,7 +96,7 @@ class Actor(nn.Module):
 class Critic(nn.Module):
     """Critic (Value) Model."""
 
-    def __init__(self, state_size, action_size, fc1_units=64, fc2_units=64):
+    def __init__(self, state_size, action_size, fc1_units=100, fc2_units=100):
         """Initialize parameters and build model.
         Params
         ======
@@ -170,7 +170,7 @@ class TD3Agent():
         # Save experience / reward
         self.memory.add(state, action, reward, next_state, done)
 
-    def act(self, state, add_noise=True):
+    def act(self, state, episode_step=0, add_noise=True):
         """Returns actions for given state as per current policy."""
         state = torch.from_numpy(state).float().to(device)
         self.actor_local.eval()
@@ -178,7 +178,8 @@ class TD3Agent():
             action = self.actor_local(state).cpu().data.numpy()
         if add_noise:
             # Generate a random noise
-            noise = np.random.normal(0, self.noise_std, size=self.action_size)
+            sigma = 1. - (1. - .05) * min(1., episode_step / 500.)
+            noise = np.random.normal(0, sigma, size=self.action_size)
             # Add noise to the action for exploration
             action = (action + noise).clip(self.min_action[0], self.max_action[0])
         self.actor_local.train()
@@ -193,7 +194,7 @@ class TD3Agent():
             gamma (float): discount factor
         """
 
-        if len(self.memory) > BATCH_SIZE:
+        if len(self.memory) >= RAND_START:
             for i in range(n_iteraion):
                 state, action, reward, next_state, done = self.memory.sample()
 
@@ -259,8 +260,6 @@ class TD3Agent():
 
 def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
     os.makedirs('checkpoints/actor', exist_ok=True)
-    os.makedirs('checkpoints/critic1', exist_ok=True)
-    os.makedirs('checkpoints/critic2', exist_ok=True)
     vis.line(X=[0], Y=[0], win='reward', opts=dict(Xlabel='episode', Ylabel='reward', title='reward'))
     vis.line(X=[0], Y=[0], win='path len', opts=dict(Xlabel='episode', Ylabel='len', title='path len'))
     vis.line(X=[0], Y=[0], win='mean reward', opts=dict(Xlabel='episode', Ylabel='mean reward', title='mean reward'))
@@ -274,17 +273,17 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
         score = 0
         episode_length = 0
         for t in count():
-            if i_episode < RAND_START:
+            if len(agent.memory) < RAND_START:
                 action = env.action_space.sample()
             else:
-                action = agent.act(state)
+                action = agent.act(state, episode_step=i_episode)
             next_state, reward, done, info = env.step(action)
             agent.step(state, action, reward, next_state, done)
             state = next_state
             score += reward
             episode_length += 1
+            agent.learn(1)
             if done or t >= max_episode_length:
-                agent.learn(t)
                 break
         scores.append(score)
         scores_deque.append(score)
@@ -297,8 +296,6 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
         vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
         if i_episode % 5 == 0:
             torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'actor/{i_episode}.pth'))
-            torch.save(agent.critic_local1.state_dict(), os.path.join(model_dir, f'critic1/{i_episode}.pth'))
-            torch.save(agent.critic_local2.state_dict(), os.path.join(model_dir, f'critic2/{i_episode}.pth'))
 
             state = env.reset()
             total_reward = 0

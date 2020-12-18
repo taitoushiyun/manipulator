@@ -12,7 +12,7 @@ import pytorch_core.pytorch_util as ptu
 class TD3(RLAlgorithm):
     def __init__(self, base_kwargs, env, policy, pooling, qf1, qf2, target_policy_noise=0.2,
                  target_policy_noise_clip=0.5, tau=0.005,
-                 policy_and_target_update_period=2, discount=0.99):
+                 policy_and_target_update_period=2, discount=0.99, code_version='td3_0'):
         super(TD3, self).__init__(**base_kwargs)
 
         self.env, self.policy, self.pool = env, policy, pooling
@@ -31,9 +31,10 @@ class TD3(RLAlgorithm):
         self.qf1_target = self.qf1.copy()
         self.qf2_target = self.qf2.copy()
         self.target_policy = policy.copy()
+        self.code_version = code_version
 
     def train(self):
-        self._train(self.env, self.policy, self.pool)
+        self._train(self.env, self.policy, self.pool, self.code_version)
 
     def _do_training(self, num_iter, batch_data):
         rewards = batch_data['rewards']

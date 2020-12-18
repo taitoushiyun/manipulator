@@ -3,10 +3,20 @@ import logging
 from _collections import deque
 
 class Sampler(object):
-    def __init__(self, max_path_length, min_pool_size, batch_size):
+    def __init__(self, max_path_length, min_pool_size, batch_size, code_version):
         self._max_path_length = max_path_length
         self._min_pool_size = min_pool_size
         self._batch_size = batch_size
+        import visdom
+        self.vis = visdom.Visdom(port=6016, env=code_version)
+        self.vis.line(X=[0], Y=[0], win='reward', opts=dict(Xlabel='episode', Ylabel='reward', title='reward'))
+        self.vis.line(X=[0], Y=[0], win='path len', opts=dict(Xlabel='episode', Ylabel='len', title='path len'))
+        self.vis.line(X=[0], Y=[0], win='mean reward',
+                      opts=dict(Xlabel='episode', Ylabel='mean reward', title='mean reward'))
+        self.vis.line(X=[0], Y=[0], win='eval reward',
+                      opts=dict(Xlabel='episode', Ylabel='reward', title='eval reward'))
+        self.vis.line(X=[0], Y=[0], win='eval path len',
+                      opts=dict(Xlabel='episode', Ylabel='len', title='eval path len'))
 
         self.env, self.policy, self.pooling = None, None, None
 
@@ -24,7 +34,7 @@ class Sampler(object):
 
 
 class SimpleSampler(Sampler):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs, ):
         super(SimpleSampler, self).__init__(**kwargs)
         self._path_length = 0
         self._path_return = 0
@@ -34,14 +44,7 @@ class SimpleSampler(Sampler):
         self._current_observation = None
         self._total_samples = 0
         self.reward_episodes = []
-        import visdom
-        self.vis = visdom.Visdom(port=6016, env='td3_2')
-        self.vis.line(X=[0], Y=[0], win='reward', opts=dict(Xlabel='episode', Ylabel='reward', title='reward'))
-        self.vis.line(X=[0], Y=[0], win='path len', opts=dict(Xlabel='episode', Ylabel='len', title='path len'))
-        self.vis.line(X=[0], Y=[0], win='mean reward',
-                 opts=dict(Xlabel='episode', Ylabel='mean reward', title='mean reward'))
-        self.vis.line(X=[0], Y=[0], win='eval reward', opts=dict(Xlabel='episode', Ylabel='reward', title='eval reward'))
-        self.vis.line(X=[0], Y=[0], win='eval path len', opts=dict(Xlabel='episode', Ylabel='len', title='eval path len'))
+
         self.queue = deque(maxlen=10)
 
     def sample(self, render=False):

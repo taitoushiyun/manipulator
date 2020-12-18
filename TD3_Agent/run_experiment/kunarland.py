@@ -17,6 +17,7 @@ from ReplayBuffers.simple_sample import SimpleSampler
 
 
 def training_process():
+    code_version = 'td3_3'
     act_dims = 2
     obs_dims = 8
     env = gym.make('LunarLanderContinuous-v2')
@@ -25,7 +26,7 @@ def training_process():
     q1_fn = QFunction([100, 100], obs_dims, act_dims)
     print(q1_fn)
     q2_fn = QFunction([100, 100], obs_dims, act_dims)
-    sampler = SimpleSampler(max_path_length=500, min_pool_size=2000, batch_size=64)
+    sampler = SimpleSampler(max_path_length=500, min_pool_size=2000, batch_size=64, code_version=code_version)
     base_kwargs = {
         'num_total_epochs': 2000,
         'epoch_length': 2000,
@@ -33,7 +34,7 @@ def training_process():
         'sampler': sampler,
     }
     pooling = SimpleReplayBuffer(max_replay_buffer_size=int(1e7), observation_dim=obs_dims, action_dim=act_dims)
-    td3_agent = TD3(base_kwargs, env, policy, pooling, q1_fn, q2_fn)
+    td3_agent = TD3(base_kwargs, env, policy, pooling, q1_fn, q2_fn, code_version=code_version)
 
     td3_agent.train()
     pickle.dump(sampler.reward_episodes, open('td3_Lunar_learning_process.pkl', 'wb'))

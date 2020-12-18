@@ -6,28 +6,32 @@ from TD3.td3 import TD3
 
 
 def main(args_):
-    goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
-                  'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
-                  'super hard': [0, -50, 0, -50, 0, -50, 0, 0, -20, -10]}
-    env_config = {
-        'distance_threshold': args_.distance_threshold,
-        'reward_type': args_.reward_type,
-        'max_angles_vel': args_.max_angles_vel,  # 10degree/s
-        'num_joints': args_.num_joints,
-        'goal_set': goal_index[args_.goal_set],
-    }
-    env = ManipulatorEnv(0, env_config)
+    # goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
+    #               'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
+    #               'super hard': [0, -50, 0, -50, 0, -50, 0, 0, -20, -10]}
+    # env_config = {
+    #     'distance_threshold': args_.distance_threshold,
+    #     'reward_type': args_.reward_type,
+    #     'max_angles_vel': args_.max_angles_vel,  # 10degree/s
+    #     'num_joints': args_.num_joints,
+    #     'goal_set': goal_index[args_.goal_set],
+    # }
+    # env = ManipulatorEnv(0, env_config)
+    import gym
+    env = gym.make('LunarLanderContinuous-v2')
     obs_dims = env.observation_space.shape[0]
     act_dims = env.action_space.shape[0]
     policy = Policy(obs_dim=obs_dims,
                     act_dim=act_dims,
-                    max_action=env_config['max_angles_vel'],
+                    # max_action=env_config['max_angles_vel'],
+                    max_action=env.action_space.high[0],
                     max_sigma=1,
                     min_sigma=0.05,
                     decay_period=500)
     target_policy = Policy(obs_dim=obs_dims,
                            act_dim=act_dims,
-                           max_action=env_config['max_angles_vel'],
+                           # max_action=env_config['max_angles_vel'],
+                           max_action=env.action_space.high[0],
                            max_sigma=1,
                            min_sigma=0.05,
                            decay_period=500)
