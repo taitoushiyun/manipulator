@@ -12,20 +12,21 @@ import torch
 from tqdm import tqdm
 import json
 from itertools import count
-
+import gym
 
 def playGame(args_, train=True, episode_count=2000):
-    goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
-                  'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
-                  'super hard': [0, -50, 0, -50, 0, -50, 0, 0, -20, -10]}
-    env_config = {
-        'distance_threshold': args_.distance_threshold,
-        'reward_type': args_.reward_type,
-        'max_angles_vel': args_.max_angles_vel,  # 10degree/s
-        'num_joints': args_.num_joints,
-        'goal_set': goal_index[args_.goal_set],
-    }
-    env = ManipulatorEnv(0, env_config)
+    # goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
+    #               'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
+    #               'super hard': [0, -50, 0, -50, 0, -50, 0, 0, -20, -10]}
+    # env_config = {
+    #     'distance_threshold': args_.distance_threshold,
+    #     'reward_type': args_.reward_type,
+    #     'max_angles_vel': args_.max_angles_vel,  # 10degree/s
+    #     'num_joints': args_.num_joints,
+    #     'goal_set': goal_index[args_.goal_set],
+    # }
+    # env = ManipulatorEnv(0, env_config)
+    env = gym.make('LunarLanderContinuous-v2')
 
     agent = TD3Agent(state_size=env.observation_space.shape[0],
                      action_size=env.action_space.shape[0],
@@ -45,8 +46,8 @@ def playGame(args_, train=True, episode_count=2000):
         best = -np.inf
 
         if train:
-            vis = visdom.Visdom(port=6016, env='td3_0')
-            td3_torcs(env, agent, episode_count, 100, 'checkpoints', vis)
+            vis = visdom.Visdom(port=6016, env='td3_1')
+            td3_torcs(env, agent, episode_count, 1000, 'checkpoints', vis)
         else:
             state = env.reset()
             total_reward = 0
@@ -79,3 +80,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     # write the selected car to configuration file
     playGame(args, args.train, args.episodes)
+

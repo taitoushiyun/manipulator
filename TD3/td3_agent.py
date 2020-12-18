@@ -16,13 +16,13 @@ import matplotlib.pyplot as plt
 from itertools import count
 
 BUFFER_SIZE = int(1e6)  # replay buffer size
-BATCH_SIZE = 256  # minibatch size
+BATCH_SIZE = 64  # minibatch size
 GAMMA = 0.99  # discount factor
 TAU = 1e-3  # for soft update of target parameters
 LR_ACTOR = 1e-3  # learning rate of the actor
 LR_CRITIC = 1e-3  # learning rate of the critic
 UPDATE_EVERY_STEP = 2  # how often to update the target and actor networks
-RAND_START = 5  # number of random exploration episodes at the start
+RAND_START = 20  # number of random exploration episodes at the start
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -70,7 +70,7 @@ class ReplayBuffer:
 class Actor(nn.Module):
     """Actor (Policy) Model."""
 
-    def __init__(self, state_size, action_size, max_action, fc1_units=400, fc2_units=300):
+    def __init__(self, state_size, action_size, max_action, fc1_units=64, fc2_units=64):
         """Initialize parameters and build model.
         Params
         ======
@@ -96,7 +96,7 @@ class Actor(nn.Module):
 class Critic(nn.Module):
     """Critic (Value) Model."""
 
-    def __init__(self, state_size, action_size, fc1_units=400, fc2_units=300):
+    def __init__(self, state_size, action_size, fc1_units=64, fc2_units=64):
         """Initialize parameters and build model.
         Params
         ======
@@ -289,9 +289,12 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
         scores.append(score)
         scores_deque.append(score)
         mean_score = np.mean(scores_deque)
-        vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
+        # vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
+        #         # vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
+        #         # vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
+        vis.line(X=[i_episode], Y=[score], win='reward', update='append')
         vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
-        vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
+        vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
         if i_episode % 5 == 0:
             torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'actor/{i_episode}.pth'))
             torch.save(agent.critic_local1.state_dict(), os.path.join(model_dir, f'critic1/{i_episode}.pth'))
@@ -310,6 +313,6 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
                     # print(f"Total reward: {total_reward}")
                     # print(f"Episode length: {t}")
                     break
-            vis.line(X=[i_episode], Y=[(total_reward - env.max_rewards) * 100], win='eval reward', update='append')
+            vis.line(X=[i_episode], Y=[total_reward], win='eval reward', update='append')
             vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
 
