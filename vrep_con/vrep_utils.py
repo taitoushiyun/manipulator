@@ -32,7 +32,7 @@ class ManipulatorEnv(gym.Env):
         self.state_dim = self.num_joints + 12       # EE_point_position, EE_point_vel, goal_position, base_position
         self.action_dim = self.num_joints // 2
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_dim,), dtype=np.float32)
-        self.action_space = spaces.Box(low=-1.0, high=1., shape=(self.action_dim,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1.0, high=1, shape=(self.action_dim,), dtype=np.float32)
         self.j_ang_idx = range(self.num_joints // 2)
         self.j_vel_idx = range(self.num_joints // 2, self.num_joints)
         self.e_pos_idx = range(self.num_joints,  self.num_joints + 3)
@@ -40,7 +40,7 @@ class ManipulatorEnv(gym.Env):
         self.g_pos_idx = range(self.num_joints + 6, self.num_joints + 9)
         self.b_pos_idx = range(self.num_joints + 9, self.num_joints + 12)
         self.dh_model = DHModel(index, self.num_joints)
-        self.goal_theta, self.goal = self._sample_goal()
+        self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
         self.observation = np.zeros((self.state_dim, ))
         self.observation[self.g_pos_idx] = np.asarray(self.goal)
         self.observation[self.b_pos_idx] = np.asarray([0.2, -index, 1])
@@ -87,8 +87,10 @@ class ManipulatorEnv(gym.Env):
         goal_theta = np.clip(theta, -3, 3)
         print(f'goal sample for joints is {goal_theta}')
         goal = self.dh_model.forward_kinematics(goal_theta)
+        reset_state = self.dh_model.forward_kinematics(np.zeros((self.num_joints, )))
+        max_rewards = np.linalg.norm(goal - reset_state, axis=-1)
         print(f'goal sample for end point is {goal}')
-        return goal_theta, goal
+        return goal_theta, goal, max_rewards
 
     def end_simulation(self):
         vrep.simxStopSimulation(self.clientID, vrep.simx_opmode_blocking)
