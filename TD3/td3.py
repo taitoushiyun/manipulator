@@ -20,11 +20,11 @@ class TD3(object):
                  tau,
                  gamma,
                  update_freq,
-                 num_epoches,
-                 epoch_len,
+                 num_steps,
                  save_freq,
                  code_version,
-                 vis_port
+                 vis_port,
+                 batch_size,
                  ):
         self.env = env
         self.policy = policy
@@ -40,9 +40,9 @@ class TD3(object):
         self.tau = tau
         self.training_step = 0
         self.gamma = gamma
+        self.batch_size = batch_size
         self.update_freq = update_freq
-        self.num_epoches = num_epoches
-        self.epoch_len = epoch_len
+        self.num_steps = num_steps
         self.save_freq = save_freq
         self.code_version = code_version
         self.vis_port = vis_port
@@ -51,29 +51,23 @@ class TD3(object):
         self.qf1_criterion = nn.MSELoss()
         self.qf1_opt = optim.Adam(self.qf1.parameters())
         self.qf2_opt = optim.Adam(self.qf2.parameters())
-        self.policy_opt = optim.Adam(self.policy.paramters())
+        self.policy_opt = optim.Adam(self.policy.parameters())
 
     def train(self):
-        for epoch in range(self.num_epoches):
-            for t in range(self.epoch_len):
-                self.sampler.sample()
-                if not self.sampler.batch_ready():
-                    continue
-                for i in range(self.epoch_len):
-                    self._training(iter_step=t + epoch * self.epoch_len,
-                                   )
-            if epoch % self.save_freq == 0 and epoch >= 400:
-                torch.save(self.policy.state_dict(), save_path)
-                self.eval()
+        for step in range(self.num_steps):
+            self.sampler.sample()
+            if not self.sampler.batch_ready():
+                continue
+            self._training(self.pool.random_batch(self.batch_size))
 
     def _training(self, batch_data):
         cur_obs = torch.tensor(batch_data['observations'], dtype=torch.float)
         actions = torch.tensor(batch_data['actions'], dtype=torch.float)
         rewards = torch.tensor(batch_data['rewards'], dtype=torch.float)
-        dones = batch_data['terminals']
+        dones = torch.tensor(batch_data['terminals'], dtype=torch.float)
         next_obs = torch.tensor(batch_data['next_observations'], dtype=torch.float)
         next_action = self.target_policy(next_obs)
-        noise = torch.normal(torch.zeros_like(next_obs), self.target_policy_noise)
+        noise = torch.normal(torch.zeros_like(next_action), self.target_policy_noise)
         noise = torch.clamp(noise, -self.target_policy_noise_clip, self.target_policy_noise_clip)
         noisy_next_actions = torch.clamp(next_action + noise,
                                          -self.policy.max_action, self.policy.max_action)
@@ -81,7 +75,6 @@ class TD3(object):
         qf2 = self.target_qf2(next_obs, noisy_next_actions)
         v_preds = torch.min(qf1, qf2)
         target_q = rewards + (1. - dones) * self.gamma * v_preds
-
         qf1_loss = self.qf1_criterion(self.qf1(cur_obs, actions), target_q.detach())
         self.qf1_opt.zero_grad()
         qf1_loss.backward()
@@ -101,7 +94,7 @@ class TD3(object):
 
             for source_param, target_param in zip(self.policy.parameters(), self.target_policy.parameters()):
                 target_param.data.copy_(target_param.data * (1.0 - self.tau) + source_param.data * self.tau)
-            for source_param, target_param in zip(self.qf1.parameters(), self.target_qf1.paramters()):
+            for source_param, target_param in zip(self.qf1.parameters(), self.target_qf1.parameters()):
                 target_param.data.copy_(target_param.data * (1.0 - self.tau) + source_param.data * self.tau)
             for source_param, target_param in zip(self.qf2.parameters(), self.target_qf2.parameters()):
                 target_param.data.copy_(target_param.data * (1.0 - self.tau) + source_param.data * self.tau)
@@ -111,5 +104,4 @@ class TD3(object):
         pass
 
     def sample(self):
-
         pass

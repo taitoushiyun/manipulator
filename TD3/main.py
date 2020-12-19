@@ -1,3 +1,4 @@
+import importmagic
 import argparse
 from vrep_con.vrep_utils import ManipulatorEnv
 from TD3.policy import Policy, QFun
@@ -36,23 +37,19 @@ def main(args_):
                            min_sigma=0.05,
                            decay_period=500)
     target_policy.load_state_dict(policy.state_dict())
-    qf1 = QFun(obs_dim=obs_dims,
-               act_dim=act_dims)
-    qf2 = QFun(obs_dim=obs_dims,
-               act_dim=act_dims)
-    target_qf1 = QFun(obs_dim=obs_dims,
-                      act_dim=act_dims)
-    target_qf2 = QFun(obs_dim=obs_dims,
-                      act_dim=act_dims)
+    qf1 = QFun(obs_dim=obs_dims, act_dim=act_dims)
+    qf2 = QFun(obs_dim=obs_dims, act_dim=act_dims)
+    target_qf1 = QFun(obs_dim=obs_dims, act_dim=act_dims)
+    target_qf2 = QFun(obs_dim=obs_dims, act_dim=act_dims)
     target_qf1.load_state_dict(qf1.state_dict())
     target_qf2.load_state_dict(qf2.state_dict())
 
     pool = ReplayBuffer(max_memory_size=args.max_buffer_size,
-                        obs_dims=obs_dims,
-                        act_dims=act_dims)
+                        obs_dims=obs_dims, act_dims=act_dims)
     sampler = Sampler(env, policy, pool,
                       min_pool_size=args.min_pool_size,
-                      max_episode_steps=args.max_episode_steps)
+                      max_episode_steps=args.max_episode_steps,
+                      code_version=args.code_version)
     td3 = TD3(env=env,
               policy=policy,
               target_policy=target_policy,
@@ -67,12 +64,11 @@ def main(args_):
               tau=args.tau,
               gamma=args.gamma,
               update_freq=args.update_freq,
-              num_epoches=args.num_epoches,
-              epoch_len=args.epoch_len,
+              num_steps=args.num_steps,
               save_freq=args.save_freq,
               code_version=args.code_version,
-              vis_port=args.vis_port
-              )
+              vis_port=args.vis_port,
+              batch_size=args.batch_size)
     td3.train()
 
 
@@ -85,24 +81,19 @@ if __name__ == '__main__':
     parser.add_argument('--num-joints', type=int, default=10)
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard'], default='hard')
     # pool config
-    parser.add_argument('--max_buffer_size', type=int, default=1000000)
-    parser.add_argument('--min_pool_size', type=int, default=10000)
-    parser.add_argument('--max_episode_steps', type=int, default=100)
+    parser.add_argument('--max_buffer_size', type=int, default=int(1e7))
+    parser.add_argument('--min_pool_size', type=int, default=2000)
+    parser.add_argument('--max_episode_steps', type=int, default=500)
 
+    parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--target_policy_noise', type=float, default=0.2)
     parser.add_argument('--target_policy_noise_clip', type=float, default=0.5)
-    parser.add_argument('--tau', type=float, default=0.05)
+    parser.add_argument('--tau', type=float, default=0.005)
     parser.add_argument('--gamma', type=float, default=.99)
-    parser.add_argument('--update_freq', type=int, default=500)
-    parser.add_argument('--num_epoches', type=int, default=10000)
-    parser.add_argument('--epoch_len', type=int , default=1)
+    parser.add_argument('--update_freq', type=int, default=2)
+    parser.add_argument('--num_steps', type=int, default=int(1e7))
     parser.add_argument('--save_freq', type=int, default=100)
-    parser.add_argument('--code_version', type=int, default='td3_0')
+    parser.add_argument('--code_version', type=str, default='td3_5')
     parser.add_argument('--vis_port', type=int, default=6016)
-
-
-
-
-
     args = parser.parse_args()
     main(args)

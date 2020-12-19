@@ -306,7 +306,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
                 total_reward += reward
                 total_len += 1
                 state = next_state
-                if done:
+                if done or total_len >= max_episode_length:
                     # print(f"Total reward: {total_reward}")
                     # print(f"Episode length: {t}")
                     break

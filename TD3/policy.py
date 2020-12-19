@@ -13,11 +13,11 @@ class Policy(nn.Module):
         self._min_sigma = min_sigma
         self._decay_period = decay_period
         super(Policy, self).__init__()
-        self.mlp = nn.Sequential(nn.Linear(self.obs_dim, 64),
+        self.mlp = nn.Sequential(nn.Linear(self.obs_dim, 100),
                                  nn.ReLU(),
-                                 nn.Linear(64, 64),
+                                 nn.Linear(100, 100),
                                  nn.ReLU(),
-                                 nn.Linear(64, self.act_dim),
+                                 nn.Linear(100, self.act_dim),
                                  nn.Tanh()
                                  )
 
@@ -30,21 +30,27 @@ class Policy(nn.Module):
                  + np.random.randn(1, self.act_dim) * sigma
         return action[0]
 
+    def eval_action(self, obs_np, episode=0):
+        action = self.forward(torch.tensor(obs_np[None], dtype=torch.float)).detach().numpy()
+        return action[0]
+
 
 class QFun(nn.Module):
     def __init__(self, obs_dim, act_dim):
         super(QFun, self).__init__()
         self.obs_dim = obs_dim
         self.act_dim = act_dim
-        self.mlp = nn.Sequential(nn.Linear(self.obs_dim + self.act_dim, 64),
+        self.mlp = nn.Sequential(nn.Linear(self.obs_dim + self.act_dim, 100),
                                  nn.ReLU(),
-                                 nn.Linear(64, 64),
+                                 nn.Linear(100, 100),
                                  nn.ReLU(),
-                                 nn.Linear(64, self.act_dim))
+                                 nn.Linear(100, 1))
 
     def forward(self, cur_obs_tensor, actions_tensor):
         input_ = torch.cat([cur_obs_tensor, actions_tensor], -1)
-        return self.mlp(input_).detach().numpy()
+
+        v = self.mlp(input_)
+        return v
 
 
 
