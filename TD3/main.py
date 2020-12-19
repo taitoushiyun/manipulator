@@ -26,6 +26,7 @@ def main(args_):
                     act_dim=act_dims,
                     # max_action=env_config['max_angles_vel'],
                     max_action=env.action_space.high[0],
+                    min_action=env.action_space.low[0],
                     max_sigma=1,
                     min_sigma=0.05,
                     decay_period=500)
@@ -33,6 +34,7 @@ def main(args_):
                            act_dim=act_dims,
                            # max_action=env_config['max_angles_vel'],
                            max_action=env.action_space.high[0],
+                           min_action=env.action_space.low[0],
                            max_sigma=1,
                            min_sigma=0.05,
                            decay_period=500)

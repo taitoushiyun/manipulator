@@ -72,7 +72,10 @@ class Sampler(object):
     def sample(self):
         if self.cur_obs is None:
             self.cur_obs = self.env.reset()
-        action = self.policy.select_action(self.cur_obs)
+        if not self.batch_ready():
+            action = self.env.action_space.sample()
+        else:
+            action = self.policy.select_action(self.cur_obs, self.n_episodes)
         next_obs, reward, done, info = self.env.step(action)
         self.path_len += 1
         self.path_reward += reward
