@@ -43,24 +43,27 @@ def playGame(args_, train=True, episode_count=2000):
         # except:
         #     print("Cannot find the weight")
 
-        print("TORCS Experiment Start.")
-        best = -np.inf
 
         if train:
             vis = visdom.Visdom(port=args.vis_port, env=args.code_version)
             td3_torcs(env, agent, episode_count, args.max_episode_steps, 'checkpoints', vis)
         else:
-            state = env.reset()
-            total_reward = 0
-            for t in count():
-                action = agent.act(state, add_noise=False)
-                next_state, reward, done, _ = env.step(action)
-                total_reward += reward
-                state = next_state
-                if done:
-                    print(f"Total reward: {total_reward}")
-                    print(f"Episode length: {t}")
-                    break
+            for i in range(0, 131):
+                if i % 5 == 0:
+                    model = torch.load(f'I://remote/manipulator/TD3/checkpoints/actor/{i}.pth')  # 'PPO/checkpoints/40.pth'
+                    agent.actor_local.load_state_dict(model)
+                    state = env.reset()
+                    total_reward = 0
+                    for t in count():
+                        action = agent.act(state, add_noise=False)
+                        next_state, reward, done, _ = env.step(action)
+                        total_reward += reward
+                        state = next_state
+                        if done or t >= args.max_episode_steps:
+                            print(f'episode {i}')
+                            print(f"Total reward: {total_reward}")
+                            print(f"Episode length: {t+1}")
+                            break
 
     finally:
         env.end_simulation()  # This is for shutting down TORCS
@@ -69,15 +72,15 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_9')
+    parser.add_argument('--code_version', type=str, default='td3_11')
     parser.add_argument('--vis-port', type=int, default=6016)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
-    parser.add_argument('--distance-threshold', type=float, default=0.02)
+    parser.add_argument('--distance-threshold', type=float, default=0.05)
     parser.add_argument('--reward-type', type=str, default='dense')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
     parser.add_argument('--num-joints', type=int, default=10)
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard'], default='super hard')
+    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard'], default='hard')
 
     parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--episodes', type=int, default=2000)
@@ -85,5 +88,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     # write the selected car to configuration file
     playGame(args, args.train, args.episodes)
+
 
 

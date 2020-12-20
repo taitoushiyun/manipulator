@@ -1,6 +1,7 @@
 import time
 from vrep_con.vrep_utils import ManipulatorEnv
 from PPO.actor_critic import Actor_critic
+from TD3.td3_agent import Actor
 import torch
 import numpy as np
 from matplotlib import pyplot as plt
@@ -18,21 +19,22 @@ if __name__ == '__main__':
         'goal_set': goal_index['super hard'],
     }
     env = ManipulatorEnv(0, env_config)
-    policy = actor_critic = Actor_critic(env=env,
-                                         actor_obs_dims=22, actor_hidden_sizes=[64, 64],
-                                         actor_action_dims=5, critic_obs_dims=22,
-                                         critic_hidden_sizes=[64, 64])
+    policy = Actor(22, 5, 1.)
+    # policy = actor_critic = Actor_critic(env=env,
+    #                                      actor_obs_dims=22, actor_hidden_sizes=[64, 64],
+    #                                      actor_action_dims=5, critic_obs_dims=22,
+    #                                      critic_hidden_sizes=[64, 64])
 
     action_records = [[] for _ in range(5)]
 
     for i in range(210, 224):
         model = torch.load(f'PPO/checkpoints/{i}.pth')  # 'PPO/checkpoints/40.pth'
-        actor_critic.load_state_dict(model)
+        policy.load_state_dict(model)
         print(f'episode {i}')
         action_record = []
         cur_obs = env.reset()
         while True:
-            action = actor_critic.eval_action(torch.FloatTensor(cur_obs[None]))
+            action = policy.act(torch.FloatTensor(cur_obs[None]))
             next_obs, reward, done, info = env.step(action)
             action_record.append(cur_obs[:5])
             cur_obs = next_obs

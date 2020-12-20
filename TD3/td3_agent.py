@@ -1,5 +1,5 @@
 # reference: https://raw.githubusercontent.com/henry32144/TD3-Pytorch/master/BipedalWalkerV2.ipynb
-
+from TD3.logger import logger
 import gym
 import copy
 import random
@@ -17,7 +17,7 @@ from itertools import count
 
 BUFFER_SIZE = int(1e7)  # replay buffer size
 BATCH_SIZE = 64  # minibatch size
-GAMMA = 0.99  # discount factor
+GAMMA = 0.6  # discount factor
 TAU = 5e-3  # for soft update of target parameters
 LR_ACTOR = 1e-3  # learning rate of the actor
 LR_CRITIC = 1e-3  # learning rate of the critic
@@ -268,7 +268,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
     scores = []
     scores_deque = deque(maxlen=10)
 
-    for i_episode in tqdm(range(n_episodes)):
+    for i_episode in range(n_episodes):
         state = env.reset()
         score = 0
         episode_length = 0
@@ -288,6 +288,8 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
         scores.append(score)
         scores_deque.append(score)
         mean_score = np.mean(scores_deque)
+        logger.info(
+            "Episode: %d,          Path length: %d       Reward: %f" % (i_episode, episode_length, score))
         vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
         vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
         vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
