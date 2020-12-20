@@ -15,18 +15,19 @@ from itertools import count
 import gym
 
 def playGame(args_, train=True, episode_count=2000):
-    # goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
-    #               'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
-    #               'super hard': [0, -50, 0, -50, 0, -50, 0, 0, -20, -10]}
-    # env_config = {
-    #     'distance_threshold': args_.distance_threshold,
-    #     'reward_type': args_.reward_type,
-    #     'max_angles_vel': args_.max_angles_vel,  # 10degree/s
-    #     'num_joints': args_.num_joints,
-    #     'goal_set': goal_index[args_.goal_set],
-    # }
-    # env = ManipulatorEnv(0, env_config)
-    env = gym.make('LunarLanderContinuous-v2')
+    goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
+                  'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
+                  'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
+    env_config = {
+        'distance_threshold': args_.distance_threshold,
+        'reward_type': args_.reward_type,
+        'max_angles_vel': args_.max_angles_vel,  # 10degree/s
+        'num_joints': args_.num_joints,
+        'goal_set': goal_index[args_.goal_set],
+        'max_episode_steps': args_.max_episode_steps,
+    }
+    env = ManipulatorEnv(0, env_config)
+    # env = gym.make('LunarLanderContinuous-v2')
 
     agent = TD3Agent(state_size=env.observation_space.shape[0],
                      action_size=env.action_space.shape[0],
@@ -68,20 +69,21 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_6')
+    parser.add_argument('--code_version', type=str, default='td3_9')
     parser.add_argument('--vis-port', type=int, default=6016)
 
+    parser.add_argument('--max_episode_steps', type=int, default=100)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='dense')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
     parser.add_argument('--num-joints', type=int, default=10)
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard'], default='hard')
+    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard'], default='super hard')
 
     parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--episodes', type=int, default=2000)
-    parser.add_argument('--max_episode_steps', type=int, default=500)
 
     args = parser.parse_args()
     # write the selected car to configuration file
     playGame(args, args.train, args.episodes)
+
 

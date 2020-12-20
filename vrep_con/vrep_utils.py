@@ -28,6 +28,7 @@ class ManipulatorEnv(gym.Env):
         self.reward_type = env_config['reward_type']
         self.num_joints = env_config['num_joints']
         self.goal_set = env_config['goal_set']
+        self._max_episode_steps = env_config['max_episode_steps']
 
         self.state_dim = self.num_joints + 12       # EE_point_position, EE_point_vel, goal_position, base_position
         self.action_dim = self.num_joints // 2
@@ -48,7 +49,6 @@ class ManipulatorEnv(gym.Env):
         self._init_vrep()
         time.sleep(2)
         self._elapsed_steps = None
-        self._max_episode_steps = 100
 
     def _init_vrep(self):
         vrep.simxFinish(-1)

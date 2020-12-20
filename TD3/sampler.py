@@ -1,5 +1,6 @@
 import numpy as np
 from _collections import deque
+import random
 
 class ReplayBuffer(object):
     def __init__(self, max_memory_size, obs_dims, act_dims):
@@ -31,7 +32,8 @@ class ReplayBuffer(object):
             self._size += 1
 
     def random_batch(self, batch_size):
-        indices = np.random.randint(0, self._size, batch_size)
+        indices = random.sample(list(range(self._size)), batch_size)
+        # indices = np.random.randint(0, self._size, batch_size)
         return dict(
             observations=self.observations[indices],
             actions=self.actions[indices],

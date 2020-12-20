@@ -16,6 +16,7 @@ def main(args_):
     #     'max_angles_vel': args_.max_angles_vel,  # 10degree/s
     #     'num_joints': args_.num_joints,
     #     'goal_set': goal_index[args_.goal_set],
+    #     'max_episode_steps': args_.max_episode_steps,
     # }
     # env = ManipulatorEnv(0, env_config)
     import gym
@@ -95,7 +96,7 @@ if __name__ == '__main__':
     parser.add_argument('--update_freq', type=int, default=2)
     parser.add_argument('--num_steps', type=int, default=int(1e7))
     parser.add_argument('--save_freq', type=int, default=100)
-    parser.add_argument('--code_version', type=str, default='td3_5')
+    parser.add_argument('--code_version', type=str, default='td3_6')
     parser.add_argument('--vis_port', type=int, default=6016)
     args = parser.parse_args()
     main(args)
