@@ -13,8 +13,13 @@ from tqdm import tqdm
 import json
 from itertools import count
 import gym
+from TD3.logger import logger
 
 def playGame(args_, train=True, episode_count=2000):
+    reg = ''
+    for key, value in vars(args).items():
+        reg += str(key) + ': ' + str(value) + '\n'
+    logger.info(reg)
     goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
                   'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
                   'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
@@ -72,7 +77,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_13')
+    parser.add_argument('--code_version', type=str, default='td3_14')
     parser.add_argument('--vis-port', type=int, default=6016)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
@@ -83,7 +88,7 @@ if __name__ == "__main__":
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard'], default='super hard')
 
     parser.add_argument('--train', type=bool, default=True)
-    parser.add_argument('--episodes', type=int, default=2000)
+    parser.add_argument('--episodes', type=int, default=1000)
 
     args = parser.parse_args()
     # write the selected car to configuration file

@@ -290,12 +290,12 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
         mean_score = np.mean(scores_deque)
         logger.info(
             "Episode: %d,          Path length: %d       Reward: %f" % (i_episode, episode_length, score))
-        vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
-        vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
-        vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
-        # vis.line(X=[i_episode], Y=[score], win='reward', update='append')
+        # vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
         # vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
-        # vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
+        # vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
+        vis.line(X=[i_episode], Y=[score], win='reward', update='append')
+        vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
+        vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
         if i_episode % 5 == 0:
             torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'actor/{i_episode}.pth'))
 
@@ -312,8 +312,8 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
                     # print(f"Total reward: {total_reward}")
                     # print(f"Episode length: {t}")
                     break
-            # vis.line(X=[i_episode], Y=[total_reward], win='eval reward', update='append')
-            # vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
-            vis.line(X=[i_episode], Y=[100 * (total_reward - env.max_rewards)], win='eval reward', update='append')
+            vis.line(X=[i_episode], Y=[total_reward], win='eval reward', update='append')
             vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
+            # vis.line(X=[i_episode], Y=[100 * (total_reward - env.max_rewards)], win='eval reward', update='append')
+            # vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
 
