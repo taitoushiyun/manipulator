@@ -17,7 +17,7 @@ from itertools import count
 
 BUFFER_SIZE = int(1e7)  # replay buffer size
 BATCH_SIZE = 64  # minibatch size
-GAMMA = 0.6  # discount factor
+GAMMA = 0.9  # discount factor
 TAU = 5e-3  # for soft update of target parameters
 LR_ACTOR = 1e-3  # learning rate of the actor
 LR_CRITIC = 1e-3  # learning rate of the critic
