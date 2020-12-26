@@ -10,6 +10,9 @@ from gym import spaces
 DEG2RAD = np.pi / 180.
 RAD2DEG = 180. / np.pi
 
+GOAL = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
+        'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
+        'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
 
 class ManipulatorEnv(gym.Env):
     def __init__(self, index, env_config):
@@ -41,10 +44,10 @@ class ManipulatorEnv(gym.Env):
         self.g_pos_idx = range(self.num_joints + 6, self.num_joints + 9)
         self.b_pos_idx = range(self.num_joints + 9, self.num_joints + 12)
         self.dh_model = DHModel(index, self.num_joints)
-        self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
-        self.observation = np.zeros((self.state_dim, ))
-        self.observation[self.g_pos_idx] = np.asarray(self.goal)
-        self.observation[self.b_pos_idx] = np.asarray([0.2, -index, 1])
+        # self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
+        # self.observation = np.zeros((self.state_dim, ))
+        # self.observation[self.g_pos_idx] = np.asarray(self.goal)
+        # self.observation[self.b_pos_idx] = np.asarray([0.2, -index, 1])
         self.last_obs = None
         self._init_vrep()
         time.sleep(2)
@@ -79,17 +82,19 @@ class ManipulatorEnv(gym.Env):
         self.handles['point'] = point_handles
 
     def _sample_goal(self):
-        # theta = np.random.randn(self.num_joints)
-        if self.goal_set is not None and isinstance(self.goal_set, list):
-            theta = np.asarray(self.goal_set) * DEG2RAD
+        if self.goal_set in ['easy', 'hard', 'super hard']:
+            theta = np.asarray(GOAL[self.goal_set]) * DEG2RAD
+        elif self.goal_set == 'random':
+            theta = np.vstack((np.zeros((self.action_dim,)),
+                               45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.action_dim,)))).T.flatten()
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)
-        print(f'goal sample for joints is {goal_theta}')
+        # print(f'goal sample for joints is {goal_theta}')
         goal = self.dh_model.forward_kinematics(goal_theta)
         reset_state = self.dh_model.forward_kinematics(np.zeros((self.num_joints, )))
         max_rewards = np.linalg.norm(goal - reset_state, axis=-1)
-        print(f'goal sample for end point is {goal}')
+        # print(f'goal sample for end point is {goal}')
         return goal_theta, goal, max_rewards
 
     def end_simulation(self):
@@ -113,9 +118,13 @@ class ManipulatorEnv(gym.Env):
 
     def reset(self):
         self._elapsed_steps = 0
-        if self.running:
-            self.stop_sim()
+        # if self.running:
+        self.stop_sim()
         # set initial state
+        self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
+        self.observation = np.zeros((self.state_dim,))
+        self.observation[self.g_pos_idx] = np.asarray(self.goal)
+        self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])
         vrep.simxSetObjectPosition(self.clientID, self.handles['point'][1],
                                    -1, self.goal, vrep.simx_opmode_oneshot)
         vrep.simxSynchronous(self.clientID, True)

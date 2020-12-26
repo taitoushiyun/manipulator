@@ -178,7 +178,7 @@ class TD3Agent():
             action = self.actor_local(state).cpu().data.numpy()
         if add_noise:
             # Generate a random noise
-            sigma = 1. - (1. - .05) * min(1., episode_step / 500.)
+            sigma = 1. - (1. - .05) * min(1., episode_step / 1000.)
             noise = np.random.normal(0, sigma, size=self.action_size)
             # Add noise to the action for exploration
             action = (action + noise).clip(self.min_action[0], self.max_action[0])
@@ -260,13 +260,14 @@ class TD3Agent():
 
 def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
     os.makedirs('checkpoints/actor', exist_ok=True)
-    vis.line(X=[0], Y=[0], win='reward', opts=dict(Xlabel='episode', Ylabel='reward', title='reward'))
+    vis.line(X=[0], Y=[0], win='result', opts=dict(Xlabel='episode', Ylabel='result', title='result'))
     vis.line(X=[0], Y=[0], win='path len', opts=dict(Xlabel='episode', Ylabel='len', title='path len'))
-    vis.line(X=[0], Y=[0], win='mean reward', opts=dict(Xlabel='episode', Ylabel='mean reward', title='mean reward'))
-    vis.line(X=[0], Y=[0], win='eval reward', opts=dict(Xlabel='episode', Ylabel='reward', title='eval reward'))
+    vis.line(X=[0], Y=[0], win='success rate', opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='success rate'))
+    vis.line(X=[0], Y=[0], win='eval result', opts=dict(Xlabel='episode', Ylabel='eval result', title='eval result'))
     vis.line(X=[0], Y=[0], win='eval path len', opts=dict(Xlabel='episode', Ylabel='len', title='eval path len'))
-    scores = []
-    scores_deque = deque(maxlen=10)
+    vis.line(X=[0], Y=[0], win='eval success rate', opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='eval success rate'))
+    result_deque = deque(maxlen=20)
+    eval_result_queue = deque(maxlen=10)
 
     for i_episode in range(n_episodes):
         state = env.reset()
@@ -283,19 +284,21 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
             score += reward
             episode_length += 1
             agent.learn(1)
-            if done or t >= max_episode_length:
+            if done or episode_length >= max_episode_length:
+                result = 0.
+                if done and episode_length < max_episode_length:
+                    result = 1.
                 break
-        scores.append(score)
-        scores_deque.append(score)
-        mean_score = np.mean(scores_deque)
+        result_deque.append(result)
+        success_rate = np.mean(result_deque)
         logger.info(
-            "Episode: %d,          Path length: %d       Reward: %f" % (i_episode, episode_length, score))
+            "Episode: %d,          Path length: %d       result: %f" % (i_episode, episode_length, result))
         # vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
         # vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
         # vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
-        vis.line(X=[i_episode], Y=[score], win='reward', update='append')
+        vis.line(X=[i_episode], Y=[result], win='result', update='append')
         vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
-        vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
+        vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
         if i_episode % 5 == 0:
             torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'actor/{i_episode}.pth'))
 
@@ -309,11 +312,15 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
                 total_len += 1
                 state = next_state
                 if done or total_len >= max_episode_length:
-                    # print(f"Total reward: {total_reward}")
-                    # print(f"Episode length: {t}")
+                    eval_result = 0
+                    if done and total_len < max_episode_length:
+                        eval_result = 1.
                     break
-            vis.line(X=[i_episode], Y=[total_reward], win='eval reward', update='append')
+            eval_result_queue.append(eval_result)
+            eval_success_rate = np.mean(eval_result_queue)
+            vis.line(X=[i_episode], Y=[eval_result], win='eval result', update='append')
             vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
+            vis.line(X=[i_episode], Y=[eval_success_rate * 100], win='eval success rate', update='append')
             # vis.line(X=[i_episode], Y=[100 * (total_reward - env.max_rewards)], win='eval reward', update='append')
             # vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
 

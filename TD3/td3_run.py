@@ -16,19 +16,19 @@ import gym
 from TD3.logger import logger
 
 def playGame(args_, train=True, episode_count=2000):
+    random.seed(0)
+    np.random.seed(0)
+    torch.manual_seed(0)
     reg = ''
     for key, value in vars(args).items():
         reg += str(key) + ': ' + str(value) + '\n'
     logger.info(reg)
-    goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
-                  'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
-                  'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
     env_config = {
         'distance_threshold': args_.distance_threshold,
         'reward_type': args_.reward_type,
         'max_angles_vel': args_.max_angles_vel,  # 10degree/s
         'num_joints': args_.num_joints,
-        'goal_set': goal_index[args_.goal_set],
+        'goal_set': args_.goal_set,
         'max_episode_steps': args_.max_episode_steps,
     }
     env = ManipulatorEnv(0, env_config)
@@ -77,7 +77,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_14')
+    parser.add_argument('--code_version', type=str, default='td3_17')
     parser.add_argument('--vis-port', type=int, default=6016)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
@@ -85,10 +85,10 @@ if __name__ == "__main__":
     parser.add_argument('--reward-type', type=str, default='dense')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
     parser.add_argument('--num-joints', type=int, default=10)
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard'], default='super hard')
+    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'], default='random')
 
     parser.add_argument('--train', type=bool, default=True)
-    parser.add_argument('--episodes', type=int, default=1000)
+    parser.add_argument('--episodes', type=int, default=5000)
 
     args = parser.parse_args()
     # write the selected car to configuration file
