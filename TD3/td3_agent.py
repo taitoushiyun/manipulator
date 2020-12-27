@@ -270,7 +270,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
     eval_result_queue = deque(maxlen=10)
 
     for i_episode in range(n_episodes):
-        state = env.reset()
+        state = env.reset(eval_=False)
         score = 0
         episode_length = 0
         for t in count():
@@ -302,7 +302,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
         if i_episode % 5 == 0:
             torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'actor/{i_episode}.pth'))
 
-            state = env.reset()
+            state = env.reset(eval_=True)
             total_reward = 0
             total_len = 0
             for t in count():

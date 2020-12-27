@@ -81,12 +81,17 @@ class ManipulatorEnv(gym.Env):
         self.handles['joint'] = joint_handles
         self.handles['point'] = point_handles
 
-    def _sample_goal(self):
+    def _sample_goal(self, eval_):
         if self.goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[self.goal_set]) * DEG2RAD
         elif self.goal_set == 'random':
-            theta = np.vstack((np.zeros((self.action_dim,)),
-                               45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.action_dim,)))).T.flatten()
+            if not eval_:
+                theta = np.vstack((np.zeros((self.action_dim,)),
+                                   45 * DEG2RAD * np.random.randn(self.action_dim))).T.flatten()
+            else:
+                theta = np.vstack((np.zeros((self.action_dim,)),
+                                   45 * DEG2RAD * np.random.uniform(low=-1, high=1,
+                                                                    size=(self.action_dim,)))).T.flatten()
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)
@@ -116,12 +121,12 @@ class ManipulatorEnv(gym.Env):
             pass
         self.running = False
 
-    def reset(self):
+    def reset(self, eval_=False):
         self._elapsed_steps = 0
         # if self.running:
         self.stop_sim()
         # set initial state
-        self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
+        self.goal_theta, self.goal, self.max_rewards = self._sample_goal(eval_)
         self.observation = np.zeros((self.state_dim,))
         self.observation[self.g_pos_idx] = np.asarray(self.goal)
         self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])

@@ -53,21 +53,24 @@ def playGame(args_, train=True, episode_count=2000):
             vis = visdom.Visdom(port=args.vis_port, env=args.code_version)
             td3_torcs(env, agent, episode_count, args.max_episode_steps, 'checkpoints', vis)
         else:
-            for i in range(0, 131):
+            for i in range(4900, 5000):
                 if i % 5 == 0:
                     model = torch.load(f'I://remote/manipulator/TD3/checkpoints/actor/{i}.pth')  # 'PPO/checkpoints/40.pth'
                     agent.actor_local.load_state_dict(model)
-                    state = env.reset()
+                    state = env.reset(eval_=True)
                     total_reward = 0
+                    path_length = 0
                     for t in count():
                         action = agent.act(state, add_noise=False)
                         next_state, reward, done, _ = env.step(action)
                         total_reward += reward
+                        path_length += 1
                         state = next_state
-                        if done or t >= args.max_episode_steps:
+                        if done or path_length >= args.max_episode_steps:
                             print(f'episode {i}')
                             print(f"Total reward: {total_reward}")
                             print(f"Episode length: {t+1}")
+                            time.sleep(1)
                             break
 
     finally:
@@ -77,7 +80,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_18')
+    parser.add_argument('--code_version', type=str, default='td3_19')
     parser.add_argument('--vis-port', type=int, default=6016)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
@@ -87,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument('--num-joints', type=int, default=10)
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'], default='random')
 
-    parser.add_argument('--train', type=bool, default=True)
+    parser.add_argument('--train', type=bool, default=False)
     parser.add_argument('--episodes', type=int, default=5000)
 
     args = parser.parse_args()

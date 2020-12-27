@@ -16,7 +16,8 @@ if __name__ == '__main__':
         'reward_type': 'dense',
         'max_angles_vel': 10,  # 10degree/s
         'num_joints': 10,
-        'goal_set': goal_index['super hard'],
+        'goal_set': 'random',
+        'max_episode_steps': 100,
     }
     env = ManipulatorEnv(0, env_config)
     policy = Actor(22, 5, 1.)
@@ -27,23 +28,24 @@ if __name__ == '__main__':
 
     action_records = [[] for _ in range(5)]
 
-    for i in range(210, 224):
-        model = torch.load(f'PPO/checkpoints/{i}.pth')  # 'PPO/checkpoints/40.pth'
-        policy.load_state_dict(model)
-        print(f'episode {i}')
-        action_record = []
-        cur_obs = env.reset()
-        while True:
-            action = policy.act(torch.FloatTensor(cur_obs[None]))
-            next_obs, reward, done, info = env.step(action)
-            action_record.append(cur_obs[:5])
-            cur_obs = next_obs
-            if done:
-                action_record = np.asarray(action_record)
-                for j in range(5):
-                    action_records[j].append(list(action_record[:, j]))
-                time.sleep(1)
-                break
+    for i in range(4900, 5000):
+        if i % 5 == 0:
+            model = torch.load(f'TD3/checkpoints/actor/{i}.pth')  # 'PPO/checkpoints/40.pth'
+            policy.load_state_dict(model)
+            print(f'episode {i}')
+            action_record = []
+            cur_obs = env.reset(eval_=True)
+            while True:
+                action = policy.act(torch.FloatTensor(cur_obs[None]))
+                next_obs, reward, done, info = env.step(action)
+                action_record.append(cur_obs[:5])
+                cur_obs = next_obs
+                if done:
+                    action_record = np.asarray(action_record)
+                    for j in range(5):
+                        action_records[j].append(list(action_record[:, j]))
+                    time.sleep(1)
+                    break
     # print(cur_obs[env.j_ang_idx])
     # time.sleep(1000)
     # plt.figure(figsize=(20, 4))
