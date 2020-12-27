@@ -174,10 +174,10 @@ class ManipulatorEnv(gym.Env):
         if self.reward_type == 'sparse':
             return -(d > self.distance_threshold).astype(np.float32)
         else:
-            return -d
-            # d_last = np.linalg.norm(self.last_obs[self.e_pos_idx] - self.goal, axis=-1)
-            # # print(f'reward now is {dense_reward(d)}, reward last is {dense_reward(d_last)}')
-            # return dense_reward(d) - dense_reward(d_last)
+            # return -d
+            d_last = np.linalg.norm(self.last_obs[self.e_pos_idx] - self.goal, axis=-1)
+            # print(f'reward now is {dense_reward(d)}, reward last is {dense_reward(d_last)}')
+            return dense_reward(d) - dense_reward(d_last)
 
     def set_joint_effect(self, action):
         assert len(action) == self.num_joints, 'action dimension wrong'

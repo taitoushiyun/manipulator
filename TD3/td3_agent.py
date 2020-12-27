@@ -318,6 +318,8 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
                     break
             eval_result_queue.append(eval_result)
             eval_success_rate = np.mean(eval_result_queue)
+            logger.info(
+                "Eval Episode: %d,          Path length: %d       result: %f" % (i_episode, total_len, eval_result))
             vis.line(X=[i_episode], Y=[eval_result], win='eval result', update='append')
             vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
             vis.line(X=[i_episode], Y=[eval_success_rate * 100], win='eval success rate', update='append')
