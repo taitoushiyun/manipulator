@@ -90,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument('--num-joints', type=int, default=10)
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'], default='random')
 
-    parser.add_argument('--train', type=bool, default=False)
+    parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--episodes', type=int, default=5000)
 
     args = parser.parse_args()

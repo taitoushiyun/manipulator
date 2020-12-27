@@ -87,7 +87,7 @@ class ManipulatorEnv(gym.Env):
         elif self.goal_set == 'random':
             if not eval_:
                 theta = np.vstack((np.zeros((self.action_dim,)),
-                                   45 * DEG2RAD * np.random.randn(self.action_dim))).T.flatten()
+                                   0.5 * 45 * DEG2RAD * np.random.randn(self.action_dim).clip(-2, 2))).T.flatten()
             else:
                 theta = np.vstack((np.zeros((self.action_dim,)),
                                    45 * DEG2RAD * np.random.uniform(low=-1, high=1,
