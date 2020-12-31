@@ -15,6 +15,7 @@ from itertools import count
 import gym
 from TD3.logger import logger
 
+
 def playGame(args_, train=True, episode_count=2000):
     random.seed(0)
     np.random.seed(0)
@@ -80,15 +81,16 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_19')
+    parser.add_argument('--code_version', type=str, default='td3_20')
     parser.add_argument('--vis-port', type=int, default=6016)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='dense')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
-    parser.add_argument('--num-joints', type=int, default=10)
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'], default='random')
+    parser.add_argument('--num-joints', type=int, default=20)
+    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random', ''],
+                        default='random')
 
     parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--episodes', type=int, default=5000)
