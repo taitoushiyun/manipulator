@@ -31,14 +31,16 @@ def playGame(args_, train=True, episode_count=2000):
         'num_joints': args_.num_joints,
         'goal_set': args_.goal_set,
         'max_episode_steps': args_.max_episode_steps,
+        'cc_model': args_.cc_model,
     }
-    env = ManipulatorEnv(0, env_config)
+    env = ManipulatorEnv(env_config)
     # env = gym.make('LunarLanderContinuous-v2')
 
     agent = TD3Agent(state_size=env.observation_space.shape[0],
-                     action_size=env.action_space.shape[0],
+                     action_size=2,
                      max_action=env.action_space.high,
-                     min_action=env.action_space.low, random_seed=0)
+                     min_action=env.action_space.low,
+                     random_seed=0)
 
     try:
         # try:
@@ -54,10 +56,15 @@ def playGame(args_, train=True, episode_count=2000):
             vis = visdom.Visdom(port=args.vis_port, env=args.code_version)
             td3_torcs(env, agent, episode_count, args.max_episode_steps, 'checkpoints', vis)
         else:
-            for i in range(4900, 5000):
+            vis = visdom.Visdom(port=args.vis_port, env=args.code_version)
+            vis.line(X=[0], Y=[0], win='eval success rate', opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='eval success rate'))
+            from _collections import deque
+            result_queue = deque(maxlen=10)
+            for i in range(0, 5000):
                 if i % 5 == 0:
                     model = torch.load(f'I://remote/manipulator/TD3/checkpoints/actor/{i}.pth')  # 'PPO/checkpoints/40.pth'
                     agent.actor_local.load_state_dict(model)
+
                     state = env.reset(eval_=True)
                     total_reward = 0
                     path_length = 0
@@ -68,11 +75,16 @@ def playGame(args_, train=True, episode_count=2000):
                         path_length += 1
                         state = next_state
                         if done or path_length >= args.max_episode_steps:
-                            print(f'episode {i}')
-                            print(f"Total reward: {total_reward}")
-                            print(f"Episode length: {t+1}")
-                            time.sleep(1)
+                            # print(f"Episode length: {t+1}")
+                            result = 0
+                            if done and path_length < args.max_episode_steps:
+                                result = 1
                             break
+                    result_queue.append(result)
+                    eval_success_rate = sum(result_queue) / len(result_queue)
+                    print(f'episode {i} result {result}')
+                    vis.line(X=[i], Y=[eval_success_rate * 100], win='eval success rate', update='append')
+
 
     finally:
         env.end_simulation()  # This is for shutting down TORCS
@@ -81,18 +93,19 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_20')
+    parser.add_argument('--code_version', type=str, default='td3_21')
     parser.add_argument('--vis-port', type=int, default=6016)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='dense')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
-    parser.add_argument('--num-joints', type=int, default=20)
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random', ''],
+    parser.add_argument('--num-joints', type=int, default=12)
+    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
                         default='random')
+    parser.add_argument('--cc_model', type=bool, default=False)
 
-    parser.add_argument('--train', type=bool, default=True)
+    parser.add_argument('--train', type=bool, default=False)
     parser.add_argument('--episodes', type=int, default=5000)
 
     args = parser.parse_args()

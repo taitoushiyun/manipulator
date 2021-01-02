@@ -22,15 +22,14 @@ def dh_table(theta, l):
 
 
 class DHModel(object):
-    def __init__(self, model_index, num_joints):
-        self.model_index = model_index
+    def __init__(self, num_joints):
         self.num_joints = num_joints
 
     def forward_kinematics(self, theta):
         assert len(theta) % 2 == 0 and len(theta) == self.num_joints
         L = 0.1
         temp = np.array([[1, 0, 0, 0.2],
-                        [0, 1, 0, -self.model_index],
+                        [0, 1, 0, 0],
                         [0, 0, 1, 1],
                         [0, 0, 0, 1]])
         for i in range(len(theta)):

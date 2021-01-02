@@ -7,7 +7,7 @@ def simulation(index):
     env = ManipulatorEnv(index)
     for j in range(3):
         obs = env.reset()
-        action = np.random.randn(5)
+        action = np.random.randn(2)
         for i in range(20):
             obs, reward, done, info = env.step(action)
     env.end_simulation()

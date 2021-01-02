@@ -268,8 +268,9 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
     vis.line(X=[0], Y=[0], win='eval success rate', opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='eval success rate'))
     result_deque = deque(maxlen=20)
     eval_result_queue = deque(maxlen=10)
-
+    import time
     for i_episode in range(n_episodes):
+        time_a = time.time()
         state = env.reset(eval_=False)
         score = 0
         episode_length = 0
@@ -284,6 +285,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
             score += reward
             episode_length += 1
             agent.learn(1)
+
             if done or episode_length >= max_episode_length:
                 result = 0.
                 if done and episode_length < max_episode_length:
@@ -325,4 +327,6 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
             vis.line(X=[i_episode], Y=[eval_success_rate * 100], win='eval success rate', update='append')
             # vis.line(X=[i_episode], Y=[100 * (total_reward - env.max_rewards)], win='eval reward', update='append')
             # vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
+        time_b = time.time()
+        print(time_b - time_a)
 

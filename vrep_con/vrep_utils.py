@@ -10,15 +10,17 @@ from gym import spaces
 DEG2RAD = np.pi / 180.
 RAD2DEG = 180. / np.pi
 
+
 GOAL = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
         'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
         'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
 
+
 class ManipulatorEnv(gym.Env):
-    def __init__(self, index, env_config):
+    def __init__(self, env_config):
         super(ManipulatorEnv, self).__init__()
         self.env_config = env_config
-        self.port = 20000 + index
+        self.port = 20000
         self.handles = {}
         self.clientID = None
         self.running = False
@@ -32,22 +34,23 @@ class ManipulatorEnv(gym.Env):
         self.num_joints = env_config['num_joints']
         self.goal_set = env_config['goal_set']
         self._max_episode_steps = env_config['max_episode_steps']
+        self.cc_model = env_config['cc_model']
 
         self.state_dim = self.num_joints + 12       # EE_point_position, EE_point_vel, goal_position, base_position
         self.action_dim = self.num_joints // 2
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_dim,), dtype=np.float32)
-        self.action_space = spaces.Box(low=-1.0, high=1, shape=(self.action_dim,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1.0, high=1, shape=(2,), dtype=np.float32)
         self.j_ang_idx = range(self.num_joints // 2)
         self.j_vel_idx = range(self.num_joints // 2, self.num_joints)
         self.e_pos_idx = range(self.num_joints,  self.num_joints + 3)
         self.e_vel_idx = range(self.num_joints + 3, self.num_joints + 6)
         self.g_pos_idx = range(self.num_joints + 6, self.num_joints + 9)
         self.b_pos_idx = range(self.num_joints + 9, self.num_joints + 12)
-        self.dh_model = DHModel(index, self.num_joints)
-        # self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
+        self.dh_model = DHModel(self.num_joints)
+        # self.goal_theta, self.goal, self.max_rewards = self._sample_goal(eval_=True)
         # self.observation = np.zeros((self.state_dim, ))
         # self.observation[self.g_pos_idx] = np.asarray(self.goal)
-        # self.observation[self.b_pos_idx] = np.asarray([0.2, -index, 1])
+        # self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])
         self.last_obs = None
         self._init_vrep()
         time.sleep(2)
@@ -71,9 +74,9 @@ class ManipulatorEnv(gym.Env):
         self.get_handles()
 
     def get_handles(self):
-        joint_ids = [f'joint{idx_0}_{idx_1}#{self.port - 20000}'
+        joint_ids = [f'joint{idx_0}_{idx_1}#0'
                      for idx_0 in range(self.num_joints // 2) for idx_1 in range(2)]
-        point_ids = [f'aux{self.num_joints // 2}#{self.port-20000}', f'goal#{self.port-20000}', f'base#{self.port-20000}']
+        point_ids = [f'aux{self.num_joints // 2}#0', f'goal#0', f'base#0']
         joint_handles = [vrep.simxGetObjectHandle(self.clientID, joint_id, vrep.simx_opmode_blocking)[1]
                          for joint_id in joint_ids]
         point_handles = [vrep.simxGetObjectHandle(self.clientID, point_id, vrep.simx_opmode_blocking)[1]
@@ -85,13 +88,10 @@ class ManipulatorEnv(gym.Env):
         if self.goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[self.goal_set]) * DEG2RAD
         elif self.goal_set == 'random':
-            if not eval_:
-                theta = np.vstack((np.zeros((self.action_dim,)),
-                                   0.5 * 45 * DEG2RAD * np.random.randn(self.action_dim).clip(-2, 2))).T.flatten()
-            else:
-                theta = np.vstack((np.zeros((self.action_dim,)),
-                                   45 * DEG2RAD * np.random.uniform(low=-1, high=1,
-                                                                    size=(self.action_dim,)))).T.flatten()
+            theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(2, ))
+            theta = np.vstack((np.zeros((self.num_joints // 2,)),
+                               np.hstack((theta[0] * np.ones(self.num_joints // 4),
+                                          theta[1] * np.ones(self.num_joints // 4))))).T.flatten()
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)
@@ -157,7 +157,7 @@ class ManipulatorEnv(gym.Env):
         self._elapsed_steps += 1
         action = self.max_angles_vel * DEG2RAD * np.asarray(action)
         action = action[:, np.newaxis]
-        action = np.concatenate((np.zeros((self.action_dim, 1)), action), axis=-1).flatten()
+        action = np.concatenate((np.zeros((2, 1)), action), axis=-1).flatten()
         self.set_joint_effect(action)
         vrep.simxSynchronousTrigger(self.clientID)
         vrep.simxGetPingTime(self.clientID)
@@ -185,11 +185,14 @@ class ManipulatorEnv(gym.Env):
             return dense_reward(d) - dense_reward(d_last)
 
     def set_joint_effect(self, action):
-        assert len(action) == self.num_joints, 'action dimension wrong'
+        assert len(action) == 4, 'action dimension wrong'
         vrep.simxPauseCommunication(self.clientID, True)
-        for i in range(self.num_joints):
+        for i in range(2):
             vrep.simxSetJointTargetVelocity(self.clientID, self.handles['joint'][i],
                                             action[i], vrep.simx_opmode_oneshot)
+        for i in range(2):
+            vrep.simxSetJointTargetVelocity(self.clientID, self.handles['joint'][self.action_dim + i],
+                                            action[2 + i], vrep.simx_opmode_oneshot)
         vrep.simxPauseCommunication(self.clientID, False)
 
     def get_state(self, mode):
@@ -211,20 +214,30 @@ class ManipulatorEnv(gym.Env):
         return state
 
 
-if __name__ == '__main__':
-    env = ManipulatorEnv(0)
-    print('env created success')
-    obs = env.reset()
-    print('reset success')
-    action_ = [0, 45, 0, -45, 0, -45, 0, 45, 0, 0]
-    vrep.simxPauseCommunication(env.clientID, True)
-    for i in range(env.num_joints):
-        vrep.simxSetJointPosition(env.clientID, env.handles['joint'][i],
-                                        action_[i]*DEG2RAD, vrep.simx_opmode_oneshot)
-    vrep.simxPauseCommunication(env.clientID, False)
-    time.sleep(100)
-
-
-
-
-
+# if __name__ == '__main__':
+    # goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
+    #               'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
+    #               'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
+    # env_config = {
+    #     'distance_threshold': 0.02,
+    #     'reward_type': 'dense',
+    #     'max_angles_vel': 10,  # 10degree/s
+    #     'num_joints': 12,
+    #     'goal_set': 'random',
+    #     'max_episode_steps': 100,
+    #     'cc_model': False,
+    # }
+    # env = ManipulatorEnv(env_config)
+    # print('env created success')
+    # action_ = [1, -1]
+    # time_a = time.time()
+    # for i in range(5):
+    #     obs = env.reset()
+    #     while True:
+    #         obs, reward, done, info = env.step(action_)
+    #         if done:
+    #             break
+    # time_b = time.time()
+    # print(time_b - time_a)
+    #
+    # env.end_simulation()
