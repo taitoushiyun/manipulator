@@ -71,15 +71,18 @@ class ManipulatorEnv(gym.Env):
         self.get_handles()
 
     def get_handles(self):
-        joint_ids = [f'joint{idx_0}_{idx_1}#{self.port - 20000}'
-                     for idx_0 in range(self.num_joints // 2) for idx_1 in range(2)]
-        point_ids = [f'aux{self.num_joints // 2}#{self.port-20000}', f'goal#{self.port-20000}', f'base#{self.port-20000}']
+        joint_ids = [f'manipulator_joint{i_}' for i_ in range(self.num_joints)]
+        point_ids = [f'manipulator_ee_point{self.num_joints // 2}', f'manipulator_goal', f'manipulator']
         joint_handles = [vrep.simxGetObjectHandle(self.clientID, joint_id, vrep.simx_opmode_blocking)[1]
                          for joint_id in joint_ids]
         point_handles = [vrep.simxGetObjectHandle(self.clientID, point_id, vrep.simx_opmode_blocking)[1]
                          for point_id in point_ids]
+        collision_handles = [vrep.simxGetCollisionHandle(self.clientID, f'Collision{i_}',
+                             vrep.simx_opmode_blocking)[1] for i_ in range(self.num_joints + 2)] + \
+                            [vrep.simxGetCollisionHandle(self.clientID, 'Collision', vrep.simx_opmode_blocking)[1]]
         self.handles['joint'] = joint_handles
         self.handles['point'] = point_handles
+        self.handles['collision'] = collision_handles
 
     def _sample_goal(self, eval_):
         if self.goal_set in ['easy', 'hard', 'super hard']:
@@ -144,10 +147,12 @@ class ManipulatorEnv(gym.Env):
         vrep.simxGetObjectVelocity(self.clientID, self.handles['point'][0], vrep.simx_opmode_streaming)
         vrep.simxGetObjectPosition(self.clientID, self.handles['point'][1], -1, vrep.simx_opmode_streaming)
         vrep.simxGetObjectPosition(self.clientID, self.handles['point'][2], -1, vrep.simx_opmode_streaming)
+        for i_ in range(self.num_joints + 3):
+            vrep.simxReadCollision(self.clientID, self.handles['collision'][i_], vrep.simx_opmode_streaming)
         time.sleep(0.5)
         self.step_cnt = 0
         self.running = True
-        observation = self.get_state(vrep.simx_opmode_buffer)
+        observation, _ = self.get_state(vrep.simx_opmode_buffer)
         self.last_obs = observation
         # print('reset')
         return observation
@@ -161,12 +166,13 @@ class ManipulatorEnv(gym.Env):
         self.set_joint_effect(action)
         vrep.simxSynchronousTrigger(self.clientID)
         vrep.simxGetPingTime(self.clientID)
-        observation = self.get_state(vrep.simx_opmode_buffer)
+        observation, info = self.get_state(vrep.simx_opmode_buffer)
         reward = self.cal_reward(observation[self.e_pos_idx], self.goal)
         done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
-        info = {}
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
+        # if info['collision_state']:
+        #     done = True
         self.last_obs = observation
         return observation, reward, done, info
 
@@ -198,32 +204,56 @@ class ManipulatorEnv(gym.Env):
                for i in range(self.num_joints // 2)]
         jvs = [vrep.simxGetObjectFloatParameter(self.clientID, self.handles['joint'][2*i+1], 2012, mode)[1]
                for i in range(self.num_joints // 2)]
-        ee_point_pos = vrep.simxGetObjectPosition(self.clientID, self.handles['point'][0],
-                                                  -1, mode)[1]
-        ee_point_vel = vrep.simxGetObjectVelocity(self.clientID, self.handles['point'][0],
-                                                  mode)[1]
+        ee_point_pos = vrep.simxGetObjectPosition(self.clientID, self.handles['point'][0], -1, mode)[1]
+        ee_point_vel = vrep.simxGetObjectVelocity(self.clientID, self.handles['point'][0], mode)[1]
+        collision_state = [vrep.simxReadCollision(self.clientID, self.handles['collision'][i_], vrep.simx_opmode_buffer)[1]
+                           for i_ in range(self.num_joints + 3)]
+        info = {'collision_state': False}
+        if any(collision_state):
+            info['collision_state'] = True
         state[self.j_ang_idx] = np.asarray(jas) * RAD2DEG
         state[self.j_vel_idx] = np.asarray(jvs) * RAD2DEG
         state[self.e_pos_idx] = np.asarray(ee_point_pos)
         state[self.e_vel_idx] = np.asarray(ee_point_vel)
         state[self.g_pos_idx] = self.observation[self.g_pos_idx]
         state[self.b_pos_idx] = self.observation[self.b_pos_idx]
-        return state
+        return state, info
 
 
 if __name__ == '__main__':
-    env = ManipulatorEnv(0)
+    goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
+                  'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
+                  'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
+    env_config = {
+        'distance_threshold': 0.02,
+        'reward_type': 'dense',
+        'max_angles_vel': 10,  # 10degree/s
+        'num_joints': 12,
+        'goal_set': 'random',
+        'max_episode_steps': 100,
+        'cc_model': False,
+    }
+    env = ManipulatorEnv(0, env_config)
     print('env created success')
-    obs = env.reset()
-    print('reset success')
-    action_ = [0, 45, 0, -45, 0, -45, 0, 45, 0, 0]
-    vrep.simxPauseCommunication(env.clientID, True)
-    for i in range(env.num_joints):
-        vrep.simxSetJointPosition(env.clientID, env.handles['joint'][i],
-                                        action_[i]*DEG2RAD, vrep.simx_opmode_oneshot)
-    vrep.simxPauseCommunication(env.clientID, False)
-    time.sleep(100)
+    action_ = [1, 1, 1, -1, -1, -1]
+    # action_ = np.random.uniform(-1, 1, size=(6,))
+    time_a = time.time()
+    for i in range(5):
+        obs = env.reset()
+        while True:
+            obs, reward, done, info = env.step(action_)
+            # print(info['collision_state'])
+            # if any(info['collision_state']):
+            #     vrep.simxAddStatusbarMessage(env.clientID, 'collision detected', vrep.simx_opmode_oneshot)
+            #     print('collision detected')
+            #
+            #     time.sleep(100)
+            if done:
+                break
+    time_b = time.time()
+    print(time_b - time_a)
 
+    env.end_simulation()
 
 
 
