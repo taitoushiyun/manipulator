@@ -13,7 +13,7 @@ RAD2DEG = 180. / np.pi
 
 GOAL = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
         'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
-        'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
+        'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10, 0, 10]}
 
 
 class ManipulatorEnv(gym.Env):
@@ -214,30 +214,30 @@ class ManipulatorEnv(gym.Env):
         return state
 
 
-# if __name__ == '__main__':
-    # goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
-    #               'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
-    #               'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
-    # env_config = {
-    #     'distance_threshold': 0.02,
-    #     'reward_type': 'dense',
-    #     'max_angles_vel': 10,  # 10degree/s
-    #     'num_joints': 12,
-    #     'goal_set': 'random',
-    #     'max_episode_steps': 100,
-    #     'cc_model': False,
-    # }
-    # env = ManipulatorEnv(env_config)
-    # print('env created success')
-    # action_ = [1, -1]
-    # time_a = time.time()
-    # for i in range(5):
-    #     obs = env.reset()
-    #     while True:
-    #         obs, reward, done, info = env.step(action_)
-    #         if done:
-    #             break
-    # time_b = time.time()
-    # print(time_b - time_a)
-    #
-    # env.end_simulation()
+if __name__ == '__main__':
+    goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
+                  'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
+                  'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10, 0, 10]}
+    env_config = {
+        'distance_threshold': 0.02,
+        'reward_type': 'dense',
+        'max_angles_vel': 10,  # 10degree/s
+        'num_joints': 12,
+        'goal_set': 'super hard',
+        'max_episode_steps': 100,
+        'cc_model': True,
+    }
+    env = ManipulatorEnv(env_config)
+    print('env created success')
+    action_ = [1, -1]
+    time_a = time.time()
+    for i in range(5):
+        obs = env.reset()
+        while True:
+            obs, reward, done, info = env.step(action_)
+            if done:
+                break
+    time_b = time.time()
+    print(time_b - time_a)
+
+    env.end_simulation()

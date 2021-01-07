@@ -69,7 +69,7 @@ def playGame(args_, train=True, episode_count=2000):
                     total_reward = 0
                     path_length = 0
                     for t in count():
-                        action = agent.act(state, add_noise=False)
+                        action = agent.act(state, episode_step=i)
                         next_state, reward, done, _ = env.step(action)
                         total_reward += reward
                         path_length += 1
@@ -82,7 +82,7 @@ def playGame(args_, train=True, episode_count=2000):
                             break
                     result_queue.append(result)
                     eval_success_rate = sum(result_queue) / len(result_queue)
-                    print(f'episode {i} result {result}')
+                    print(f'episode {i} result {result} path len {path_length}')
                     vis.line(X=[i], Y=[eval_success_rate * 100], win='eval success rate', update='append')
 
 
@@ -93,7 +93,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_21')
+    parser.add_argument('--code_version', type=str, default='td3_22')
     parser.add_argument('--vis-port', type=int, default=6016)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
