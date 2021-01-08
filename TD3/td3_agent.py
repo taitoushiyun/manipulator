@@ -301,8 +301,9 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
         vis.line(X=[i_episode], Y=[result], win='result', update='append')
         vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
         vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
+        torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'actor/{i_episode}.pth'))
         if i_episode % 5 == 0:
-            torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'actor/{i_episode}.pth'))
+
 
             state = env.reset(eval_=True)
             total_reward = 0

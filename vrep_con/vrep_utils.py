@@ -55,6 +55,7 @@ class ManipulatorEnv(gym.Env):
         self._init_vrep()
         time.sleep(2)
         self._elapsed_steps = None
+        self.last_time = -200
 
     def _init_vrep(self):
         vrep.simxFinish(-1)
@@ -122,6 +123,7 @@ class ManipulatorEnv(gym.Env):
         self.running = False
 
     def reset(self, eval_=False):
+        self.last_time = -200
         self._elapsed_steps = 0
         # if self.running:
         self.stop_sim()
@@ -160,7 +162,12 @@ class ManipulatorEnv(gym.Env):
         action = np.concatenate((np.zeros((2, 1)), action), axis=-1).flatten()
         self.set_joint_effect(action)
         vrep.simxSynchronousTrigger(self.clientID)
-        vrep.simxGetPingTime(self.clientID)
+        # vrep.simxGetPingTime(self.clientID)
+        # print(vrep.simxGetPingTime(self.clientID)[1])
+        # if vrep.simxGetLastCmdTime(self.clientID) - self.last_time != 200:
+        #     print('wrong', vrep.simxGetLastCmdTime(self.clientID), self.last_time)
+        # self.last_time = vrep.simxGetLastCmdTime(self.clientID)
+
         observation = self.get_state(vrep.simx_opmode_buffer)
         reward = self.cal_reward(observation[self.e_pos_idx], self.goal)
         done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
