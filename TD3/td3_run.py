@@ -31,6 +31,9 @@ def playGame(args_, train=True, episode_count=2000):
         'num_joints': args_.num_joints,
         'goal_set': args_.goal_set,
         'max_episode_steps': args_.max_episode_steps,
+        'collision_cnt': args_.collision_cnt,
+        'headless_mode': args_.headless_mode,
+        'scene_file': args_.scene_file,
     }
     env = ManipulatorEnv(0, env_config)
     # env = gym.make('LunarLanderContinuous-v2')
@@ -91,6 +94,9 @@ if __name__ == "__main__":
     parser.add_argument('--num-joints', type=int, default=20)
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random', ''],
                         default='random')
+    parser.add_argument('--collision_cnt', type=int, default=15)
+    parser.add_argument('--scene_file', type=str, default='by_12_1.ttt')
+    parser.add_argument('--headless_mode', type=bool, default=True)
 
     parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--episodes', type=int, default=5000)

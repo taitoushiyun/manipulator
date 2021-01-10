@@ -9,24 +9,24 @@ This script contains examples of:
 """
 from os.path import dirname, join, abspath
 from pyrep import PyRep
-from pyrep.robots.arms.panda import Panda
+from pyrep.robots.arms.ur10 import UR10
 from pyrep.objects.shape import Shape
 import numpy as np
 
 SCENE_FILE = join(dirname(abspath(__file__)),
                   'scene_reinforcement_learning_env.ttt')
 POS_MIN, POS_MAX = [0.8, -0.2, 1.0], [1.0, 0.2, 1.4]
-EPISODES = 5
-EPISODE_LENGTH = 200
+EPISODES = 1
+EPISODE_LENGTH = 100
 
 
 class ReacherEnv(object):
 
     def __init__(self):
         self.pr = PyRep()
-        self.pr.launch(SCENE_FILE, headless=False)
+        self.pr.launch(SCENE_FILE, headless=True)
         self.pr.start()
-        self.agent = Panda()
+        self.agent = UR10()
         self.agent.set_control_loop_enabled(False)
         self.agent.set_motor_locked_at_zero_velocity(True)
         self.target = Shape('target')
@@ -74,19 +74,20 @@ class Agent(object):
 env = ReacherEnv()
 agent = Agent()
 replay_buffer = []
-
+import time
 for e in range(EPISODES):
 
     print('Starting episode %d' % e)
     state = env.reset()
     for i in range(EPISODE_LENGTH):
         action = agent.act(state)
+        time_a = time.time()
         reward, next_state = env.step(action)
+        time_b = time.time()
+        print(time_b - time_a)
         replay_buffer.append((state, action, reward, next_state))
         state = next_state
         agent.learn(replay_buffer)
 
 print('Done!')
 env.shutdown()
-
-
