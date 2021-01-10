@@ -162,7 +162,7 @@ class ManipulatorEnv(gym.Env):
         action = np.concatenate((np.zeros((2, 1)), action), axis=-1).flatten()
         self.set_joint_effect(action)
         vrep.simxSynchronousTrigger(self.clientID)
-        # vrep.simxGetPingTime(self.clientID)
+        vrep.simxGetPingTime(self.clientID)
         # print(vrep.simxGetPingTime(self.clientID)[1])
         # if vrep.simxGetLastCmdTime(self.clientID) - self.last_time != 200:
         #     print('wrong', vrep.simxGetLastCmdTime(self.clientID), self.last_time)
