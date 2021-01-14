@@ -53,7 +53,8 @@ class ManipulatorEnv(gym.Env):
         self.agent_ee_tip = self.agent.get_tip()
         self.agent_target = Shape("target")
         self.agent_base = self.agent.get_base()
-        self.initial_joint_positions = self.agent.get_joint_initial_positions()
+        # self.initial_joint_positions = self.agent.get_joint_initial_positions()
+        self.initial_joint_positions = np.zeros((self.num_joints, ))
 
     def _sample_goal(self):
         if self.goal_set in ['easy', 'hard', 'super hard']:
@@ -114,8 +115,8 @@ class ManipulatorEnv(gym.Env):
         done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
-        if info['collision_state']:
-            done = True
+        # if any(info['collision_state']):
+        #     done = True
         self.last_obs = observation
         return observation, reward, done, info
 

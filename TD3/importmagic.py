@@ -1,5 +1,5 @@
 import sys
 
-sys.path.append('/home/wangyw/cq/code/manipulator')
-sys.path.append('/home/wangyw/cq/code/manipulator/TD3')
-sys.path.append('/home/wangyw/cq/code/manipulator/vrep_con')
+sys.path.append('/home/cq/code/manipulator')
+sys.path.append('/home/cq/code/manipulator/TD3')
+sys.path.append('/home/cq/code/manipulator/vrep_pyrep')

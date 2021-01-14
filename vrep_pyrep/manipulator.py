@@ -13,8 +13,8 @@ class Manipulator(Arm):
         self.collisions = [Collision(cname)
                            for cname in [f'Collision{i_}' for i_ in range(collision_cnt)] + ['Collision']]
 
-    def get_collision_result(self) -> bool:
-        return any([c.read_collision() for c in self.collisions])
+    def get_collision_result(self) -> List:
+        return [c.read_collision() for c in self.collisions]
 
     def get_base(self) -> Shape:
         return self.agent_base
