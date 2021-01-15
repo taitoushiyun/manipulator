@@ -1,5 +1,9 @@
 import sys
+import os
 
-sys.path.append('/home/cq/code/manipulator')
-sys.path.append('/home/cq/code/manipulator/TD3')
-sys.path.append('/home/cq/code/manipulator/vrep_pyrep')
+main_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+
+sys.path.append(main_dir)
+sys.path.append(os.path.join(main_dir, 'TD3'))
+sys.path.append(os.path.join(main_dir, 'vrep_pyrep'))
+

@@ -72,7 +72,7 @@ class ManipulatorEnv(gym.Env):
 
     def get_handles(self):
         joint_ids = [f'manipulator_joint{i_}' for i_ in range(self.num_joints)]
-        point_ids = [f'manipulator_ee_point{self.num_joints // 2}', f'manipulator_goal', f'manipulator']
+        point_ids = [f'manipulator_ee_point{self.num_joints // 2}', f'manipulator_goal_visual', f'manipulator_base']
         joint_handles = [vrep.simxGetObjectHandle(self.clientID, joint_id, vrep.simx_opmode_blocking)[1]
                          for joint_id in joint_ids]
         point_handles = [vrep.simxGetObjectHandle(self.clientID, point_id, vrep.simx_opmode_blocking)[1]
@@ -171,8 +171,8 @@ class ManipulatorEnv(gym.Env):
         done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
-        # if info['collision_state']:
-        #     done = True
+        if info['collision_state']:
+            done = True
         self.last_obs = observation
         return observation, reward, done, info
 
@@ -206,7 +206,7 @@ class ManipulatorEnv(gym.Env):
                for i in range(self.num_joints // 2)]
         ee_point_pos = vrep.simxGetObjectPosition(self.clientID, self.handles['point'][0], -1, mode)[1]
         ee_point_vel = vrep.simxGetObjectVelocity(self.clientID, self.handles['point'][0], mode)[1]
-        collision_state = [vrep.simxReadCollision(self.clientID, self.handles['collision'][i_], vrep.simx_opmode_buffer)[1]
+        collision_state = [vrep.simxReadCollision(self.clientID, self.handles['collision'][i_], mode)[1]
                            for i_ in range(self.num_joints + 3)]
         info = {'collision_state': False}
         if any(collision_state):
@@ -237,11 +237,17 @@ if __name__ == '__main__':
     print('env created success')
     action_ = [1, 1, 1, -1, -1, -1]
     # action_ = np.random.uniform(-1, 1, size=(6,))
-    time_a = time.time()
-    for i in range(5):
+    # time_a = time.time()
+    lines = []
+    for i in range(1):
+        line = []
         obs = env.reset()
         while True:
+            time_a = time.time()
             obs, reward, done, info = env.step(action_)
+            time_b = time.time()
+            print(time_b - time_a)
+            line.append(obs[0])
             # print(info['collision_state'])
             # if any(info['collision_state']):
             #     vrep.simxAddStatusbarMessage(env.clientID, 'collision detected', vrep.simx_opmode_oneshot)
@@ -249,10 +255,14 @@ if __name__ == '__main__':
             #
             #     time.sleep(100)
             if done:
+                lines.append(line)
                 break
-    time_b = time.time()
-    print(time_b - time_a)
-
+    # time_b = time.time()
+    # print(time_b - time_a)
+    from matplotlib import pyplot as plt
+    for i in range(1):
+        plt.plot(lines[0])
+    plt.show()
     env.end_simulation()
 
 
