@@ -29,6 +29,9 @@ def playGame(args_, train=True, episode_count=2000):
         'reward_type': args_.reward_type,
         'max_angles_vel': args_.max_angles_vel,  # 10degree/s
         'num_joints': args_.num_joints,
+        'num_segments': args_.num_segments,
+        'cc_model': args_.cc_model,
+        'plane_model': args_.plane_model,
         'goal_set': args_.goal_set,
         'max_episode_steps': args_.max_episode_steps,
         'collision_cnt': args_.collision_cnt,
@@ -85,14 +88,17 @@ def playGame(args_, train=True, episode_count=2000):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
     parser.add_argument('--code_version', type=str, default='td3_25')
-    parser.add_argument('--vis-port', type=int, default=6016)
+    parser.add_argument('--vis_port', type=int, default=6016)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
-    parser.add_argument('--distance-threshold', type=float, default=0.02)
-    parser.add_argument('--reward-type', type=str, default='dense')
-    parser.add_argument('--max-angles-vel', type=float, default=10.)
-    parser.add_argument('--num-joints', type=int, default=12)
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random', ''],
+    parser.add_argument('--distance_threshold', type=float, default=0.02)
+    parser.add_argument('--reward_type', type=str, default='dense')
+    parser.add_argument('--max_angles_vel', type=float, default=10.)
+    parser.add_argument('--num_joints', type=int, default=12)
+    parser.add_argument('--num_segments', type=int, default=2)
+    parser.add_argument('--plane_model', type=bool, default=True)
+    parser.add_argument('--cc_model', type=bool, default=True)
+    parser.add_argument('--goal_set', type=str, choices=['easy', 'hard', 'super hard', 'random', ''],
                         default='random')
     parser.add_argument('--collision_cnt', type=int, default=15)
     parser.add_argument('--scene_file', type=str, default='by_12_1.ttt')

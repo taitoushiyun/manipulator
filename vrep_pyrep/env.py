@@ -1,7 +1,7 @@
 import time
 import numpy as np
 from pyrep import PyRep
-from manipulator import Manipulator
+from manipulator import ManipulatorPlane, Manipulator3D, ManipulatorCCPlane, ManipulatorCC3D
 from dh_convert import DHModel
 from os.path import dirname, join, abspath
 import gym
@@ -23,21 +23,40 @@ class ManipulatorEnv(gym.Env):
         self.distance_threshold = env_config['distance_threshold']
         self.reward_type = env_config['reward_type']
         self.num_joints = env_config['num_joints']
+        self.num_segments = env_config['num_segments']
+        self.cc_model = env_config['cc_model']
+        self.plane_model = env_config['plane_model']
         self.goal_set = env_config['goal_set']
         self._max_episode_steps = env_config['max_episode_steps']
         self.collision_cnt = env_config['collision_cnt']
         self.headless_mode = env_config['headless_mode']
 
-        self.state_dim = self.num_joints + 12  # EE_point_position, EE_point_vel, goal_position, base_position
-        self.action_dim = self.num_joints // 2
+        if self.plane_model and self.cc_model:
+            self.joint_state_dim = 2 * self.num_segments
+            mani_cls = ManipulatorCCPlane
+        elif self.plane_model and not self.cc_model:
+            self.joint_state_dim = self.num_joints
+            mani_cls = ManipulatorPlane
+        elif not self.plane_model and self.cc_model:
+            self.joint_state_dim = 4 * self.num_segments
+            mani_cls = ManipulatorCC3D
+        elif not self.plane_model and not self.cc_model:
+            self.joint_state_dim = 2 * self.num_joints
+            mani_cls = Manipulator3D
+        else:
+            raise ValueError
+
+        self.state_dim = self.joint_state_dim + 12  # EE_point_position, EE_point_vel, goal_position, base_position
+        self.action_dim = self.joint_state_dim // 2
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_dim,), dtype=np.float32)
         self.action_space = spaces.Box(low=-1.0, high=1, shape=(self.action_dim,), dtype=np.float32)
-        self.j_ang_idx = range(self.num_joints // 2)
-        self.j_vel_idx = range(self.num_joints // 2, self.num_joints)
-        self.e_pos_idx = range(self.num_joints, self.num_joints + 3)
-        self.e_vel_idx = range(self.num_joints + 3, self.num_joints + 6)
-        self.g_pos_idx = range(self.num_joints + 6, self.num_joints + 9)
-        self.b_pos_idx = range(self.num_joints + 9, self.num_joints + 12)
+        self.j_ang_idx = range(self.joint_state_dim // 2)
+        self.j_vel_idx = range(self.joint_state_dim // 2, self.joint_state_dim)
+        self.e_pos_idx = range(self.joint_state_dim, self.joint_state_dim + 3)
+        self.e_vel_idx = range(self.joint_state_dim + 3, self.joint_state_dim + 6)
+        self.g_pos_idx = range(self.joint_state_dim + 6, self.joint_state_dim + 9)
+        self.b_pos_idx = range(self.joint_state_dim + 9, self.joint_state_dim + 12)
+
         self.dh_model = DHModel(self.num_joints)
         self.observation = np.zeros((self.state_dim,))
         self.last_obs = None
@@ -46,23 +65,40 @@ class ManipulatorEnv(gym.Env):
         self.pr = PyRep()
         self.pr.launch(join(dirname(abspath(__file__)), env_config['scene_file']), headless=self.headless_mode)
         self.pr.start()
-        self.agent = Manipulator(num_joints=self.num_joints,
-                                 collision_cnt=self.collision_cnt)
+        self.agent = mani_cls(num_joints=self.num_joints,
+                              num_segments=self.num_segments,
+                              collision_cnt=self.collision_cnt)
         # self.agent.set_control_loop_enabled(False)
         # self.agent.set_motor_locked_at_zero_velocity(True)
         self.agent_ee_tip = self.agent.get_tip()
         self.agent_target = Shape("target")
         self.agent_base = self.agent.get_base()
         # self.initial_joint_positions = self.agent.get_joint_initial_positions()
-        self.initial_joint_positions = np.zeros((self.num_joints, ))
+        self.initial_joint_positions = np.zeros((self.joint_state_dim // 2, ))
 
     def _sample_goal(self):
         if self.goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[self.goal_set]) * DEG2RAD
         elif self.goal_set == 'random':
+            if self.cc_model and self.plane_model:
+                theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.num_segments, ))
+                theta = np.vstack((np.zeros((self.action_dim // 2,)),
+                                   np.hstack([theta[i_] * np.ones(self.num_joints // (2 * self.num_segments))
+                                              for i_ in range(self.num_segments)]))).T.flatten()
+            elif self.cc_model and not self.plane_model:
+                theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(2 * self.num_segments, ))
+                theta = np.vstack([np.hstack([theta[i_] * np.ones(self.num_joints // (2 * self.num_segments))
+                                              for i_ in range(self.num_segments)]),
+                                   np.hstack([theta[i_ + self.num_segments] * np.ones(self.num_joints // (2 * self.num_segments))
+                                              for i_ in range(self.num_segments)])
+                                   ]).T.flatten()
+            elif not self.cc_model and self.plane_model:
                 theta = np.vstack((np.zeros((self.action_dim,)),
                                    45 * DEG2RAD * np.random.uniform(low=-1, high=1,
                                                                     size=(self.action_dim,)))).T.flatten()
+            if not self.cc_model and not self.plane_model:
+                theta = 45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.num_joints, ))
+
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)
@@ -96,7 +132,7 @@ class ManipulatorEnv(gym.Env):
         self.observation[self.g_pos_idx] = np.asarray(self.goal)
         self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])
         self.agent_target.set_position(self.goal)
-        self.agent.set_joint_positions(self.initial_joint_positions)
+        self.agent.set_initial_joint_positions(self.initial_joint_positions)
         observation, _ = self._get_state()
         self.last_obs = observation
         return observation
@@ -104,11 +140,17 @@ class ManipulatorEnv(gym.Env):
     def step(self, action):
         assert self._elapsed_steps is not None
         self._elapsed_steps += 1
-        action = self.max_angles_vel * DEG2RAD * np.asarray(action)
-        action = action[:, np.newaxis]
-        action = np.concatenate((np.zeros((self.action_dim, 1)), action), axis=-1).flatten()
+        if self.plane_model and not self.cc_model:
+            action = self.max_angles_vel * DEG2RAD * np.asarray(action)
+            action = action[:, np.newaxis]
+            action = np.concatenate((np.zeros((self.action_dim, 1)), action), axis=-1).flatten()
+        elif self.plane_model and self.cc_model:
+            action = self.max_angles_vel * DEG2RAD * np.asarray(action)
+            action = action[:, np.newaxis]
+            action = np.concatenate((np.zeros((self.num_segments, 1)), action), axis=-1).flatten()
+        else:
+            action = self.max_angles_vel * DEG2RAD * np.asarray(action)
         self.agent.set_joint_target_velocities(action)  # Execute action on arm
-        time_c = time.time()
         self.pr.step()  # Step the physics simulation
         observation, info = self._get_state()
         reward = self.cal_reward(observation[self.e_pos_idx], self.goal)
