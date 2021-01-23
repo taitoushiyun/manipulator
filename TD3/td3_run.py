@@ -60,11 +60,11 @@ def playGame(args_, train=True, episode_count=2000):
             vis = visdom.Visdom(port=args.vis_port, env=args.code_version)
             td3_torcs(env, agent, episode_count, args.max_episode_steps, 'checkpoints', vis)
         else:
-            for i in range(4900, 5000):
+            for i in range(0, 5000):
                 if i % 5 == 0:
-                    model = torch.load(f'I://remote/manipulator/TD3/checkpoints/actor/{i}.pth')  # 'PPO/checkpoints/40.pth'
+                    model = torch.load(f'/home/cq/code/manipulator/TD3/checkpoints/actor/{i}.pth')  # 'PPO/checkpoints/40.pth'
                     agent.actor_local.load_state_dict(model)
-                    state = env.reset(eval_=True)
+                    state = env.reset()
                     total_reward = 0
                     path_length = 0
                     for t in count():
@@ -77,7 +77,6 @@ def playGame(args_, train=True, episode_count=2000):
                             print(f'episode {i}')
                             print(f"Total reward: {total_reward}")
                             print(f"Episode length: {t+1}")
-                            time.sleep(1)
                             break
 
     finally:
@@ -87,7 +86,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_25')
+    parser.add_argument('--code_version', type=str, default='td3_27')
     parser.add_argument('--vis_port', type=int, default=6016)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
@@ -97,22 +96,21 @@ if __name__ == "__main__":
     parser.add_argument('--num_joints', type=int, default=12)
     parser.add_argument('--num_segments', type=int, default=2)
     parser.add_argument('--plane_model', type=bool, default=True)
-    parser.add_argument('--cc_model', type=bool, default=True)
+    parser.add_argument('--cc_model', type=bool, default=False)
     parser.add_argument('--goal_set', type=str, choices=['easy', 'hard', 'super hard', 'random', ''],
                         default='random')
     parser.add_argument('--collision_cnt', type=int, default=15)
     parser.add_argument('--scene_file', type=str, default='by_12_1.ttt')
-    parser.add_argument('--headless_mode', type=bool, default=True)
+    parser.add_argument('--headless_mode', type=bool, default=False)
 
     parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--episodes', type=int, default=5000)
 
     args = parser.parse_args()
     # write the selected car to configuration file
-    try:
-        playGame(args, args.train, args.episodes)
-    except:
-        raise EOFError
+
+    playGame(args, args.train, args.episodes)
+
 
 
 

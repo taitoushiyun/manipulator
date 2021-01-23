@@ -7,4 +7,5 @@ theta = np.vstack([np.hstack([theta[i_] * np.ones(num_joints // (2 * num_segment
                    np.hstack([theta[i_ + num_segments] * np.ones(num_joints // (2 * num_segments))
                               for i_ in range(num_segments)])
                    ]).T.flatten()
-print(theta)
+k = [1, 2, 3, 4, 5, 6]
+print(k[[1, 3, 5]])

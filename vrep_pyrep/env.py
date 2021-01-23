@@ -34,15 +34,19 @@ class ManipulatorEnv(gym.Env):
         if self.plane_model and self.cc_model:
             self.joint_state_dim = 2 * self.num_segments
             mani_cls = ManipulatorCCPlane
+            self.initial_joint_positions = np.zeros((2 * self.num_segments,))
         elif self.plane_model and not self.cc_model:
             self.joint_state_dim = self.num_joints
             mani_cls = ManipulatorPlane
+            self.initial_joint_positions = np.zeros((self.num_joints,))
         elif not self.plane_model and self.cc_model:
             self.joint_state_dim = 4 * self.num_segments
             mani_cls = ManipulatorCC3D
+            self.initial_joint_positions = np.zeros((2 * self.num_segments,))
         elif not self.plane_model and not self.cc_model:
             self.joint_state_dim = 2 * self.num_joints
             mani_cls = Manipulator3D
+            self.initial_joint_positions = np.zeros((self.num_joints,))
         else:
             raise ValueError
 
@@ -74,31 +78,17 @@ class ManipulatorEnv(gym.Env):
         self.agent_target = Shape("target")
         self.agent_base = self.agent.get_base()
         # self.initial_joint_positions = self.agent.get_joint_initial_positions()
-        self.initial_joint_positions = np.zeros((self.joint_state_dim // 2, ))
 
     def _sample_goal(self):
         if self.goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[self.goal_set]) * DEG2RAD
         elif self.goal_set == 'random':
-            if self.cc_model and self.plane_model:
-                theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.num_segments, ))
-                theta = np.vstack((np.zeros((self.action_dim // 2,)),
-                                   np.hstack([theta[i_] * np.ones(self.num_joints // (2 * self.num_segments))
-                                              for i_ in range(self.num_segments)]))).T.flatten()
-            elif self.cc_model and not self.plane_model:
-                theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(2 * self.num_segments, ))
-                theta = np.vstack([np.hstack([theta[i_] * np.ones(self.num_joints // (2 * self.num_segments))
-                                              for i_ in range(self.num_segments)]),
-                                   np.hstack([theta[i_ + self.num_segments] * np.ones(self.num_joints // (2 * self.num_segments))
-                                              for i_ in range(self.num_segments)])
-                                   ]).T.flatten()
-            elif not self.cc_model and self.plane_model:
+            if self.plane_model:
                 theta = np.vstack((np.zeros((self.action_dim,)),
                                    45 * DEG2RAD * np.random.uniform(low=-1, high=1,
                                                                     size=(self.action_dim,)))).T.flatten()
-            if not self.cc_model and not self.plane_model:
-                theta = 45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.num_joints, ))
-
+            else:
+                theta = 45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.action_dim, ))
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)
