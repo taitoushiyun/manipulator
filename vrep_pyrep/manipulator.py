@@ -74,11 +74,11 @@ class ManipulatorCCPlane(Arm):
         return super().get_joint_positions()
 
     def get_joint_positions(self) -> List[float]:
-        return [self.joints[self._num_joints // self.num_segments * i].get_joint_position()
+        return [self.joints[self._num_joints // self.num_segments * i + 1].get_joint_position()
                 for i in range(self.num_segments)]
 
     def get_joint_velocities(self) -> List[float]:
-        return [self.joints[self._num_joints // self.num_segments * i].get_joint_velocity()
+        return [self.joints[self._num_joints // self.num_segments * i + 1].get_joint_velocity()
                 for i in range(self.num_segments)]
 
     def set_joint_target_velocities(self, velocities: List[float]) -> None:

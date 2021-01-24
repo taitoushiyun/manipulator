@@ -58,18 +58,17 @@ def playGame(args_, train=True, episode_count=2000):
 
         if train:
             vis = visdom.Visdom(port=args.vis_port, env=args.code_version)
-            td3_torcs(env, agent, episode_count, args.max_episode_steps, 'checkpoints', vis)
+            td3_torcs(env, agent, episode_count, args.max_episode_steps,
+                      os.path.join('checkpoints', args_.code_version), vis)
         else:
             vis = visdom.Visdom(port=args.vis_port, env=args.code_version)
-            vis.line(X=[0], Y=[0], win='eval result',
-                     opts=dict(Xlabel='episode', Ylabel='eval result', title='eval result'))
-            vis.line(X=[0], Y=[0], win='eval path len',
-                     opts=dict(Xlabel='episode', Ylabel='len', title='eval path len'))
-            vis.line(X=[0], Y=[0], win='eval success rate',
-                     opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='eval success rate'))
+            vis.line(X=[0], Y=[0], win='result', opts=dict(Xlabel='episode', Ylabel='result', title='result'))
+            vis.line(X=[0], Y=[0], win='path len', opts=dict(Xlabel='episode', Ylabel='len', title='path len'))
+            vis.line(X=[0], Y=[0], win='success rate',
+                     opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='success rate'))
             from _collections import deque
-            result_queue = deque(maxlen=10)
-            for i in range(0, 5000):
+            result_queue = deque(maxlen=20)
+            for i in range(4950, 5000):
                     model = torch.load(
                         f'/home/cq/code/manipulator/TD3/checkpoints/actor/{i}.pth')  # 'PPO/checkpoints/40.pth'
                     agent.actor_local.load_state_dict(model)
@@ -92,9 +91,9 @@ def playGame(args_, train=True, episode_count=2000):
                     result_queue.append(result)
                     eval_success_rate = sum(result_queue) / len(result_queue)
                     print(f'episode {i} result {result} path len {path_length}')
-                    vis.line(X=[i], Y=[result], win='eval result', update='append')
-                    vis.line(X=[i], Y=[path_length], win='eval path len', update='append')
-                    vis.line(X=[i], Y=[eval_success_rate * 100], win='eval success rate', update='append')
+                    vis.line(X=[i], Y=[result], win='result', update='append')
+                    vis.line(X=[i], Y=[path_length], win='path len', update='append')
+                    vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
 
     finally:
         env.end_simulation()  # This is for shutting down TORCS
@@ -114,11 +113,11 @@ if __name__ == "__main__":
     parser.add_argument('--num_segments', type=int, default=2)
     parser.add_argument('--plane_model', type=bool, default=True)
     parser.add_argument('--cc_model', type=bool, default=False)
-    parser.add_argument('--goal_set', type=str, choices=['easy', 'hard', 'super hard', 'random', ''],
+    parser.add_argument('--goal_set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
                         default='random')
     parser.add_argument('--collision_cnt', type=int, default=15)
     parser.add_argument('--scene_file', type=str, default='by_12_1.ttt')
-    parser.add_argument('--headless_mode', type=bool, default=True)
+    parser.add_argument('--headless_mode', type=bool, default=False)
 
     parser.add_argument('--train', type=bool, default=False)
     parser.add_argument('--episodes', type=int, default=5000)

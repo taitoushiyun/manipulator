@@ -147,8 +147,8 @@ class ManipulatorEnv(gym.Env):
         done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
-        # if any(info['collision_state']):
-        #     done = True
+        if any(info['collision_state']):
+            done = True
         self.last_obs = observation
         return observation, reward, done, info
 
@@ -179,9 +179,11 @@ if __name__ == '__main__':
         'reward_type': 'dense',
         'max_angles_vel': 10,  # 10degree/s
         'num_joints': 12,
+        'num_segments': 2,
+        'cc_model': False,
+        'plane_model': True,
         'goal_set': 'super hard',
         'max_episode_steps': 100,
-        'cc_model': False,
         'collision_cnt': 15,
         'scene_file': 'by_12_1.ttt',
         'headless_mode': True,
@@ -190,20 +192,22 @@ if __name__ == '__main__':
     print('env created success')
     action_ = [1, 1, 1, -1, -1, -1]
     # action_ = np.random.uniform(-1, 1, size=(6,))
-    time_a = time.time()
+
     lines = []
     for i in range(1):
         step = 0
         line = []
         obs = env.reset()
+        # print(obs[:1])
         while True:
-            # time_a = time.time()
+            time_a = time.time()
             obs, reward, done, info = env.step(action_)
-            line.append(obs[0])
-            # time_b = time.time()
+            time_b = time.time()
             # print(time_b - time_a)
+            print(obs[0])
+            line.append(obs[0])
             step += 1
-            print(step)
+            # print(step)
             # print(info['collision_state'])
             # if any(info['collision_state']):
             #     vrep.simxAddStatusbarMessage(env.clientID, 'collision detected', vrep.simx_opmode_oneshot)
@@ -211,9 +215,8 @@ if __name__ == '__main__':
             #
             #     time.sleep(100)
             if done:
-                time.sleep(5)
-                if info['collision_state']:
-                    print(f'collision detected in step {step}')
+                # if info['collision_state']:
+                #     print(f'collision detected in step {step}')
                 lines.append(line)
                 step = 0
                 break
@@ -221,6 +224,5 @@ if __name__ == '__main__':
     # for i in range(1):
     #     plt.plot(lines[i])
     # plt.show()
-    time_b = time.time()
-    print(time_b - time_a)
+
     env.end_simulation()
