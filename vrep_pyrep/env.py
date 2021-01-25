@@ -13,7 +13,7 @@ RAD2DEG = 180. / np.pi
 
 GOAL = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
         'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
-        'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10, 0, 10]}
+        'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
 
 
 class ManipulatorEnv(gym.Env):
@@ -145,10 +145,11 @@ class ManipulatorEnv(gym.Env):
         observation, info = self._get_state()
         reward = self.cal_reward(observation[self.e_pos_idx], self.goal)
         done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
+        # done = False
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
-        if any(info['collision_state']):
-            done = True
+        # if any(info['collision_state']):
+        #     done = True
         self.last_obs = observation
         return observation, reward, done, info
 
