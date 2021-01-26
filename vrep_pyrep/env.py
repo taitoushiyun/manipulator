@@ -34,19 +34,19 @@ class ManipulatorEnv(gym.Env):
         if self.plane_model and self.cc_model:
             self.joint_state_dim = 2 * self.num_segments
             mani_cls = ManipulatorCCPlane
-            self.initial_joint_positions = np.zeros((2 * self.num_segments,))
+            self.initial_joint_positions = self.initial_joint_velocities = np.zeros((2 * self.num_segments,))
         elif self.plane_model and not self.cc_model:
             self.joint_state_dim = self.num_joints
             mani_cls = ManipulatorPlane
-            self.initial_joint_positions = np.zeros((self.num_joints,))
+            self.initial_joint_positions = self.initial_joint_velocities = np.zeros((self.num_joints,))
         elif not self.plane_model and self.cc_model:
             self.joint_state_dim = 4 * self.num_segments
             mani_cls = ManipulatorCC3D
-            self.initial_joint_positions = np.zeros((2 * self.num_segments,))
+            self.initial_joint_positions = self.initial_joint_velocities = np.zeros((2 * self.num_segments,))
         elif not self.plane_model and not self.cc_model:
             self.joint_state_dim = 2 * self.num_joints
             mani_cls = Manipulator3D
-            self.initial_joint_positions = np.zeros((self.num_joints,))
+            self.initial_joint_positions = self.initial_joint_velocities = np.zeros((self.num_joints,))
         else:
             raise ValueError
 
@@ -72,8 +72,8 @@ class ManipulatorEnv(gym.Env):
         self.agent = mani_cls(num_joints=self.num_joints,
                               num_segments=self.num_segments,
                               collision_cnt=self.collision_cnt)
-        # self.agent.set_control_loop_enabled(False)
-        # self.agent.set_motor_locked_at_zero_velocity(True)
+        self.agent.set_control_loop_enabled(False)
+        self.agent.set_motor_locked_at_zero_velocity(True)
         self.agent_ee_tip = self.agent.get_tip()
         self.agent_target = Shape("target")
         self.agent_base = self.agent.get_base()
@@ -117,12 +117,15 @@ class ManipulatorEnv(gym.Env):
         return state, info
 
     def reset(self):
+        self.pr.stop()
+        self.pr.start()
         self._elapsed_steps = 0
         self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
         self.observation[self.g_pos_idx] = np.asarray(self.goal)
         self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])
         self.agent_target.set_position(self.goal)
         self.agent.set_initial_joint_positions(self.initial_joint_positions)
+        # self.agent.set_initial_joint_velocities(self.initial_joint_velocities)
         observation, _ = self._get_state()
         self.last_obs = observation
         return observation
@@ -145,11 +148,10 @@ class ManipulatorEnv(gym.Env):
         observation, info = self._get_state()
         reward = self.cal_reward(observation[self.e_pos_idx], self.goal)
         done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
-        # done = False
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
-        # if any(info['collision_state']):
-        #     done = True
+        if any(info['collision_state']):
+            done = True
         self.last_obs = observation
         return observation, reward, done, info
 

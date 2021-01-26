@@ -268,6 +268,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
     vis.line(X=[0], Y=[0], win='eval success rate', opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='eval success rate'))
     result_deque = deque(maxlen=20)
     eval_result_queue = deque(maxlen=10)
+    os.makedirs(model_dir, exist_ok=True)
 
     for i_episode in range(n_episodes):
         state = env.reset()
@@ -286,7 +287,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
             agent.learn(1)
             if done or episode_length >= max_episode_length:
                 result = 0.
-                if done and episode_length < max_episode_length:
+                if done and episode_length < max_episode_length and not any(info['collision_state']):
                     result = 1.
                 break
         result_deque.append(result)
@@ -312,7 +313,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis):
                 state = next_state
                 if done or total_len >= max_episode_length:
                     eval_result = 0
-                    if done and total_len < max_episode_length:
+                    if done and total_len < max_episode_length and not any(info['collision_state']):
                         eval_result = 1.
                     break
             eval_result_queue.append(eval_result)

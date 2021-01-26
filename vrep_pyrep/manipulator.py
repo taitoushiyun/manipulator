@@ -31,6 +31,9 @@ class ManipulatorPlane(Arm):
     def set_initial_joint_positions(self, p):
         super().set_joint_positions(p)
 
+    def set_initial_joint_velocities(self, v):
+        super().set_joint_target_velocities(v)
+
 
 class Manipulator3D(Arm):
     def __init__(self, count=0, name='manipulator', num_joints=12, num_segments=6, collision_cnt=15):
@@ -50,6 +53,9 @@ class Manipulator3D(Arm):
 
     def set_initial_joint_positions(self, p):
         super().set_joint_positions(p)
+
+    def set_initial_joint_velocities(self, v):
+        super().set_joint_target_velocities(v)
 
 
 class ManipulatorCCPlane(Arm):
@@ -111,6 +117,9 @@ class ManipulatorCCPlane(Arm):
         sim.simSetModelProperty(self._handle, prior)
         self.set_model(is_model)
 
+    def set_initial_joint_velocities(self, v):
+        self.set_joint_target_velocities(v)
+
 
 class ManipulatorCC3D(Arm):
     def __init__(self, count=0, name='manipulator', num_joints=12, num_segments=2, collision_cnt=15):
@@ -169,3 +178,6 @@ class ManipulatorCC3D(Arm):
         # Re-enable the dynamics
         sim.simSetModelProperty(self._handle, prior)
         self.set_model(is_model)
+
+    def set_initial_joint_velocities(self, v):
+        self.set_joint_target_velocities(v)

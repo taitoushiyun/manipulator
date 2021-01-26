@@ -68,36 +68,35 @@ def playGame(args_, train=True, episode_count=2000):
                      opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='success rate'))
             from _collections import deque
             result_queue = deque(maxlen=20)
-            for i in range(1800, 2000):
-                if i % 5 == 0:
-                    model = torch.load(
-                        # f'/home/cq/code/manipulator/TD3/checkpoints/actor/{i}.pth')  # 'PPO/checkpoints/40.pth'
-                        f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_10/checkpoints/actor/{i}.pth')
-                    agent.actor_local.load_state_dict(model)
+            for i in range(0, 5000):
+                # if i % 5 == 0:
+                model = torch.load(
+                    f'/home/cq/code/manipulator/TD3/checkpoints/td3_28/{i}.pth')  # 'PPO/checkpoints/40.pth'
+                    # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_18/checkpoints/actor/{i}.pth')
+                agent.actor_local.load_state_dict(model)
 
-                    state = env.reset()
-                    time.sleep(1)
-                    total_reward = 0
-                    path_length = 0
-                    for t in count():
-                        action = agent.act(state, add_noise=False)
-                        next_state, reward, done, _ = env.step(action)
-                        # time.sleep(0.05)
-                        total_reward += reward
-                        path_length += 1
-                        state = next_state
-                        if done or path_length >= args.max_episode_steps:
-                            # print(f"Episode length: {t+1}")
-                            result = 0
-                            if done and path_length < args.max_episode_steps:
-                                result = 1
-                            break
-                    result_queue.append(result)
-                    eval_success_rate = sum(result_queue) / len(result_queue)
-                    print(f'episode {i} result {result} path len {path_length}')
-                    vis.line(X=[i], Y=[result], win='result', update='append')
-                    vis.line(X=[i], Y=[path_length], win='path len', update='append')
-                    vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
+                state = env.reset()
+                total_reward = 0
+                path_length = 0
+                for t in count():
+                    action = agent.act(state, add_noise=False)
+                    next_state, reward, done, info = env.step(action)
+                    # time.sleep(0.05)
+                    total_reward += reward
+                    path_length += 1
+                    state = next_state
+                    if done or path_length >= args.max_episode_steps:
+                        # print(f"Episode length: {t+1}")
+                        result = 0
+                        if done and path_length < args.max_episode_steps and not any(info['collision_state']):
+                            result = 1
+                        break
+                result_queue.append(result)
+                eval_success_rate = sum(result_queue) / len(result_queue)
+                print(f'episode {i} result {result} path len {path_length}')
+                vis.line(X=[i], Y=[result], win='result', update='append')
+                vis.line(X=[i], Y=[path_length], win='path len', update='append')
+                vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
 
     finally:
         env.end_simulation()  # This is for shutting down TORCS
@@ -106,22 +105,22 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_28')
+    parser.add_argument('--code_version', type=str, default='td3_29')
     parser.add_argument('--vis_port', type=int, default=6016)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
     parser.add_argument('--distance_threshold', type=float, default=0.02)
     parser.add_argument('--reward_type', type=str, default='dense')
     parser.add_argument('--max_angles_vel', type=float, default=10.)
-    parser.add_argument('--num_joints', type=int, default=10)
+    parser.add_argument('--num_joints', type=int, default=12)
     parser.add_argument('--num_segments', type=int, default=2)
     parser.add_argument('--plane_model', type=bool, default=True)
     parser.add_argument('--cc_model', type=bool, default=False)
     parser.add_argument('--goal_set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
-                        default='super hard')
+                        default='random')
     parser.add_argument('--collision_cnt', type=int, default=13)
-    parser.add_argument('--scene_file', type=str, default='simple_10_1.ttt')
-    parser.add_argument('--headless_mode', type=bool, default=False)
+    parser.add_argument('--scene_file', type=str, default='simple_12_1.ttt')
+    parser.add_argument('--headless_mode', type=bool, default=True)
 
     parser.add_argument('--train', type=bool, default=False)
     parser.add_argument('--episodes', type=int, default=5000)
