@@ -68,10 +68,10 @@ def playGame(args_, train=True, episode_count=2000):
                      opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='success rate'))
             from _collections import deque
             result_queue = deque(maxlen=20)
-            for i in range(0, 5000):
+            for i in range(100):
                 # if i % 5 == 0:
                 model = torch.load(
-                    f'/home/cq/code/manipulator/TD3/checkpoints/td3_28/{i}.pth')  # 'PPO/checkpoints/40.pth'
+                    f'/home/cq/code/manipulator/TD3/checkpoints/td3_30/9999.pth')  # 'PPO/checkpoints/40.pth'
                     # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_18/checkpoints/actor/{i}.pth')
                 agent.actor_local.load_state_dict(model)
 
@@ -105,7 +105,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_29')
+    parser.add_argument('--code_version', type=str, default='td3_31')
     parser.add_argument('--vis_port', type=int, default=6016)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
@@ -120,10 +120,10 @@ if __name__ == "__main__":
                         default='random')
     parser.add_argument('--collision_cnt', type=int, default=13)
     parser.add_argument('--scene_file', type=str, default='simple_12_1.ttt')
-    parser.add_argument('--headless_mode', type=bool, default=True)
+    parser.add_argument('--headless_mode', type=bool, default=False)
 
     parser.add_argument('--train', type=bool, default=False)
-    parser.add_argument('--episodes', type=int, default=5000)
+    parser.add_argument('--episodes', type=int, default=10000)
 
     args = parser.parse_args()
     # write the selected car to configuration file
