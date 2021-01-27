@@ -77,7 +77,7 @@ class ManipulatorEnv(gym.Env):
         self.agent_ee_tip = self.agent.get_tip()
         self.agent_target = Shape("target")
         self.agent_base = self.agent.get_base()
-        # self.initial_joint_positions = self.agent.get_joint_initial_positions()
+        self.initial_config_tree = self.agent.get_configuration_tree()
 
     def _sample_goal(self):
         if self.goal_set in ['easy', 'hard', 'super hard']:
@@ -117,15 +117,13 @@ class ManipulatorEnv(gym.Env):
         return state, info
 
     def reset(self):
-        self.pr.stop()
-        self.pr.start()
+        self.pr.set_configuration_tree(self.initial_config_tree)
         self._elapsed_steps = 0
         self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
         self.observation[self.g_pos_idx] = np.asarray(self.goal)
         self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])
         self.agent_target.set_position(self.goal)
         self.agent.set_initial_joint_positions(self.initial_joint_positions)
-        # self.agent.set_initial_joint_velocities(self.initial_joint_velocities)
         observation, _ = self._get_state()
         self.last_obs = observation
         return observation
@@ -185,11 +183,11 @@ if __name__ == '__main__':
         'num_segments': 2,
         'cc_model': False,
         'plane_model': True,
-        'goal_set': 'super hard',
+        'goal_set': 'random',
         'max_episode_steps': 100,
         'collision_cnt': 15,
-        'scene_file': 'by_12_1.ttt',
-        'headless_mode': True,
+        'scene_file': 'simple_12_1.ttt',
+        'headless_mode': False,
     }
     env = ManipulatorEnv(env_config)
     print('env created success')
@@ -203,23 +201,14 @@ if __name__ == '__main__':
         obs = env.reset()
         # print(obs[:1])
         while True:
-            time_a = time.time()
+            # time_a = time.time()
             obs, reward, done, info = env.step(action_)
-            time_b = time.time()
+            # time_b = time.time()
             # print(time_b - time_a)
-            print(obs[0])
+            # print(obs[0])
             line.append(obs[0])
             step += 1
-            # print(step)
-            # print(info['collision_state'])
-            # if any(info['collision_state']):
-            #     vrep.simxAddStatusbarMessage(env.clientID, 'collision detected', vrep.simx_opmode_oneshot)
-            #     print('collision detected')
-            #
-            #     time.sleep(100)
             if done:
-                # if info['collision_state']:
-                #     print(f'collision detected in step {step}')
                 lines.append(line)
                 step = 0
                 break

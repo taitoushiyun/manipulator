@@ -81,7 +81,6 @@ def playGame(args_, train=True, episode_count=2000):
                 for t in count():
                     action = agent.act(state, add_noise=False)
                     next_state, reward, done, info = env.step(action)
-                    # time.sleep(0.05)
                     total_reward += reward
                     path_length += 1
                     state = next_state
