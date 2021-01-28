@@ -119,9 +119,9 @@ if __name__ == "__main__":
                         default='random')
     parser.add_argument('--collision_cnt', type=int, default=13)
     parser.add_argument('--scene_file', type=str, default='simple_12_1.ttt')
-    parser.add_argument('--headless_mode', type=bool, default=False)
+    parser.add_argument('--headless_mode', type=bool, default=True)
 
-    parser.add_argument('--train', type=bool, default=False)
+    parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--episodes', type=int, default=10000)
 
     args = parser.parse_args()
