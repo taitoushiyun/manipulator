@@ -71,8 +71,8 @@ def playGame(args_, train=True, episode_count=2000):
             for i in range(100):
                 # if i % 5 == 0:
                 model = torch.load(
-                    f'/home/cq/code/manipulator/TD3/checkpoints/td3_30/9999.pth')  # 'PPO/checkpoints/40.pth'
-                    # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_18/checkpoints/actor/{i}.pth')
+                    # f'/home/cq/code/manipulator/TD3/checkpoints/td3_30/9999.pth')  # 'PPO/checkpoints/40.pth'
+                    f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
                 agent.actor_local.load_state_dict(model)
 
                 state = env.reset()
@@ -119,7 +119,7 @@ if __name__ == "__main__":
                         default='super hard')
     parser.add_argument('--collision_cnt', type=int, default=13)
     parser.add_argument('--scene_file', type=str, default='simple_10_1.ttt')
-    parser.add_argument('--headless_mode', type=bool, default=False)
+    parser.add_argument('--headless_mode', type=bool, default=True)
 
     parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--episodes', type=int, default=1000)
