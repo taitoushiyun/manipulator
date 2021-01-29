@@ -148,8 +148,8 @@ class ManipulatorEnv(gym.Env):
         done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
-        # if any(info['collision_state']):
-        #     done = True
+        if any(info['collision_state']):
+            done = True
         self.last_obs = observation
         return observation, reward, done, info
 

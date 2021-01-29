@@ -23,10 +23,10 @@ LR_ACTOR = 1e-3  # learning rate of the actor
 LR_CRITIC = 1e-3  # learning rate of the critic
 UPDATE_EVERY_STEP = 2  # how often to update the target and actor networks
 RAND_START = 2000  # number of random exploration episodes at the start
-# if torch.cuda.is_available():
-#     torch.cuda.current_device()
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = 'cpu'
+if torch.cuda.is_available():
+    torch.cuda.current_device()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = 'cpu'
 
 
 class ReplayBuffer:
@@ -180,7 +180,7 @@ class TD3Agent():
             action = self.actor_local(state).cpu().data.numpy()
         if add_noise:
             # Generate a random noise
-            sigma = 1. - (1. - .05) * min(1., episode_step / 500.)
+            sigma = 1. - (1. - .05) * min(1., episode_step / 2000.)
             noise = np.random.normal(0, sigma, size=self.action_size)
             # Add noise to the action for exploration
             action = (action + noise).clip(self.min_action[0], self.max_action[0])
