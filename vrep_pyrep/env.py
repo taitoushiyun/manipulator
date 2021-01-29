@@ -12,7 +12,7 @@ DEG2RAD = np.pi / 180.
 RAD2DEG = 180. / np.pi
 
 GOAL = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
-        'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
+        'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20, 0, 0],
         'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
 
 
@@ -148,8 +148,8 @@ class ManipulatorEnv(gym.Env):
         done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
-        if any(info['collision_state']):
-            done = True
+        # if any(info['collision_state']):
+        #     done = True
         self.last_obs = observation
         return observation, reward, done, info
 
@@ -161,11 +161,14 @@ class ManipulatorEnv(gym.Env):
 
         if self.reward_type == 'sparse':
             return -(d > self.distance_threshold).astype(np.float32)
-        else:
+        elif self.reward_type == 'dense distance':
             return -d
-            # d_last = np.linalg.norm(self.last_obs[self.e_pos_idx] - self.goal, axis=-1)
-            # # print(f'reward now is {dense_reward(d)}, reward last is {dense_reward(d_last)}')
-            # return dense_reward(d) - dense_reward(d_last)
+        elif self.reward_type == 'dense potential':
+            d_last = np.linalg.norm(self.last_obs[self.e_pos_idx] - self.goal, axis=-1)
+            # print(f'reward now is {dense_reward(d)}, reward last is {dense_reward(d_last)}')
+            return dense_reward(d) - dense_reward(d_last)
+        else:
+            raise ValueError('reward type wrong')
 
     def end_simulation(self):
         self.pr.stop()
