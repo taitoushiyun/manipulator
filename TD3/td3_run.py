@@ -17,9 +17,9 @@ from TD3.logger import logger
 
 
 def playGame(args_, train=True, episode_count=2000):
-    # random.seed(0)
-    # np.random.seed(0)
-    # torch.manual_seed(0)
+    random.seed(args_.seed)
+    np.random.seed(args_.seed)
+    torch.manual_seed(args_.seed)
     reg = ''
     for key, value in vars(args).items():
         reg += str(key) + ': ' + str(value) + '\n'
@@ -39,6 +39,7 @@ def playGame(args_, train=True, episode_count=2000):
         'scene_file': args_.scene_file,
     }
     env = ManipulatorEnv(env_config)
+    env.action_space.seed(args_.seed)
     # env = gym.make('LunarLanderContinuous-v2')
 
     agent = TD3Agent(state_size=env.observation_space.shape[0],
@@ -106,6 +107,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
     parser.add_argument('--code_version', type=str, default='td3_34')
     parser.add_argument('--vis_port', type=int, default=6016)
+    parser.add_argument('--seed', type=int, default=0)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
     parser.add_argument('--distance_threshold', type=float, default=0.02)

@@ -23,9 +23,10 @@ LR_ACTOR = 1e-3  # learning rate of the actor
 LR_CRITIC = 1e-3  # learning rate of the critic
 UPDATE_EVERY_STEP = 2  # how often to update the target and actor networks
 RAND_START = 2000  # number of random exploration episodes at the start
-if torch.cuda.is_available():
-    torch.cuda.current_device()
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# if torch.cuda.is_available():
+#     torch.cuda.current_device()
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = 'cpu'
 
 
 class ReplayBuffer:

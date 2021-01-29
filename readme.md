@@ -67,6 +67,11 @@ td3_24 multi goal td3_20的retry实验
 -----------------------------td3_pyrep-----------------------------  
 td3_25 multi goal not cc_model train   pyrep version first try  
 td3_27 multi goal not cc_model train   pyrep 兼容cc版本first try  
-td3_28 multi goal not cc_model train pyrep 兼容cc版本 pr.stop+pr.start
-td3_29 eval of td3_28
-td3_30 td3_28 retry 10000 episodes
+td3_28 multi goal not cc_model train pyrep 兼容cc版本 pr.stop+pr.start  
+td3_29 eval of td3_28  
+td3_30 td3_28 retry 10000 episodes  
+修改reset方式  
+td3_31 multi goal not cc_model reward dense distance gamma=0.9  
+td3_32 multi goal not cc_model reward dense distance gamma=0.99  
+td3_33 super hard goal not cc_model reward dense distance gamma=0.9 action_noise_drop_rate 1000  
+td3_34 super hard goal not cc_model reward dense distance gamma=0.9 action_noise_drop_rate 500  
