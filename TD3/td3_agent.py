@@ -15,14 +15,6 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from itertools import count
 
-BUFFER_SIZE = int(1e7)  # replay buffer size
-BATCH_SIZE = 64  # minibatch size
-GAMMA = 0.6  # discount factor
-TAU = 5e-3  # for soft update of target parameters
-LR_ACTOR = 1e-3  # learning rate of the actor
-LR_CRITIC = 1e-3  # learning rate of the critic
-UPDATE_EVERY_STEP = 2  # how often to update the target and actor networks
-RAND_START = 2000  # number of random exploration episodes at the start
 if torch.cuda.is_available():
     torch.cuda.current_device()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -124,8 +116,10 @@ class Critic(nn.Module):
 class TD3Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, max_action, min_action, random_seed, noise=0.2, noise_std=0.1,
-                 noise_clip=0.5, noise_drop_rate=500.):
+    def __init__(self, state_size, action_size, max_action, min_action, random_seed,
+                 gamma=0.99, tau=5e-3, lr_actor=1e-3, lr_critic=1e-3, update_every_step=2, random_start=2000,
+                 noise=0.2, noise_std=0.1,
+                 noise_clip=0.5, noise_drop_rate=500., buffer_size=int(1e7), batch_size=64):
         """Initialize an Agent object.
 
         Params
@@ -143,6 +137,10 @@ class TD3Agent():
         self.action_size = action_size
         self.max_action = max_action
         self.min_action = min_action
+        self.gamma = gamma
+        self.tau = tau
+        self.update_every_step = update_every_step
+        self.random_start = random_start
         self.noise = noise
         self.noise_std = noise_std
         self.noise_clip = noise_clip
@@ -152,20 +150,20 @@ class TD3Agent():
         # Actor Network (w/ Target Network)
         self.actor_local = Actor(state_size, action_size, float(max_action[0])).to(device)
         self.actor_target = Actor(state_size, action_size, float(max_action[0])).to(device)
-        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
+        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=lr_actor)
 
         # Critic Network (w/ Target Network)
         self.critic_local1 = Critic(state_size, action_size).to(device)
         self.critic_target1 = Critic(state_size, action_size).to(device)
         self.critic_target1.load_state_dict(self.critic_local1.state_dict())
-        self.critic_optimizer1 = optim.Adam(self.critic_local1.parameters(), lr=LR_CRITIC)
+        self.critic_optimizer1 = optim.Adam(self.critic_local1.parameters(), lr=lr_critic)
 
         self.critic_local2 = Critic(state_size, action_size).to(device)
         self.critic_target2 = Critic(state_size, action_size).to(device)
         self.critic_target2.load_state_dict(self.critic_local2.state_dict())
-        self.critic_optimizer2 = optim.Adam(self.critic_local2.parameters(), lr=LR_CRITIC)
+        self.critic_optimizer2 = optim.Adam(self.critic_local2.parameters(), lr=lr_critic)
         # Replay memory
-        self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
+        self.memory = ReplayBuffer(action_size, buffer_size, batch_size, random_seed)
 
     def step(self, state, action, reward, next_state, done):
         """Save experience in replay memory"""
@@ -187,7 +185,7 @@ class TD3Agent():
         self.actor_local.train()
         return action
 
-    def learn(self, n_iteraion, gamma=GAMMA):
+    def learn(self, n_iteraion):
         """Update policy and value parameters using given batch of experience tuples.
 
         Params
@@ -196,7 +194,7 @@ class TD3Agent():
             gamma (float): discount factor
         """
 
-        if len(self.memory) >= RAND_START:
+        if len(self.memory) >= self.random_start:
             for i in range(n_iteraion):
                 state, action, reward, next_state, done = self.memory.sample()
                 # action_ = action.cpu().numpy()
@@ -217,7 +215,7 @@ class TD3Agent():
 
                 Q_targets_next = torch.min(Q1_targets_next, Q2_targets_next)
                 # Compute Q targets for current states (y_i)
-                Q_targets = reward + (gamma * Q_targets_next * (1 - done)).detach()
+                Q_targets = reward + (self.gamma * Q_targets_next * (1 - done)).detach()
                 # Compute critic loss
                 Q1_expected = self.critic_local1(state, action)
                 Q2_expected = self.critic_local2(state, action)
@@ -232,7 +230,7 @@ class TD3Agent():
                 critic_loss2.backward()
                 self.critic_optimizer2.step()
 
-                if i % UPDATE_EVERY_STEP == 0:
+                if i % self.update_every_step == 0:
                     # ---------------------------- update actor ---------------------------- #
                     # Compute actor loss
                     actions_pred = self.actor_local(state)
@@ -243,9 +241,9 @@ class TD3Agent():
                     self.actor_optimizer.step()
 
                     # ----------------------- update target networks ----------------------- #
-                    self.soft_update(self.critic_local1, self.critic_target1, TAU)
-                    self.soft_update(self.critic_local2, self.critic_target2, TAU)
-                    self.soft_update(self.actor_local, self.actor_target, TAU)
+                    self.soft_update(self.critic_local1, self.critic_target1, self.tau)
+                    self.soft_update(self.critic_local2, self.critic_target2, self.tau)
+                    self.soft_update(self.actor_local, self.actor_target, self.tau)
 
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.
@@ -282,7 +280,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         score = 0
         episode_length = 0
         for t in count():
-            if len(agent.memory) < RAND_START:
+            if len(agent.memory) < args_.random_start:
                 action = env.action_space.sample()
             else:
                 action = agent.act(state, episode_step=i_episode)
