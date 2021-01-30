@@ -107,13 +107,13 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_38')
+    parser.add_argument('--code_version', type=str, default='td3_39')
     parser.add_argument('--vis_port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
 
     parser.add_argument('--max_episode_steps', type=int, default=100)
     parser.add_argument('--distance_threshold', type=float, default=0.02)
-    parser.add_argument('--reward_type', type=str, default='dense distance')
+    parser.add_argument('--reward_type', type=str, default='dense potential')
     parser.add_argument('--max_angles_vel', type=float, default=10.)
     parser.add_argument('--num_joints', type=int, default=12)
     parser.add_argument('--num_segments', type=int, default=2)
