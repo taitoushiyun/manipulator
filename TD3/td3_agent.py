@@ -180,7 +180,7 @@ class TD3Agent():
             action = self.actor_local(state).cpu().data.numpy()
         if add_noise:
             # Generate a random noise
-            sigma = 1. - (1. - .05) * min(1., episode_step / 2000.)
+            sigma = 1. - (1. - .05) * min(1., episode_step / 500.)
             noise = np.random.normal(0, sigma, size=self.action_size)
             # Add noise to the action for exploration
             action = (action + noise).clip(self.min_action[0], self.max_action[0])

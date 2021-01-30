@@ -105,7 +105,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_35')
+    parser.add_argument('--code_version', type=str, default='td3_36')
     parser.add_argument('--vis_port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
 
@@ -115,16 +115,16 @@ if __name__ == "__main__":
     parser.add_argument('--max_angles_vel', type=float, default=10.)
     parser.add_argument('--num_joints', type=int, default=12)
     parser.add_argument('--num_segments', type=int, default=2)
-    parser.add_argument('--plane_model', type=bool, default=False)
+    parser.add_argument('--plane_model', type=bool, default=True)
     parser.add_argument('--cc_model', type=bool, default=False)
     parser.add_argument('--goal_set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
-                        default='random')
+                        default='hard')
     parser.add_argument('--collision_cnt', type=int, default=15)
     parser.add_argument('--scene_file', type=str, default='simple_12_1.ttt')
-    parser.add_argument('--headless_mode', type=bool, default=True)
+    parser.add_argument('--headless_mode', type=bool, default=False)
 
     parser.add_argument('--train', type=bool, default=True)
-    parser.add_argument('--episodes', type=int, default=10000)
+    parser.add_argument('--episodes', type=int, default=2000)
 
     args = parser.parse_args()
     # write the selected car to configuration file

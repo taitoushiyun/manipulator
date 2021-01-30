@@ -69,9 +69,12 @@ td3_25 multi goal not cc_model train   pyrep version first try
 td3_27 multi goal not cc_model train   pyrep 兼容cc版本first try  
 td3_28 multi goal not cc_model train pyrep 兼容cc版本 pr.stop+pr.start  
 td3_29 eval of td3_28  
-td3_30 td3_28 retry 10000 episodes  
+td3_30 td3_28 retry 10000 episodes  dense potential gamma=0.9 not cc_model plane model
 修改reset方式  
 td3_31 multi goal not cc_model reward dense distance gamma=0.9  
 td3_32 multi goal not cc_model reward dense distance gamma=0.99  
 td3_33 super hard goal not cc_model reward dense distance gamma=0.9 action_noise_drop_rate 1000  
 td3_34 super hard goal not cc_model reward dense distance gamma=0.9 action_noise_drop_rate 500  
+td3_35 multi goal gamma 0.9 action_noise_drop_rate 2000  reward dense potential not cc model 3D model 12 joints  
+td3_36 hard goal gamma=0.9 action_noise_drop_rate 500 reward dense potential not cc model plane model  
+td3_37 hard goal gamma=0.9 action_noise_drop_rate 500 reward dense distance not cc model plane model  
