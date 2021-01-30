@@ -45,7 +45,9 @@ def playGame(args_, train=True, episode_count=2000):
     agent = TD3Agent(state_size=env.observation_space.shape[0],
                      action_size=env.action_space.shape[0],
                      max_action=env.action_space.high,
-                     min_action=env.action_space.low, random_seed=0)
+                     min_action=env.action_space.low,
+                     random_seed=0,
+                     noise_drop_rate=args_.noise_drop_rate)
 
     try:
         # try:
@@ -105,7 +107,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_37')
+    parser.add_argument('--code_version', type=str, default='td3_38')
     parser.add_argument('--vis_port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
 
@@ -115,7 +117,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_angles_vel', type=float, default=10.)
     parser.add_argument('--num_joints', type=int, default=12)
     parser.add_argument('--num_segments', type=int, default=2)
-    parser.add_argument('--plane_model', type=bool, default=True)
+    parser.add_argument('--plane_model', type=bool, default=False)
     parser.add_argument('--cc_model', type=bool, default=False)
     parser.add_argument('--goal_set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
                         default='hard')
@@ -123,8 +125,10 @@ if __name__ == "__main__":
     parser.add_argument('--scene_file', type=str, default='simple_12_1.ttt')
     parser.add_argument('--headless_mode', type=bool, default=False)
 
+    parser.add_argument('--noise_drop_rate', type=float, default=500.)
+
     parser.add_argument('--train', type=bool, default=True)
-    parser.add_argument('--episodes', type=int, default=2000)
+    parser.add_argument('--episodes', type=int, default=1000)
 
     args = parser.parse_args()
     # write the selected car to configuration file

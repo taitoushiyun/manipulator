@@ -77,4 +77,5 @@ td3_33 super hard goal not cc_model reward dense distance gamma=0.9 action_noise
 td3_34 super hard goal not cc_model reward dense distance gamma=0.9 action_noise_drop_rate 500  
 td3_35 multi goal gamma 0.9 action_noise_drop_rate 2000  reward dense potential not cc model 3D model 12 joints  
 td3_36 hard goal gamma=0.9 action_noise_drop_rate 500 reward dense potential not cc model plane model  
-td3_37 hard goal gamma=0.9 action_noise_drop_rate 500 reward dense distance not cc model plane model  
+td3_37 hard goal gamma=0.9 action_noise_drop_rate 500 reward dense distance not cc model plane model 
+td3_38 hard goal gamma=0.9 action_noise_drop_rate 500 reward dense distance not cc model 3D model 

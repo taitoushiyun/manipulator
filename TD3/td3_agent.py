@@ -126,7 +126,7 @@ class TD3Agent():
     """Interacts with and learns from the environment."""
 
     def __init__(self, state_size, action_size, max_action, min_action, random_seed, noise=0.2, noise_std=0.1,
-                 noise_clip=0.5):
+                 noise_clip=0.5, noise_drop_rate=500.):
         """Initialize an Agent object.
 
         Params
@@ -147,6 +147,7 @@ class TD3Agent():
         self.noise = noise
         self.noise_std = noise_std
         self.noise_clip = noise_clip
+        self.noise_drop_rate = noise_drop_rate
         self.seed = random.seed(random_seed)
 
         # Actor Network (w/ Target Network)
@@ -180,7 +181,7 @@ class TD3Agent():
             action = self.actor_local(state).cpu().data.numpy()
         if add_noise:
             # Generate a random noise
-            sigma = 1. - (1. - .05) * min(1., episode_step / 500.)
+            sigma = 1. - (1. - .05) * min(1., episode_step / self.noise_drop_rate)
             noise = np.random.normal(0, sigma, size=self.action_size)
             # Add noise to the action for exploration
             action = (action + noise).clip(self.min_action[0], self.max_action[0])
