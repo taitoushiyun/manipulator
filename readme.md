@@ -81,4 +81,5 @@ td3_37 hard goal gamma=0.9 action_noise_drop_rate 500 reward dense distance not 
 td3_38 hard goal gamma=0.9 action_noise_drop_rate 500 reward dense distance not cc model 3D model  
 td3_39 hard goal gamma=0.9 action_noise-drop_rate 500 reward dense potential not cc model 3D model  
 td3_40 hard goal gamma=0.99 action_noise_drop_rate 500 reward dense potential not cc model 3D model  
-td3_41 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model
+td3_41 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model  
+td3_42 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model  
