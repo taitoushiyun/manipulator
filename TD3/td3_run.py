@@ -107,7 +107,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_39')
+    parser.add_argument('--code_version', type=str, default='td3_40')
     parser.add_argument('--vis_port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
 
