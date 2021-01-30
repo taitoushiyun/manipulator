@@ -26,7 +26,6 @@ RAND_START = 2000  # number of random exploration episodes at the start
 if torch.cuda.is_available():
     torch.cuda.current_device()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# device = 'cpu'
 
 
 class ReplayBuffer:
@@ -200,15 +199,15 @@ class TD3Agent():
         if len(self.memory) >= RAND_START:
             for i in range(n_iteraion):
                 state, action, reward, next_state, done = self.memory.sample()
-
-                action_ = action.cpu().numpy()
+                # action_ = action.cpu().numpy()
 
                 # ---------------------------- update critic ---------------------------- #
                 # Get predicted next-state actions and Q values from target models
                 actions_next = self.actor_target(next_state)
 
                 # Generate a random noise
-                noise = torch.FloatTensor(action_).data.normal_(0, self.noise).to(device)
+                # noise = torch.FloatTensor(action_).data.normal_(0, self.noise).to(device)
+                noise = torch.normal(torch.zeros_like(actions_next), self.noise).to(device)
                 noise = noise.clamp(-self.noise_clip, self.noise_clip)
                 actions_next = (actions_next + noise).clamp(self.min_action[0].astype(float),
                                                             self.max_action[0].astype(float))
