@@ -80,8 +80,8 @@ def playGame(args_, train=True, episode_count=2000):
             for i in range(100):
                 # if i % 5 == 0:
                 model = torch.load(
-                    # f'/home/cq/code/manipulator/TD3/checkpoints/td3_30/9999.pth')  # 'PPO/checkpoints/40.pth'
-                    f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
+                    f'/home/cq/code/manipulator/TD3/checkpoints/td3_44/9999.pth')  # 'PPO/checkpoints/40.pth'
+                    # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
                 agent.actor_local.load_state_dict(model)
 
                 state = env.reset()
@@ -113,7 +113,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_44')
+    parser.add_argument('--code_version', type=str, default='td3_46')
     parser.add_argument('--vis_port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
     #  TD3 config
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr-critic', type=float, default=1e-3)
     parser.add_argument('--update-every-step', type=int, default=2)
     parser.add_argument('--random-start', type=int, default=2000)
-    parser.add_argument('--noise-decay-period', type=float, default=1000.)
+    parser.add_argument('--noise-decay-period', type=float, default=4000.)
     # env config
     parser.add_argument('--max_episode_steps', type=int, default=100)
     parser.add_argument('--distance_threshold', type=float, default=0.02)
