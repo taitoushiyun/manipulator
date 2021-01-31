@@ -1,5 +1,4 @@
 # reference: https://raw.githubusercontent.com/henry32144/TD3-Pytorch/master/BipedalWalkerV2.ipynb
-from TD3.logger import logger
 import gym
 import copy
 import random
@@ -14,6 +13,9 @@ import os
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from itertools import count
+import logging
+
+logger = logging.getLogger('mani')
 
 if torch.cuda.is_available():
     torch.cuda.current_device()

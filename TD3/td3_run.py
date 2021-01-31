@@ -13,7 +13,41 @@ from tqdm import tqdm
 import json
 from itertools import count
 import gym
-from TD3.logger import logger
+
+
+def get_logger(code_version):
+    import time
+    import logging
+    import os
+    import sys
+
+    main_dir = os.path.abspath(os.path.dirname(__file__))
+    log_dir = os.path.join(main_dir, 'log')
+    sub_log_dir = os.path.join(log_dir, sys.argv[0].split('.')[0])
+    os.makedirs(sub_log_dir, exist_ok=True)
+    log_name = code_version
+    file_name = os.path.join(sub_log_dir, log_name + '.log')
+    if os.path.exists(file_name):
+        try:
+            os.remove(file_name)
+        except:
+            pass
+
+    logger = logging.getLogger('mani')
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(fmt='%(asctime)s [%(filename)s][line:%(lineno)d][%(levelname)s] %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
+    fh = logging.FileHandler(file_name)
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    ch.setFormatter(formatter)
+
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+    return logger
 
 
 def playGame(args_, train=True, episode_count=2000):
@@ -113,7 +147,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_46')
+    parser.add_argument('--code_version', type=str, default='td3_47')
     parser.add_argument('--vis_port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
     #  TD3 config
@@ -146,7 +180,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     # write the selected car to configuration file
-
+    logger = get_logger(args.code_version)
     playGame(args, args.train, args.episodes)
 
 
