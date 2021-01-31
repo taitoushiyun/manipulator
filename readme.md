@@ -85,5 +85,7 @@ td3_41 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not
 td3_42 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model  
 td3_43 super hard goal gamma=0.6 noise_decay_period 500 reward dense potential not cc model 3D model  
 td3_44 random goal gamma=0.6 noise_decay_period 1000 reward dense potential not cc model 3D model
-td3_44 random goal gamma=0.6 noise_decay_period 4000 reward dense potential not cc model 3D model
+td3_46 random goal gamma=0.6 noise_decay_period 4000 reward dense potential not cc model 3D model
+td3_45 hard goal gamma=0.9 noise_decay_period 1000 reward sparse not cc model 3D model
+
 
