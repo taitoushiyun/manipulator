@@ -1,5 +1,5 @@
 import numpy as np
-from ReplayBuffers.replay_buffer import ReplayBuffer
+from SAC_Agent.ReplayBuffers.replay_buffer import ReplayBuffer
 
 
 class SimpleReplayBuffer(ReplayBuffer):

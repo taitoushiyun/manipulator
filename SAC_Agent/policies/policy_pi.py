@@ -1,8 +1,8 @@
 import numpy as np
 import torch
 from torch import nn as nn
-from policies.networks import Policy, ExplorationPolicy, Mlp
-from policies.distribution import TanhNormal
+from SAC_Agent.policies.networks import Policy, ExplorationPolicy, Mlp
+from SAC_Agent.policies.distribution import TanhNormal
 
 
 LOG_SIG_MAX = 2

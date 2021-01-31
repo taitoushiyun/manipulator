@@ -2,11 +2,11 @@ import numpy as np
 import time
 import torch
 import gym
-from policies.policy_pi import TanhGaussianPolicy
-from ReplayBuffers.simple_sampler import SimpleSampler
-from ReplayBuffers.simple_replay_buffer import EnvReplayBuffer
-from policies.value_functions import VFunction, QFunction
-from algorithms.twin_sac_algorithm import SAC
+from SAC_Agent.policies.policy_pi import TanhGaussianPolicy
+from SAC_Agent.ReplayBuffers.simple_sampler import SimpleSampler
+from SAC_Agent.ReplayBuffers.simple_replay_buffer import EnvReplayBuffer
+from SAC_Agent.policies.value_functions import VFunction, QFunction
+from SAC_Agent.algorithms.twin_sac_algorithm import SAC
 import matplotlib.pyplot as plt
 import pickle
 
@@ -30,7 +30,7 @@ def training_process():
         'num_train_repeat': 1,
         'sampler': sampler
     }
-    sac_agent = SAC(base_kwargs, env, policy_pi, pooling, Q1_fn, Q2_fn, V_fn, use_automatic_entropy_tuning=True,
+    sac_agent = SAC(base_kwargs, env, policy_pi, pooling, Q1_fn, Q2_fn, V_fn, use_automatic_entropy_tuning=False,
                     policy_update_period=2)               # policy_update_period=5, target_update_period=5
     sac_agent.train()
 

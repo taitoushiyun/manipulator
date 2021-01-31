@@ -5,8 +5,8 @@ from collections import OrderedDict
 from torch import nn as nn
 from torch.autograd import Variable
 
-from pytorch_core import pytorch_util as ptu
-from pytorch_core.serializable import Serializable
+from SAC_Agent.pytorch_core import pytorch_util as ptu
+from SAC_Agent.pytorch_core.serializable import Serializable
 
 
 class PyTorchModule(nn.Module, Serializable):
