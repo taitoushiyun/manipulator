@@ -87,13 +87,15 @@ td3_43 super hard goal gamma=0.6 noise_decay_period 500 reward dense potential n
 td3_44 random goal gamma=0.6 noise_decay_period 1000 reward dense potential not cc model 3D model  
 td3_46 random goal gamma=0.6 noise_decay_period 4000 reward dense potential not cc model 3D model  
 td3_45 hard goal gamma=0.9 noise_decay_period 1000 reward sparse not cc model 3D model  
-td3_47 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model
+td3_47 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model
 actor [64, 64, 32, 32],  ciritc [64, 64]  
-td3_48 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model
+td3_48 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model
 actor [100, 100],  ciritc [64, 64]  
-td3_49 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model
+td3_49 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model
 actor [100, 100],  ciritc [32, 32]  
-td3_50 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model
+td3_50 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model
+actor [64, 64],  ciritc [64, 64]  
+td3_51 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model
 actor [64, 64],  ciritc [64, 64]  
 
 

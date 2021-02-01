@@ -154,8 +154,8 @@ if __name__ == "__main__":
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
     #  TD3 config
-    parser.add_argument('--actor-hidden', type=list, default=[100, 100])
-    parser.add_argument('--critic-hidden', type=list, default=[100, 100])
+    parser.add_argument('--actor-hidden', type=list, default=[64, 64])
+    parser.add_argument('--critic-hidden', type=list, default=[64, 64])
     parser.add_argument('--buffer-size', type=int, default=int(1e7))
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--gamma', type=float, default=0.6)
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=100)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
-    parser.add_argument('--reward-type', type=str, default='dense potential')
+    parser.add_argument('--reward-type', type=str, default='dense distance')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
     parser.add_argument('--num-joints', type=int, default=12)
     parser.add_argument('--num-segments', type=int, default=2)
@@ -178,7 +178,7 @@ if __name__ == "__main__":
                         default='hard')
     parser.add_argument('--collision-cnt', type=int, default=15)
     parser.add_argument('--scene-file', type=str, default='simple_12_1.ttt')
-    parser.add_argument('--headless-mode', type=bool, default=True)
+    parser.add_argument('--headless-mode', type=bool, default=False)
 
     parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--load-model', type=str, default=None)
