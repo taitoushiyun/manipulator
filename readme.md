@@ -99,5 +99,7 @@ td3_51 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not 
 actor [64, 64],  ciritc [64, 64]  
 td3_52 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model
 actor [100, 100],  ciritc [64, 64]    done change
+td3_53 hard goal gamma=0.99 action_noise_drop_rate 500 reward dense distance not cc model 3D model
+actor [100, 100],  ciritc [64, 64]    done change
 
 
