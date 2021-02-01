@@ -150,11 +150,11 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code-version', type=str, default='td3_51')
+    parser.add_argument('--code-version', type=str, default='td3_52')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
     #  TD3 config
-    parser.add_argument('--actor-hidden', type=list, default=[64, 64])
+    parser.add_argument('--actor-hidden', type=list, default=[100, 100])
     parser.add_argument('--critic-hidden', type=list, default=[64, 64])
     parser.add_argument('--buffer-size', type=int, default=int(1e7))
     parser.add_argument('--batch-size', type=int, default=64)
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=100)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
-    parser.add_argument('--reward-type', type=str, default='dense distance')
+    parser.add_argument('--reward-type', type=str, default='dense potential')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
     parser.add_argument('--num-joints', type=int, default=12)
     parser.add_argument('--num-segments', type=int, default=2)
