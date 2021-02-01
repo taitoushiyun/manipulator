@@ -116,7 +116,7 @@ def playGame(args_, train=True, episode_count=2000):
             for i in range(100):
                 # if i % 5 == 0:
                 model = torch.load(
-                    f'/home/cq/code/manipulator/TD3/checkpoints/td3_46/9999.pth')  # 'PPO/checkpoints/40.pth'
+                    f'/home/cq/code/manipulator/TD3/checkpoints/td3_49/999.pth')  # 'PPO/checkpoints/40.pth'
                     # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
                 agent.actor_local.load_state_dict(model)
 
@@ -126,6 +126,7 @@ def playGame(args_, train=True, episode_count=2000):
                 for t in count():
                     action = agent.act(state, add_noise=False)
                     next_state, reward, done, info = env.step(action)
+                    time.sleep(0.1)
                     total_reward += reward
                     path_length += 1
                     state = next_state
@@ -149,12 +150,12 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_49')
+    parser.add_argument('--code_version', type=str, default='td3_50')
     parser.add_argument('--vis_port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
     #  TD3 config
-    parser.add_argument('--actor-hidden', type=list, default=[100, 100])
-    parser.add_argument('--critic-hidden', type=list, default=[32, 32])
+    parser.add_argument('--actor-hidden', type=list, default=[64, 64])
+    parser.add_argument('--critic-hidden', type=list, default=[64, 64])
     parser.add_argument('--buffer-size', type=int, default=int(1e7))
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--gamma', type=float, default=0.6)

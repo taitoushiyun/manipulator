@@ -296,7 +296,6 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
     else:
         start_episode = 0
     for i_episode in range(start_episode, n_episodes):
-        time_a = time.time()
         state = env.reset()
         score = 0
         episode_length = 0
@@ -360,5 +359,4 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
                     vis.line(X=[i_episode], Y=[100 * (eval_score - env.max_rewards)], win='eval reward', update='append')
                 if args_.reward_type == 'dense distance':
                     vis.line(X=[i_episode], Y=[eval_score], win='eval reward', update='append')
-        time_b = time.time()
-        print(time_b - time_a)
+
