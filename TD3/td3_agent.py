@@ -14,6 +14,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from itertools import count
 import logging
+import time
 
 logger = logging.getLogger('mani')
 
@@ -65,7 +66,7 @@ class ReplayBuffer:
 class Actor(nn.Module):
     """Actor (Policy) Model."""
 
-    def __init__(self, state_size, action_size, max_action):
+    def __init__(self, state_size, action_size, actor_hidden, max_action):
         """Initialize parameters and build model.
         Params
         ======
@@ -76,26 +77,28 @@ class Actor(nn.Module):
             fc2_units (int): Number of nodes in second hidden layer
         """
         super(Actor, self).__init__()
-        self.mlp = nn.Sequential(nn.Linear(state_size, 64),
-                                 nn.ReLU(),
-                                 nn.Linear(64, 64),
-                                 nn.ReLU(),
-                                 nn.Linear(64, 32),
-                                 nn.ReLU(),
-                                 nn.Linear(32, 32),
-                                 nn.ReLU(),
-                                 nn.Linear(32, action_size))
+        self.actor_fcs = []
+        actor_in_size = state_size
+        for i, actor_next_size in enumerate(actor_hidden):
+            actor_fc = nn.Linear(actor_in_size, actor_next_size)
+            actor_in_size = actor_next_size
+            self.__setattr__("actor_fc_{}".format(i), actor_fc)
+            self.actor_fcs.append(actor_fc)
+        self.actor_last = nn.Linear(actor_in_size, action_size)
         self.max_action = max_action
 
     def forward(self, state):
         """Build an actor (policy) network that maps states -> actions."""
-        return self.max_action * torch.tanh(self.mlp(state))
+        h = state
+        for fc in self.actor_fcs:
+            h = torch.relu(fc(h))
+        return self.max_action * torch.tanh(self.actor_last(h))
 
 
 class Critic(nn.Module):
     """Critic (Value) Model."""
 
-    def __init__(self, state_size, action_size, fc1_units=64, fc2_units=64):
+    def __init__(self, state_size, action_size, critic_hidden):
         """Initialize parameters and build model.
         Params
         ======
@@ -105,27 +108,31 @@ class Critic(nn.Module):
             fc2_units (int): Number of nodes in the second hidden layer
         """
         super(Critic, self).__init__()
-        self.fc1 = nn.Linear(state_size + action_size, fc1_units)
-        self.fc2 = nn.Linear(fc1_units, fc2_units)
-        self.fc3 = nn.Linear(fc2_units, 1)
+        self.critic_fcs = []
+        critic_in_size = state_size + action_size
+        for i, critic_next_size in enumerate(critic_hidden):
+            critic_fc = nn.Linear(critic_in_size, critic_next_size)
+            critic_in_size = critic_next_size
+            self.__setattr__("critic_fc_{}".format(i), critic_fc)
+            self.critic_fcs.append(critic_fc)
+        self.critic_last = nn.Linear(critic_in_size, 1)
 
     def forward(self, state, action):
         """Build a critic (value) network that maps (state, action) pairs -> Q-values."""
         state_action = torch.cat([state, action], dim=1)
-        xs = F.relu(self.fc1(state_action))
-        x = F.relu(self.fc2(xs))
-        x = self.fc3(x)
-
-        return x
+        h = state_action
+        for fc in self.critic_fcs:
+            h = torch.relu(fc(h))
+        return self.critic_last(h)
 
 
 class TD3Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, max_action, min_action, random_seed,
+    def __init__(self, state_size, action_size, max_action, min_action, actor_hidden, critic_hidden, random_seed,
                  gamma=0.99, tau=5e-3, lr_actor=1e-3, lr_critic=1e-3, update_every_step=2, random_start=2000,
-                 noise=0.2, noise_std=0.1,
-                 noise_clip=0.5, noise_drop_rate=500., buffer_size=int(1e7), batch_size=64):
+                 noise=0.2, noise_std=0.1, noise_clip=0.5, noise_drop_rate=500.,
+                 buffer_size=int(1e7), batch_size=64):
         """Initialize an Agent object.
 
         Params
@@ -154,18 +161,18 @@ class TD3Agent():
         self.seed = random.seed(random_seed)
 
         # Actor Network (w/ Target Network)
-        self.actor_local = Actor(state_size, action_size, float(max_action[0])).to(device)
-        self.actor_target = Actor(state_size, action_size, float(max_action[0])).to(device)
+        self.actor_local = Actor(state_size, action_size, actor_hidden, float(max_action[0])).to(device)
+        self.actor_target = Actor(state_size, action_size, actor_hidden, float(max_action[0])).to(device)
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=lr_actor)
 
         # Critic Network (w/ Target Network)
-        self.critic_local1 = Critic(state_size, action_size).to(device)
-        self.critic_target1 = Critic(state_size, action_size).to(device)
+        self.critic_local1 = Critic(state_size, action_size, critic_hidden).to(device)
+        self.critic_target1 = Critic(state_size, action_size, critic_hidden).to(device)
         self.critic_target1.load_state_dict(self.critic_local1.state_dict())
         self.critic_optimizer1 = optim.Adam(self.critic_local1.parameters(), lr=lr_critic)
 
-        self.critic_local2 = Critic(state_size, action_size).to(device)
-        self.critic_target2 = Critic(state_size, action_size).to(device)
+        self.critic_local2 = Critic(state_size, action_size, critic_hidden).to(device)
+        self.critic_target2 = Critic(state_size, action_size, critic_hidden).to(device)
         self.critic_target2.load_state_dict(self.critic_local2.state_dict())
         self.critic_optimizer2 = optim.Adam(self.critic_local2.parameters(), lr=lr_critic)
         # Replay memory
@@ -281,7 +288,15 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
     eval_result_queue = deque(maxlen=10)
     os.makedirs(model_dir, exist_ok=True)
 
-    for i_episode in range(n_episodes):
+    if args_.load_model is not None:
+        model = torch.load(args_.load_model)
+        agent.actor_local.load_state_dict(model.state_dict())
+        agent.actor_target.load_state_dict(model.state_dict())
+        start_episode = int(args_.load_model.split('/')[-1].split('.')[0])
+    else:
+        start_episode = 0
+    for i_episode in range(start_episode, n_episodes):
+        time_a = time.time()
         state = env.reset()
         score = 0
         episode_length = 0
@@ -345,4 +360,5 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
                     vis.line(X=[i_episode], Y=[100 * (eval_score - env.max_rewards)], win='eval reward', update='append')
                 if args_.reward_type == 'dense distance':
                     vis.line(X=[i_episode], Y=[eval_score], win='eval reward', update='append')
-
+        time_b = time.time()
+        print(time_b - time_a)

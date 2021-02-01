@@ -80,6 +80,8 @@ def playGame(args_, train=True, episode_count=2000):
                      action_size=env.action_space.shape[0],
                      max_action=env.action_space.high,
                      min_action=env.action_space.low,
+                     actor_hidden=args_.actor_hidden,
+                     critic_hidden=args_.critic_hidden,
                      random_seed=0,
                      gamma=args_.gamma,
                      tau=args_.tau,
@@ -147,10 +149,12 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code_version', type=str, default='td3_48')
+    parser.add_argument('--code_version', type=str, default='td3_49')
     parser.add_argument('--vis_port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
     #  TD3 config
+    parser.add_argument('--actor-hidden', type=list, default=[100, 100])
+    parser.add_argument('--critic-hidden', type=list, default=[32, 32])
     parser.add_argument('--buffer-size', type=int, default=int(1e7))
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--gamma', type=float, default=0.6)
@@ -158,8 +162,8 @@ if __name__ == "__main__":
     parser.add_argument('--lr-actor', type=float, default=1e-3)
     parser.add_argument('--lr-critic', type=float, default=1e-3)
     parser.add_argument('--update-every-step', type=int, default=2)
-    parser.add_argument('--random-start', type=int, default=10000)
-    parser.add_argument('--noise-decay-period', type=float, default=4000.)
+    parser.add_argument('--random-start', type=int, default=2000)
+    parser.add_argument('--noise-decay-period', type=float, default=500.)
     # env config
     parser.add_argument('--max_episode_steps', type=int, default=100)
     parser.add_argument('--distance_threshold', type=float, default=0.02)
@@ -170,13 +174,14 @@ if __name__ == "__main__":
     parser.add_argument('--plane_model', type=bool, default=False)
     parser.add_argument('--cc_model', type=bool, default=False)
     parser.add_argument('--goal_set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
-                        default='random')
+                        default='hard')
     parser.add_argument('--collision_cnt', type=int, default=15)
     parser.add_argument('--scene_file', type=str, default='simple_12_1.ttt')
-    parser.add_argument('--headless_mode', type=bool, default=True)
+    parser.add_argument('--headless_mode', type=bool, default=False)
 
     parser.add_argument('--train', type=bool, default=True)
-    parser.add_argument('--episodes', type=int, default=10000)
+    parser.add_argument('--load-model', type=str, default=None)
+    parser.add_argument('--episodes', type=int, default=1000)
 
     args = parser.parse_args()
     # write the selected car to configuration file
