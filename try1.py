@@ -3,8 +3,10 @@ import numpy as np
 
 from matplotlib import pyplot as plt
 from vrep_con.dh_convert import DHModel
-from vrep_con.vrep_utils import DEG2RAD
 import time
+
+DEG2RAD = np.pi / 180.
+RAD2DEG = 180. / np.pi
 
 '''
 45度均匀采样的平面样本分布
