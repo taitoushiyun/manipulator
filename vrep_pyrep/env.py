@@ -52,7 +52,7 @@ class ManipulatorEnv(gym.Env):
         else:
             raise ValueError
 
-        self.state_dim = self.joint_state_dim + 12  # EE_point_position, EE_point_vel, goal_position, base_position
+        self.state_dim = self.joint_state_dim + 9  # EE_point_position, EE_point_vel, goal_position, base_position
         self.action_dim = self.joint_state_dim // 2
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_dim,), dtype=np.float32)
         self.action_space = spaces.Box(low=-1.0, high=1, shape=(self.action_dim,), dtype=np.float32)
@@ -103,21 +103,21 @@ class ManipulatorEnv(gym.Env):
 
     def _get_state(self):
         state = np.zeros(self.state_dim)
-        state[self.j_ang_idx] = np.asarray(self.agent.get_joint_positions())
-        state[self.j_vel_idx] = np.asarray(self.agent.get_joint_velocities())
-        # e_pos = np.asarray(self.agent_ee_tip.get_position())
-        # state[self.e_pos_idx] = np.asarray([(e_pos[0]-0.4)/0.4,
-        #                                     e_pos[1],
-        #                                     e_pos[2]-1.])
-        # state[self.e_vel_idx] = np.asarray(self.agent_ee_tip.get_velocity()[0]) * 2
-        # g_pos = self.observation[self.g_pos_idx]
-        # state[self.g_pos_idx] = np.asarray([(g_pos[0]-0.4)/0.4,
-        #                                     g_pos[1],
-        #                                     g_pos[2]-1.])
-        state[self.e_pos_idx] = np.asarray(self.agent_ee_tip.get_position())
-        state[self.e_vel_idx] = np.asarray(self.agent_ee_tip.get_velocity()[0])
-        state[self.g_pos_idx] = self.observation[self.g_pos_idx]
-        state[self.b_pos_idx] = self.observation[self.b_pos_idx]
+        state[self.j_ang_idx] = np.asarray(self.agent.get_joint_positions()) * RAD2DEG / 90.
+        state[self.j_vel_idx] = np.asarray(self.agent.get_joint_velocities()) * RAD2DEG / 10.
+        e_pos = np.asarray(self.agent_ee_tip.get_position())
+        state[self.e_pos_idx] = np.asarray([(e_pos[0]-0.4)/0.4,
+                                            e_pos[1],
+                                            e_pos[2]-1.])
+        state[self.e_vel_idx] = np.asarray(self.agent_ee_tip.get_velocity()[0]) * 2
+        g_pos = self.observation[self.g_pos_idx]
+        state[self.g_pos_idx] = np.asarray([(g_pos[0]-0.4)/0.4,
+                                            g_pos[1],
+                                            g_pos[2]-1.])
+        # state[self.e_pos_idx] = np.asarray(self.agent_ee_tip.get_position())
+        # state[self.e_vel_idx] = np.asarray(self.agent_ee_tip.get_velocity()[0])
+        # state[self.g_pos_idx] = self.observation[self.g_pos_idx]
+        # state[self.b_pos_idx] = self.observation[self.b_pos_idx]
         # observation = np.concatenate([self.agent.get_joint_positions(),
         #                               self.agent.get_joint_velocities(),
         #                               self.agent_ee_tip.get_position(),
@@ -132,7 +132,7 @@ class ManipulatorEnv(gym.Env):
         self._elapsed_steps = 0
         self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
         self.observation[self.g_pos_idx] = np.asarray(self.goal)
-        self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])
+        # self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])
         self.agent_target.set_position(self.goal)
         self.agent.set_initial_joint_positions(self.initial_joint_positions)
         observation, _ = self._get_state()
@@ -155,8 +155,11 @@ class ManipulatorEnv(gym.Env):
         self.agent.set_joint_target_velocities(action)  # Execute action on arm
         self.pr.step()  # Step the physics simulation
         observation, info = self._get_state()
-        reward = self.cal_reward(observation[self.e_pos_idx], self.goal)
-        done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
+        achieved_goal = np.asarray([observation[self.e_pos_idx][0] * 0.4 + 0.4,
+                                    observation[self.e_pos_idx][1],
+                                    observation[self.e_pos_idx][2] + 1.])
+        reward = self.cal_reward(achieved_goal, self.goal)
+        done = np.linalg.norm(achieved_goal - self.goal, axis=-1) <= self.distance_threshold
         # if done:
         #     reward += 100
         #     return observation, reward, done, info
@@ -177,7 +180,10 @@ class ManipulatorEnv(gym.Env):
         elif self.reward_type == 'dense distance':
             return -d
         elif self.reward_type == 'dense potential':
-            d_last = np.linalg.norm(self.last_obs[self.e_pos_idx] - self.goal, axis=-1)
+            last_achieved_goal = np.asarray([self.last_obs[self.e_pos_idx][0] * 0.4 + 0.4,
+                                             self.last_obs[self.e_pos_idx][1],
+                                             self.last_obs[self.e_pos_idx][2] + 1.])
+            d_last = np.linalg.norm(last_achieved_goal - self.goal, axis=-1)
             # print(f'reward now is {dense_reward(d)}, reward last is {dense_reward(d_last)}')
             return dense_reward(d) - dense_reward(d_last)
         else:

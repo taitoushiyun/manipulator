@@ -120,11 +120,15 @@ actor [128, 128],  critic [64, 64]
 td3_63 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
 actor [128, 128],  critic [64, 64] 模型最大关节角度50度  
 td3_64 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
-actor [128, 128],  critic [64, 64] 状态近似归一化  
+actor [128, 128],  critic [64, 64] 状态近似归一化  base_pos bug 全为0  
 td3_65 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
-actor [128, 128],  critic [64, 64] 状态归一化
+actor [128, 128],  critic [64, 64] 状态归一化  失败  
 td3_66 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
 actor [128, 128],  critic [64, 64] 状态近似归一化  
+td3_67 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
+actor [128, 128],  critic [64, 64] 状态归一化，包括末端位置 和速度
+td3_68 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
+actor [128, 128],  critic [64, 64] 关节角度角速度归一化  
 
  
 
