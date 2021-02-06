@@ -154,7 +154,7 @@ if __name__ == "__main__":
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
     #  TD3 config
-    parser.add_argument('--actor-hidden', type=list, default=[100, 100])
+    parser.add_argument('--actor-hidden', type=list, default=[128, 128])
     parser.add_argument('--critic-hidden', type=list, default=[64, 64])
     parser.add_argument('--buffer-size', type=int, default=int(1e7))
     parser.add_argument('--batch-size', type=int, default=64)
@@ -175,7 +175,7 @@ if __name__ == "__main__":
     parser.add_argument('--plane-model', type=bool, default=False)
     parser.add_argument('--cc-model', type=bool, default=False)
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
-                        default='hard')
+                        default='super hard')
     parser.add_argument('--collision-cnt', type=int, default=15)
     parser.add_argument('--scene-file', type=str, default='simple_12_1.ttt')
     parser.add_argument('--headless-mode', type=bool, default=True)

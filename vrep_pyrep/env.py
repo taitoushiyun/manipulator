@@ -146,7 +146,6 @@ class ManipulatorEnv(gym.Env):
         self.agent.set_joint_target_velocities(action)  # Execute action on arm
         self.pr.step()  # Step the physics simulation
         observation, info = self._get_state()
-        self.last_obs = observation
         reward = self.cal_reward(observation[self.e_pos_idx], self.goal)
         done = np.linalg.norm(observation[self.e_pos_idx] - self.goal, axis=-1) <= self.distance_threshold
         # if done:
@@ -156,6 +155,7 @@ class ManipulatorEnv(gym.Env):
             done = True
         if any(info['collision_state']):
             done = True
+        self.last_obs = observation
         return observation, reward, done, info
 
     def cal_reward(self, achieved_goal, goal):
