@@ -123,6 +123,8 @@ td3_64 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not
 actor [128, 128],  critic [64, 64] 状态近似归一化  
 td3_65 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
 actor [128, 128],  critic [64, 64] 状态归一化
+td3_66 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
+actor [128, 128],  critic [64, 64] 状态近似归一化  
 
  
 
