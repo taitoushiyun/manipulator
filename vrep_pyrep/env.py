@@ -52,7 +52,7 @@ class ManipulatorEnv(gym.Env):
         else:
             raise ValueError
 
-        self.state_dim = self.joint_state_dim + 12  # EE_point_position, EE_point_vel, goal_position, base_position
+        self.state_dim = self.joint_state_dim + 9  # EE_point_position, EE_point_vel, goal_position, base_position
         self.action_dim = self.joint_state_dim // 2
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_dim,), dtype=np.float32)
         self.action_space = spaces.Box(low=-1.0, high=1, shape=(self.action_dim,), dtype=np.float32)
@@ -61,7 +61,7 @@ class ManipulatorEnv(gym.Env):
         self.e_pos_idx = range(self.joint_state_dim, self.joint_state_dim + 3)
         self.e_vel_idx = range(self.joint_state_dim + 3, self.joint_state_dim + 6)
         self.g_pos_idx = range(self.joint_state_dim + 6, self.joint_state_dim + 9)
-        self.b_pos_idx = range(self.joint_state_dim + 9, self.joint_state_dim + 12)
+        # self.b_pos_idx = range(self.joint_state_dim + 9, self.joint_state_dim + 12)
 
         self.dh_model = DHModel(self.num_joints)
         self.observation = np.zeros((self.state_dim,))
@@ -103,12 +103,22 @@ class ManipulatorEnv(gym.Env):
 
     def _get_state(self):
         state = np.zeros(self.state_dim)
-        state[self.j_ang_idx] = np.asarray(self.agent.get_joint_positions()) * RAD2DEG
-        state[self.j_vel_idx] = np.asarray(self.agent.get_joint_velocities()) * RAD2DEG
-        state[self.e_pos_idx] = np.asarray(self.agent_ee_tip.get_position())
-        state[self.e_vel_idx] = np.asarray(self.agent_ee_tip.get_velocity()[0])
-        state[self.g_pos_idx] = self.observation[self.g_pos_idx]
-        state[self.b_pos_idx] = self.observation[self.b_pos_idx]
+        state[self.j_ang_idx] = np.asarray(self.agent.get_joint_positions()) * RAD2DEG / 90.
+        state[self.j_vel_idx] = np.asarray(self.agent.get_joint_velocities()) * RAD2DEG / 10.
+        e_pos = np.asarray(self.agent_ee_tip.get_position())
+        state[self.e_pos_idx] = np.asarray([(e_pos[0]-0.4)/0.4,
+                                            e_pos[1],
+                                            e_pos[2]-1.])
+        state[self.e_vel_idx] = np.asarray(self.agent_ee_tip.get_velocity()[0]) * 2
+        g_pos = self.observation[self.g_pos_idx]
+        state[self.g_pos_idx] = np.asarray([(g_pos[0]-0.4)/0.4,
+                                            g_pos[1],
+                                            g_pos[2]-1.])
+        # state[self.e_pos_idx] = np.asarray(self.agent_ee_tip.get_position())
+        # state[self.e_vel_idx] = np.asarray(self.agent_ee_tip.get_velocity()[0])
+        # state[self.g_pos_idx] = self.observation[self.g_pos_idx]
+
+        # state[self.b_pos_idx] = self.observation[self.b_pos_idx]
         # observation = np.concatenate([self.agent.get_joint_positions(),
         #                               self.agent.get_joint_velocities(),
         #                               self.agent_ee_tip.get_position(),
@@ -123,7 +133,7 @@ class ManipulatorEnv(gym.Env):
         self._elapsed_steps = 0
         self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
         self.observation[self.g_pos_idx] = np.asarray(self.goal)
-        self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])
+        # self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])
         self.agent_target.set_position(self.goal)
         self.agent.set_initial_joint_positions(self.initial_joint_positions)
         observation, _ = self._get_state()
@@ -184,7 +194,7 @@ if __name__ == '__main__':
                   'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
     env_config = {
         'distance_threshold': 0.02,
-        'reward_type': 'dense',
+        'reward_type': 'dense distance',
         'max_angles_vel': 10,  # 10degree/s
         'num_joints': 12,
         'num_segments': 2,
@@ -194,7 +204,7 @@ if __name__ == '__main__':
         'max_episode_steps': 100,
         'collision_cnt': 15,
         'scene_file': 'simple_12_1.ttt',
-        'headless_mode': False,
+        'headless_mode': True,
     }
     env = ManipulatorEnv(env_config)
     print('env created success')
@@ -212,7 +222,7 @@ if __name__ == '__main__':
             obs, reward, done, info = env.step(action_)
             # time_b = time.time()
             # print(time_b - time_a)
-            # print(obs[0])
+            print(obs[6])
             line.append(obs[0])
             step += 1
             if done:

@@ -1,8 +1,13 @@
 
-import logging
+import numpy as np
+DEG2RAD = np.pi / 180.
+RAD2DEG = 180. / np.pi
 
-log = logging.getLogger('multi_agent')
-def test():
-    log.info('222')
-
-
+a = 6
+for i in range(6):
+    a -= np.cos(10*(i+1)*DEG2RAD)
+print(a)
+b = 0
+for i in range(6):
+    b += np.sin(10*(i+1)*DEG2RAD)
+print(b)

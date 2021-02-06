@@ -104,16 +104,25 @@ actor [100, 100],  ciritc [64, 64] done change
 td3_55 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model
 actor [100, 100],  critic [64, 64]  
 td3_56 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model 
-actor [100, 100],  critic [64, 64]  reward +10  
+actor [100, 100],  critic [64, 64] reward +10  
 td3_57 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model 
-actor [100, 100],  critic [64, 64]  reward +100  
+actor [100, 100],  critic [64, 64] reward +100  
 td3_58 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model 
 actor [200, 200],  critic [64, 64]  
 td3_59 hard goal gamma=0.99 action_noise_drop_rate 500 reward dense distance not cc model 3D model 
 actor [100, 100],  critic [64, 64]  reward +100  
 td3_60 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
 actor [200, 200],  critic [64, 64]  
-
+td3_61 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
+actor [128, 128],  critic [64, 64]  
+td3_62 random goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
+actor [128, 128],  critic [64, 64]  
+td3_63 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
+actor [128, 128],  critic [64, 64] 模型最大关节角度50度  
+td3_64 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
+actor [128, 128],  critic [64, 64] 状态近似归一化  
+td3_65 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
+actor [128, 128],  critic [64, 64] 状态归一化
 
  
 
