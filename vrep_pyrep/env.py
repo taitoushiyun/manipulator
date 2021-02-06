@@ -158,9 +158,7 @@ class ManipulatorEnv(gym.Env):
             done = True
         return observation, reward, done, info
 
-
     def cal_reward(self, achieved_goal, goal):
-
         def dense_reward(d):
             return -d
         d = np.linalg.norm(achieved_goal - goal, axis=-1)

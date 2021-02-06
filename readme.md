@@ -82,7 +82,7 @@ td3_38 hard goal gamma=0.9 action_noise_drop_rate 500 reward dense distance not 
 td3_39 hard goal gamma=0.9 action_noise-drop_rate 500 reward dense potential not cc model 3D model  
 td3_40 hard goal gamma=0.99 action_noise_drop_rate 500 reward dense potential not cc model 3D model  
 td3_41 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model  
-td3_42 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model  
+td3_42 hard goal gamma=0.6 action_noise_drop_rate 50 reward dense0 distance not cc model 3D model  
 td3_43 super hard goal gamma=0.6 noise_decay_period 500 reward dense potential not cc model 3D model  
 td3_44 random goal gamma=0.6 noise_decay_period 1000 reward dense potential not cc model 3D model  
 td3_46 random goal gamma=0.6 noise_decay_period 4000 reward dense potential not cc model 3D model  
@@ -101,8 +101,20 @@ td3_52 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not 
 actor [100, 100],  ciritc [64, 64] done change  
 td3_53 td3_54 hard goal gamma=0.99 action_noise_drop_rate 500 reward dense distance not cc model 3D model
 actor [100, 100],  ciritc [64, 64] done change  
-td3_54 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model
+td3_55 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model
 actor [100, 100],  critic [64, 64]  
+td3_56 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model 
+actor [100, 100],  critic [64, 64]  reward +10  
+td3_57 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model 
+actor [100, 100],  critic [64, 64]  reward +100  
+td3_58 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense distance not cc model 3D model 
+actor [200, 200],  critic [64, 64]  
+td3_59 hard goal gamma=0.99 action_noise_drop_rate 500 reward dense distance not cc model 3D model 
+actor [100, 100],  critic [64, 64]  reward +100  
+td3_60 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
+actor [200, 200],  critic [64, 64]  
+
+
  
 
 

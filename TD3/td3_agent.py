@@ -325,7 +325,8 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         success_rate = np.mean(result_deque)
         mean_score = np.mean(score_deque)
         logger.info(
-            "Episode: %d,          Path length: %d       result: %f" % (i_episode, episode_length, result))
+            "Episode: %d,          Path length: %d       result: %f       reward: %f"
+            % (i_episode, episode_length, result, score))
         if args_.goal_set != 'random':
             if args_.reward_type == 'dense potential':
                 vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
