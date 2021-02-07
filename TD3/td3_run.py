@@ -116,7 +116,7 @@ def playGame(args_, train=True, episode_count=2000):
             for i in range(100):
                 # if i % 5 == 0:
                 model = torch.load(
-                    f'/home/cq/code/manipulator/TD3/checkpoints/td3_49/999.pth')  # 'PPO/checkpoints/40.pth'
+                    f'/home/cq/code/manipulator/TD3/checkpoints/td3_69/9999.pth')  # 'PPO/checkpoints/40.pth'
                     # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
                 agent.actor_local.load_state_dict(model)
 
@@ -130,7 +130,7 @@ def playGame(args_, train=True, episode_count=2000):
                     total_reward += reward
                     path_length += 1
                     state = next_state
-                    if done or path_length >= args.max_episode_steps:
+                    if done:
                         # print(f"Episode length: {t+1}")
                         result = 0
                         if done and path_length < args.max_episode_steps and not any(info['collision_state']):
@@ -178,9 +178,9 @@ if __name__ == "__main__":
                         default='random')
     parser.add_argument('--collision-cnt', type=int, default=15)
     parser.add_argument('--scene-file', type=str, default='simple_12_1.ttt')
-    parser.add_argument('--headless-mode', type=bool, default=True)
+    parser.add_argument('--headless-mode', type=bool, default=False)
 
-    parser.add_argument('--train', type=bool, default=True)
+    parser.add_argument('--train', type=bool, default=False)
     parser.add_argument('--load-model', type=str, default=None)
     parser.add_argument('--episodes', type=int, default=10000)
 
