@@ -150,7 +150,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code-version', type=str, default='td3_67')
+    parser.add_argument('--code-version', type=str, default='td3_69')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=0)
     #  TD3 config
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr-critic', type=float, default=1e-3)
     parser.add_argument('--update-every-step', type=int, default=2)
     parser.add_argument('--random-start', type=int, default=2000)
-    parser.add_argument('--noise-decay-period', type=float, default=500.)
+    parser.add_argument('--noise-decay-period', type=float, default=1000.)
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=100)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
@@ -175,14 +175,14 @@ if __name__ == "__main__":
     parser.add_argument('--plane-model', type=bool, default=False)
     parser.add_argument('--cc-model', type=bool, default=False)
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
-                        default='super hard')
+                        default='random')
     parser.add_argument('--collision-cnt', type=int, default=15)
     parser.add_argument('--scene-file', type=str, default='simple_12_1.ttt')
     parser.add_argument('--headless-mode', type=bool, default=True)
 
     parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--load-model', type=str, default=None)
-    parser.add_argument('--episodes', type=int, default=1000)
+    parser.add_argument('--episodes', type=int, default=10000)
 
     args = parser.parse_args()
     # write the selected car to configuration file

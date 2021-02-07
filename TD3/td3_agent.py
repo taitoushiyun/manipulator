@@ -339,6 +339,8 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
         vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
         torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'{i_episode}.pth'))
+        time_b = time.time()
+        print(time_b - time_a)
         if i_episode % 5 == 0:
             state = env.reset()
             eval_score = 0
@@ -371,5 +373,4 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
                     vis.line(X=[i_episode], Y=[100 * (eval_score - env.max_rewards)], win='eval reward', update='append')
                 if args_.reward_type == 'dense distance':
                     vis.line(X=[i_episode], Y=[eval_score], win='eval reward', update='append')
-        time_b = time.time()
-        print(time_b - time_a)
+
