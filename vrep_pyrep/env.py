@@ -85,12 +85,24 @@ class ManipulatorEnv(gym.Env):
         if self.goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[self.goal_set]) * DEG2RAD
         elif self.goal_set == 'random':
-            if self.plane_model:
+            if self.plane_model and not self.cc_model:
                 theta = np.vstack((np.zeros((self.action_dim,)),
                                    45 * DEG2RAD * np.random.uniform(low=-1, high=1,
                                                                     size=(self.action_dim,)))).T.flatten()
-            else:
+            elif not self.plane_model and not self.cc_model:
                 theta = 45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.action_dim, ))
+            elif self.plane_model and self.cc_model:
+                theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
+                        * np.ones((self.action_dim, self.num_joints // (2 * self.action_dim)))
+                theta = theta.flatten()
+                theta = np.vstack((np.zeros((self.num_joints // 2,)),
+                                   theta)).T.flatten()
+            elif not self.plane_model and self.cc_model:
+                theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
+                        * np.ones((self.action_dim, self.num_joints // self.action_dim))
+                theta = theta.flatten()
+            else:
+                raise ValueError
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)
