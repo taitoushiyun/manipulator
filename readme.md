@@ -67,7 +67,7 @@ td3_24 multi goal td3_20的retry实验
 -----------------------------td3_pyrep-----------------------------  
 td3_25 multi goal not cc_model train   pyrep version first try  
 td3_27 multi goal not cc_model train   pyrep 兼容cc版本first try  
-td3_28 multi goal not cc_model train pyrep 兼容cc版本 pr.stop+pr.start  
+td3_28 multi goal not cc_model train   pyrep 兼容cc版本 pr.stop+pr.start  
 td3_29 eval of td3_28  
 td3_30 td3_28 retry 10000 episodes  dense potential gamma=0.9 not cc_model plane model
 修改reset方式  
@@ -122,9 +122,9 @@ actor [128, 128],  critic [64, 64] 模型最大关节角度50度
 td3_64 hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
 actor [128, 128],  critic [64, 64] 状态近似归一化  base_pos bug 全为0  
 td3_65 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
-actor [128, 128],  critic [64, 64] 状态归一化  失败  
+actor [128, 128],  critic [64, 64] 状态归一化  失败 (done没有处理好)
 td3_66 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
-actor [128, 128],  critic [64, 64] 状态近似归一化  
+actor [128, 128],  critic [64, 64] 状态近似归一化,关节角度角速度rad表示 
 td3_67 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
 actor [128, 128],  critic [64, 64] 状态归一化，包括末端位置 和速度
 td3_68 super hard goal gamma=0.6 action_noise_drop_rate 500 reward dense potential not cc model 3D model 
@@ -136,7 +136,12 @@ td3_70 random goal gamma=0.6 action_noise_drop_rate 1000 reward dense potential 
 actor [128, 128],  critic [64, 64] 状态归一化，包括末端位置 和速度  80%成功  
 td3_71 super hard goal 'super hard': [0, -40, 0, -40, 0, -40, 0, 35, 0, 35, 0, 35]
 gamma=0.6 action_noise_drop_rate 1000 reward dense potential cc model plane model 错误的goal  
-td3_72 easy goal gamma 0.6 noise_drop_rate 500 reward dense potential cc model plane model
+td3_72 easy goal gamma 0.6 noise_drop_rate 500 reward dense potential cc model plane model  
+td3_73 hard goal gamma 0.6 noise_drop_rate 500 reward dense potential cc model plane model  
+
+td3_75 easy goal gamma 0.6 noise_drop_rate 500 reward dense potential cc model not plane model  
+td3_76 hard goal gamma 0.6 noise_drop_rate 500 reward dense potential cc model not plane model  
+
 
 
 

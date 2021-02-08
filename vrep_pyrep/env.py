@@ -228,7 +228,7 @@ if __name__ == '__main__':
         'num_joints': 12,
         'num_segments': 2,
         'cc_model': True,
-        'plane_model': False,
+        'plane_model': True,
         'goal_set': 'random',
         'max_episode_steps': 100,
         'collision_cnt': 15,
@@ -237,7 +237,7 @@ if __name__ == '__main__':
     }
     env = ManipulatorEnv(env_config)
     print('env created success')
-    action_ = [1, 1, -1, -1]
+    action_ = [1, -1]
     # action_ = np.random.uniform(-1, 1, size=(6,))
 
     lines = []

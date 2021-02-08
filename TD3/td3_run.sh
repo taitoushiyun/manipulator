@@ -1,5 +1,8 @@
 #!/bin/bash
-#python td3_run.py --code-version td3_54 --gamma 0.99  --headless-mode True --episodes 2000
+python td3_run.py --code-version td3_73 --goal-set hard --cc-model True --plane-model True &
+python td3_run.py --code-version td3_74 --goal-set 'super hard' --cc-model True --plane-model True &
+python td3_run.py --code-version td3_75 --goal-set easy --cc-model True --plane-model False &
+python td3_run.py --code-version td3_76 --goal-set hard --cc-model True --plane-model False &
+python td3_run.py --code-version td3_77 --goal-set 'super hard' --cc-model True --plane-model False &
 
-python td3_run.py --code-version td3_55 --gamma 0.6 --actor-hidden [200,200] --headless-mode True
 
