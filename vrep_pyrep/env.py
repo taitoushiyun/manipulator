@@ -22,7 +22,7 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
                         'super hard': [-45, -45, -45, -45, -45, -45, -30, -30, -30, -30, -30, -30]},
         (False, True): {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20, 0,  0],
                         'hard': [0, 20, 0, 15, 0,  20, 0,  20, 0, 20, 0, -10],
-                        'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]},
+                        'super hard': [0, -50, 0, -50, 0, -20, 0, 40, 0, 30, 0, 0]},
         (False, False): {'easy': [20, 20, 20, 20, -10, -10, -15, -15, 20, 20, 0, 0],
                          'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                          'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
@@ -43,6 +43,8 @@ class ManipulatorEnv(gym.Env):
         self._max_episode_steps = env_config['max_episode_steps']
         self.collision_cnt = env_config['collision_cnt']
         self.headless_mode = env_config['headless_mode']
+        if self.cc_model:
+            assert '_cc' in env_config['scene_file'], "scene file not match env configuration"
 
         if self.plane_model and self.cc_model:
             self.joint_state_dim = 2 * self.num_segments
@@ -72,7 +74,7 @@ class ManipulatorEnv(gym.Env):
         self.e_pos_idx = range(self.joint_state_dim, self.joint_state_dim + 3)
         self.e_vel_idx = range(self.joint_state_dim + 3, self.joint_state_dim + 6)
         self.g_pos_idx = range(self.joint_state_dim + 6, self.joint_state_dim + 9)
-        self.b_pos_idx = range(self.joint_state_dim + 9, self.joint_state_dim + 12)
+        # self.b_pos_idx = range(self.joint_state_dim + 9, self.joint_state_dim + 12)
 
         self.dh_model = DHModel(self.num_joints)
         self.observation = np.zeros((self.state_dim,))
@@ -151,7 +153,11 @@ class ManipulatorEnv(gym.Env):
         return state, info
 
     def reset(self):
-        self.pr.set_configuration_tree(self.initial_config_tree)
+        if self.cc_model:
+            self.pr.stop()
+            self.pr.start()
+        else:
+            self.pr.set_configuration_tree(self.initial_config_tree)
         self._elapsed_steps = 0
         self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
         self.observation[self.g_pos_idx] = np.asarray(self.goal)
@@ -183,9 +189,6 @@ class ManipulatorEnv(gym.Env):
                                     observation[self.e_pos_idx][2] + 1.])
         reward = self.cal_reward(achieved_goal, self.goal)
         done = np.linalg.norm(achieved_goal - self.goal, axis=-1) <= self.distance_threshold
-        # if done:
-        #     reward += 100
-        #     return observation, reward, done, info
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
         if any(info['collision_state']):
@@ -229,38 +232,24 @@ if __name__ == '__main__':
         'num_segments': 2,
         'cc_model': True,
         'plane_model': True,
-        'goal_set': 'random',
+        'goal_set': 'super hard',
         'max_episode_steps': 100,
         'collision_cnt': 15,
-        'scene_file': 'simple_12_1_cc.ttt',
+        'scene_file': 'by_12_1_cc.ttt',
         'headless_mode': False,
     }
     env = ManipulatorEnv(env_config)
     print('env created success')
-    action_ = [1, -1]
-    # action_ = np.random.uniform(-1, 1, size=(6,))
+    # action_ = [-1, 1]
 
-    lines = []
-    for i in range(5):
+    for i in range(100):
+        action_ = np.random.uniform(low=-1, high=1, size=(2, ))
         step = 0
-        line = []
         obs = env.reset()
-        # print(obs[:1])
         while True:
-            # time_a = time.time()
             obs, reward, done, info = env.step(action_)
-            time.sleep(0.2)
-            # time_b = time.time()
-            # print(time_b - time_a)
-            line.append(obs[0])
             step += 1
             if done:
-                lines.append(line)
                 step = 0
                 break
-    # from matplotlib import pyplot as plt
-    # for i in range(1):
-    #     plt.plot(lines[i])
-    # plt.show()
-
     env.end_simulation()
