@@ -7,7 +7,9 @@ from os.path import dirname, join, abspath
 import gym
 from gym import spaces
 from pyrep.objects.shape import Shape
+import logging
 
+logger = logging.getLogger('mani')
 DEG2RAD = np.pi / 180.
 RAD2DEG = 180. / np.pi
 
@@ -29,6 +31,7 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
 class ManipulatorEnv(gym.Env):
     def __init__(self, env_config):
         super(ManipulatorEnv, self).__init__()
+        logger.info(GOAL)
         self.max_angles_vel = env_config['max_angles_vel']
         self.distance_threshold = env_config['distance_threshold']
         self.reward_type = env_config['reward_type']
@@ -213,6 +216,7 @@ class ManipulatorEnv(gym.Env):
         self.pr.stop()
         self.pr.shutdown()
 
+
 if __name__ == '__main__':
     goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
                   'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
@@ -223,21 +227,21 @@ if __name__ == '__main__':
         'max_angles_vel': 10,  # 10degree/s
         'num_joints': 12,
         'num_segments': 2,
-        'cc_model': False,
-        'plane_model': True,
+        'cc_model': True,
+        'plane_model': False,
         'goal_set': 'random',
         'max_episode_steps': 100,
         'collision_cnt': 15,
-        'scene_file': 'simple_12_1.ttt',
-        'headless_mode': True,
+        'scene_file': 'simple_12_1_cc.ttt',
+        'headless_mode': False,
     }
     env = ManipulatorEnv(env_config)
     print('env created success')
-    action_ = [1, 1, 1, -1, -1, -1]
+    action_ = [1, 1, -1, -1]
     # action_ = np.random.uniform(-1, 1, size=(6,))
 
     lines = []
-    for i in range(1):
+    for i in range(5):
         step = 0
         line = []
         obs = env.reset()
@@ -245,9 +249,9 @@ if __name__ == '__main__':
         while True:
             # time_a = time.time()
             obs, reward, done, info = env.step(action_)
+            time.sleep(0.2)
             # time_b = time.time()
             # print(time_b - time_a)
-            print(obs[6])
             line.append(obs[0])
             step += 1
             if done:

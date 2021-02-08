@@ -134,7 +134,11 @@ actor [128, 128],  critic [64, 64] 状态归一化，包括末端位置 和速�
 
 td3_70 random goal gamma=0.6 action_noise_drop_rate 1000 reward dense potential cc model 3D model 
 actor [128, 128],  critic [64, 64] 状态归一化，包括末端位置 和速度  80%成功  
-td3_71 super hard goal gamma=0.6 action_noise_drop_rate 1000 reward dense potential cc model plane model  
+td3_71 super hard goal 'super hard': [0, -40, 0, -40, 0, -40, 0, 35, 0, 35, 0, 35]
+gamma=0.6 action_noise_drop_rate 1000 reward dense potential cc model plane model 错误的goal  
+td3_72 easy goal gamma 0.6 noise_drop_rate 500 reward dense potential cc model plane model
+
+
 
 
 
