@@ -11,11 +11,19 @@ from pyrep.objects.shape import Shape
 DEG2RAD = np.pi / 180.
 RAD2DEG = 180. / np.pi
 
-GOAL = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
-        'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
-        'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}
-        # 'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20, 0, -10],
-        # 'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
+# (cc_model, plane_model)
+GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
+                       'hard': [0, 20, 0, 20, 0, 20, 0,  20, 0,  20, 0,  20],
+                       'super hard': [0, -45, 0, -45, 0, -45, 0, -30, 0, -30, 0, -30]},
+        (True, False): {'easy': [20, 20, 20, 20, 20, 20, -10, -10, -10, -10, -10, -10],
+                        'hard': [20, 20, 20, 20, 20, 20, 20,  20, 20,  20, 20,  20],
+                        'super hard': [-45, -45, -45, -45, -45, -45, -30, -30, -30, -30, -30, -30]},
+        (False, True): {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20, 0,  0],
+                        'hard': [0, 20, 0, 15, 0,  20, 0,  20, 0, 20, 0, -10],
+                        'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]},
+        (False, False): {'easy': [20, 20, 20, 20, -10, -10, -15, -15, 20, 20, 0, 0],
+                         'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
+                         'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
 
 
 class ManipulatorEnv(gym.Env):
@@ -83,7 +91,7 @@ class ManipulatorEnv(gym.Env):
 
     def _sample_goal(self):
         if self.goal_set in ['easy', 'hard', 'super hard']:
-            theta = np.asarray(GOAL[self.goal_set]) * DEG2RAD
+            theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][self.goal_set]) * DEG2RAD
         elif self.goal_set == 'random':
             if self.plane_model and not self.cc_model:
                 theta = np.vstack((np.zeros((self.action_dim,)),
