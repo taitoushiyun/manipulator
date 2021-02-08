@@ -150,7 +150,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code-version', type=str, default='td3_74_rt')
+    parser.add_argument('--code-version', type=str, default='td3_80')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     #  TD3 config
@@ -178,7 +178,7 @@ if __name__ == "__main__":
                         default='super hard')
     parser.add_argument('--collision-cnt', type=int, default=15)
     parser.add_argument('--scene-file', type=str, default='simple_12_1_cc.ttt')
-    parser.add_argument('--headless-mode', type=bool, default=False)
+    parser.add_argument('--headless-mode', type=bool, default=True)
 
     parser.add_argument('--train', type=bool, default=True)
     parser.add_argument('--load-model', type=str, default=None)

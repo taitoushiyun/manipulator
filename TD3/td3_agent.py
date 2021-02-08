@@ -316,11 +316,6 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
                 if done and episode_length < max_episode_length and not any(info['collision_state']):
                     result = 1.
                 break
-            # if done or episode_length >= max_episode_length or any(info['collision_state']):
-            #     result = 0
-            #     if done:
-            #         result = 1
-            #     break
         result_deque.append(result)
         score_deque.append(score)
         success_rate = np.mean(result_deque)
@@ -356,11 +351,6 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
                     if done and total_len < max_episode_length and not any(info['collision_state']):
                         eval_result = 1.
                     break
-                # if done or total_len >= max_episode_length or any(info['collision_state']):
-                #     eval_result = 0
-                #     if done:
-                #         eval_result = 1
-                #     break
             eval_result_queue.append(eval_result)
             eval_success_rate = np.mean(eval_result_queue)
             logger.info(

@@ -16,8 +16,8 @@ RAD2DEG = 180. / np.pi
 # (cc_model, plane_model)
 GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
                        'hard': [0, 20, 0, 20, 0, 20, 0,  20, 0,  20, 0,  20],
-                       # 'super hard': [0, -45, 0, -45, 0, -45, 0, -30, 0, -30, 0, -30]},
-                       'super hard': [0, -50, 0, -50, 0, -20, 0, 40, 0, 30, 0, 0]},
+                       'super hard': [0, -45, 0, -45, 0, -45, 0, -30, 0, -30, 0, -30]},
+                       # 'super hard': [0, -50, 0, -50, 0, -20, 0, 40, 0, 30, 0, 0]},
         (True, False): {'easy': [20, 20, 20, 20, 20, 20, -10, -10, -10, -10, -10, -10],
                         'hard': [20, 20, 20, 20, 20, 20, 20,  20, 20,  20, 20,  20],
                         'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]},
@@ -194,6 +194,7 @@ class ManipulatorEnv(gym.Env):
             done = True
         if any(info['collision_state']):
             done = True
+            reward -= 0.1
         self.last_obs = observation
         return observation, reward, done, info
 

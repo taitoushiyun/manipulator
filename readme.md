@@ -138,11 +138,15 @@ td3_71 super hard goal 'super hard': [0, -40, 0, -40, 0, -40, 0, 35, 0, 35, 0, 3
 gamma=0.6 action_noise_drop_rate 1000 reward dense potential cc model plane model 错误的goal  
 td3_72 easy goal gamma 0.6 noise_drop_rate 500 reward dense potential cc model plane model  
 td3_73 hard goal gamma 0.6 noise_drop_rate 500 reward dense potential cc model plane model  
-
 td3_75 easy goal gamma 0.6 noise_drop_rate 500 reward dense potential cc model not plane model  
 td3_76 hard goal gamma 0.6 noise_drop_rate 500 reward dense potential cc model not plane model  
-
-
+td3_72_rt td3_72 td3_75 td3_76 retry (修复cc model 的 reset bug)  
+td3_74_rt super hard goal简单版本 gamma 0.6 noise_drop_rate 500 reward  dense potential cc model plane model  
+td3_74 super hard goal 困难版本 gamma 0.6 noise_drop_rate 500 reward dense  potential cc model plane model  
+td3_77 super hard goal 困难版本 gamma 0.9 noise_drop_rate 500 reward dense  potential cc model plane model  
+td3_78 super hard goal 困难版本 gamma 0.6 noise_drop_rate 500 reward dense  potential cc model plane model  不做collision检测
+td3_79 super hard goal 困难版本 gamma 0.99 noise_drop_rate 500 reward dense  potential cc model plane model 
+td3_80 super hard goal 困难版本 gamma 0.6 noise_drop_rate 500 reward dense  potential cc model plane model  collision reward -0.1
 
 
 
