@@ -149,8 +149,8 @@ td3_79 super hard goal 困难版本 gamma 0.99 noise_drop_rate 500 reward dense 
 td3_80 super hard goal 困难版本 gamma 0.6 noise_drop_rate 500 reward dense  potential cc model plane model  collision reward -0.1  
 
 td3_81 hard goal gamma 0.99 noise 500 reward dense potential cc model plane model  
-td3_81 super hard goal gamma 0.99 noise 500 dense potential cc modle 3D model
-td3_82 super hard goal gamma 0.6  noise 500 dense potential cc model 3D model
+td3_82 super hard goal gamma 0.99 noise 500 dense potential cc modle 3D model
+td3_83 super hard goal gamma 0.6  noise 500 dense potential cc model 3D model
 
 
 
