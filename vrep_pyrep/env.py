@@ -1,4 +1,5 @@
 import time
+import copy
 import numpy as np
 from pyrep import PyRep
 from manipulator import ManipulatorPlane, Manipulator3D, ManipulatorCCPlane, ManipulatorCC3D
@@ -136,14 +137,15 @@ class ManipulatorEnv(gym.Env):
         info = {'collision_state': self.agent.get_collision_result()}
         return state, info
 
-    def normalize(self, state):
+    def normalize(self, obs):
+        state = copy.deepcopy(obs)
         state[self.j_ang_idx] /= 90.
         state[self.j_vel_idx] /= 10.
         state[self.e_pos_idx[0]] = (state[self.e_pos_idx[0]] - 0.4) / .4
         state[self.e_pos_idx[2]] = (state[self.e_pos_idx[2]] - 1.) / 1.
         state[self.e_vel_idx] /= 0.5
-        state[self.g_pos_idx[0]] = (state[self.e_pos_idx[0]] - 0.4) / .4
-        state[self.g_pos_idx[2]] = (state[self.e_pos_idx[2]] - 1.) / 1.
+        state[self.g_pos_idx[0]] = (state[self.g_pos_idx[0]] - 0.4) / .4
+        state[self.g_pos_idx[2]] = (state[self.g_pos_idx[2]] - 1.) / 1.
         return state
 
     def reset(self):
