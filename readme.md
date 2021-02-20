@@ -149,8 +149,15 @@ td3_79 super hard goal 困难版本 gamma 0.99 noise_drop_rate 500 reward dense 
 td3_80 super hard goal 困难版本 gamma 0.6 noise_drop_rate 500 reward dense  potential cc model plane model  collision reward -0.1  
 
 td3_81 hard goal gamma 0.99 noise 500 reward dense potential cc model plane model  
-td3_82 super hard goal gamma 0.99 noise 500 dense potential cc modle 3D model
-td3_83 super hard goal gamma 0.6  noise 500 dense potential cc model 3D model
+td3_82 super hard goal gamma 0.99 noise 500 dense potential cc modle 3D model  
+td3_83 super hard goal gamma 0.6  noise 500 dense potential cc model 3D model  
+平面内gamma太小会导致得到的策略非累积折扣奖励最大，gamma大的时候学习效果好  
+空间内gamma太大会导致学习缓慢且收敛不稳定，gamma小的时候反而学习效果要更好  
+td3_84 hard goal num_joints 24 gamma 0.6 dense potential not cc model 3D model  
+td3_85 hard goal num_joints 24 gamma 0.99 dense potential not cc model 3D model  
+td3_86 hard goal num_joints 24 gamma 0.99 dense potential not cc model 3D model  
+
+
 
 
 

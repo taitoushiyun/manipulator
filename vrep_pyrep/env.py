@@ -25,7 +25,7 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
                         'hard': [0, 20, 0, 15, 0,  20, 0,  20, 0, 20, 0, -10],
                         'super hard': [0, -50, 0, -50, 0, -20, 0, 40, 0, 30, 0, 0]},
         (False, False): {'easy': [20, 20, 20, 20, -10, -10, -15, -15, 20, 20, 0, 0],
-                         'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
+                         'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10, 20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                          'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
 
 
@@ -224,34 +224,37 @@ class ManipulatorEnv(gym.Env):
 
 if __name__ == '__main__':
     goal_index = {'easy': [0, 20, 0, 20, 0, -10, 0, -15, 0, 20],
-                  'hard': [0, 20, 0, 15, 0, 20, 0, 20, 0, 20],
+                  'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10, 20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                   'super hard': [0, -50, 0, -50, 0, -50, 0, -20, 0, -10]}
     env_config = {
         'distance_threshold': 0.02,
         'reward_type': 'dense distance',
         'max_angles_vel': 10,  # 10degree/s
-        'num_joints': 12,
+        'num_joints': 24,
         'num_segments': 2,
-        'cc_model': True,
-        'plane_model': True,
-        'goal_set': 'super hard',
+        'cc_model': False,
+        'plane_model': False,
+        'goal_set': 'hard',
         'max_episode_steps': 100,
-        'collision_cnt': 15,
-        'scene_file': 'by_12_1_cc.ttt',
+        'collision_cnt': 27,
+        'scene_file': 'simple_24_1.ttt',
         'headless_mode': False,
     }
     env = ManipulatorEnv(env_config)
     print('env created success')
     # action_ = [-1, 1]
 
-    for i in range(100):
-        action_ = np.random.uniform(low=-1, high=1, size=(2, ))
-        step = 0
-        obs = env.reset()
-        while True:
-            obs, reward, done, info = env.step(action_)
-            step += 1
-            if done:
-                step = 0
-                break
+    # for i in range(100):
+    #     action_ = np.random.uniform(low=-1, high=1, size=(2, ))
+    #     step = 0
+    #     obs = env.reset()
+    #     while True:
+    #         obs, reward, done, info = env.step(action_)
+    #         step += 1
+    #         if done:
+    #             step = 0
+    #             break
+    obs = env.reset()
+    print(obs[env.e_pos_idx])
+    time.sleep(1)
     env.end_simulation()
