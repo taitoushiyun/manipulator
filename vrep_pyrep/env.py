@@ -25,7 +25,7 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
                         'hard': [0, 20, 0, 15, 0,  20, 0,  20, 0, 20, 0, -10],
                         'super hard': [0, -50, 0, -50, 0, -20, 0, 40, 0, 30, 0, 0]},
         (False, False): {'easy': [20, 20, 20, 20, -10, -10, -15, -15, 20, 20, 0, 0],
-                         'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10, 20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
+                         'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                          'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
 
 
@@ -120,38 +120,31 @@ class ManipulatorEnv(gym.Env):
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)
-        # print(f'goal sample for joints is {goal_theta}')
         goal = self.dh_model.forward_kinematics(goal_theta)
         reset_state = self.dh_model.forward_kinematics(np.zeros((self.num_joints, )))
         max_rewards = np.linalg.norm(goal - reset_state, axis=-1)
-        # print(f'goal sample for end point is {goal}')
         return goal_theta, goal, max_rewards
 
     def _get_state(self):
         state = np.zeros(self.state_dim)
-        state[self.j_ang_idx] = np.asarray(self.agent.get_joint_positions()) * RAD2DEG / 90.
-        state[self.j_vel_idx] = np.asarray(self.agent.get_joint_velocities()) * RAD2DEG / 10.
-        e_pos = np.asarray(self.agent_ee_tip.get_position())
-        state[self.e_pos_idx] = np.asarray([(e_pos[0]-0.4)/0.4,
-                                            e_pos[1],
-                                            e_pos[2]-1.])
-        state[self.e_vel_idx] = np.asarray(self.agent_ee_tip.get_velocity()[0]) * 2
-        g_pos = self.observation[self.g_pos_idx]
-        state[self.g_pos_idx] = np.asarray([(g_pos[0]-0.4)/0.4,
-                                            g_pos[1],
-                                            g_pos[2]-1.])
-        # state[self.e_pos_idx] = np.asarray(self.agent_ee_tip.get_position())
-        # state[self.e_vel_idx] = np.asarray(self.agent_ee_tip.get_velocity()[0])
-        # state[self.g_pos_idx] = self.observation[self.g_pos_idx]
+        state[self.j_ang_idx] = np.asarray(self.agent.get_joint_positions()) * RAD2DEG
+        state[self.j_vel_idx] = np.asarray(self.agent.get_joint_velocities()) * RAD2DEG
+        state[self.e_pos_idx] = np.asarray(self.agent_ee_tip.get_position())
+        state[self.e_vel_idx] = np.asarray(self.agent_ee_tip.get_velocity()[0])
+        state[self.g_pos_idx] = self.observation[self.g_pos_idx]
         # state[self.b_pos_idx] = self.observation[self.b_pos_idx]
-        # observation = np.concatenate([self.agent.get_joint_positions(),
-        #                               self.agent.get_joint_velocities(),
-        #                               self.agent_ee_tip.get_position(),
-        #                               self.agent_ee_tip.get_velocity(),
-        #                               self.agent_target.get_position(),
-        #                               self.agent_base.get_position()])
         info = {'collision_state': self.agent.get_collision_result()}
         return state, info
+
+    def normalize(self, state):
+        state[self.j_ang_idx] /= 90.
+        state[self.j_vel_idx] /= 10.
+        state[self.e_pos_idx[0]] = (state[self.e_pos_idx[0]] - 0.4) / .4
+        state[self.e_pos_idx[2]] = (state[self.e_pos_idx[2]] - 1.) / 1.
+        state[self.e_vel_idx] /= 0.5
+        state[self.g_pos_idx[0]] = (state[self.e_pos_idx[0]] - 0.4) / .4
+        state[self.g_pos_idx[2]] = (state[self.e_pos_idx[2]] - 1.) / 1.
+        return state
 
     def reset(self):
         if self.cc_model:
@@ -167,7 +160,7 @@ class ManipulatorEnv(gym.Env):
         self.agent.set_initial_joint_positions(self.initial_joint_positions)
         observation, _ = self._get_state()
         self.last_obs = observation
-        return observation
+        return self.normalize(observation)
 
     def step(self, action):
         assert self._elapsed_steps is not None
@@ -185,22 +178,17 @@ class ManipulatorEnv(gym.Env):
         self.agent.set_joint_target_velocities(action)  # Execute action on arm
         self.pr.step()  # Step the physics simulation
         observation, info = self._get_state()
-        achieved_goal = np.asarray([observation[self.e_pos_idx][0] * 0.4 + 0.4,
-                                    observation[self.e_pos_idx][1],
-                                    observation[self.e_pos_idx][2] + 1.])
+        achieved_goal = observation[self.e_pos_idx]
         reward = self.cal_reward(achieved_goal, self.goal)
         done = np.linalg.norm(achieved_goal - self.goal, axis=-1) <= self.distance_threshold
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
         if any(info['collision_state']):
             done = True
-            reward -= 0.1
         self.last_obs = observation
-        return observation, reward, done, info
+        return self.normalize(observation), reward, done, info
 
     def cal_reward(self, achieved_goal, goal):
-        def dense_reward(d):
-            return -d
         d = np.linalg.norm(achieved_goal - goal, axis=-1)
 
         if self.reward_type == 'sparse':
@@ -208,12 +196,9 @@ class ManipulatorEnv(gym.Env):
         elif self.reward_type == 'dense distance':
             return -d
         elif self.reward_type == 'dense potential':
-            last_achieved_goal = np.asarray([self.last_obs[self.e_pos_idx][0] * 0.4 + 0.4,
-                                             self.last_obs[self.e_pos_idx][1],
-                                             self.last_obs[self.e_pos_idx][2] + 1.])
+            last_achieved_goal = self.last_obs[self.e_pos_idx]
             d_last = np.linalg.norm(last_achieved_goal - self.goal, axis=-1)
-            # print(f'reward now is {dense_reward(d)}, reward last is {dense_reward(d_last)}')
-            return dense_reward(d) - dense_reward(d_last)
+            return -d + d_last
         else:
             raise ValueError('reward type wrong')
 
