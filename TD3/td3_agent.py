@@ -63,6 +63,50 @@ class ReplayBuffer:
         return len(self.memory)
 
 
+class HERBuffer:
+    def __init__(self, buffer_size, batch_size, seed, T, sdim, gdim, adim, rdim, replay_K):
+        self.capacity = buffer_size
+        self.batch_size = batch_size
+        self.T = T
+        self.sdim = sdim
+        self.gdim = gdim
+        self.adim = adim
+        self.rdim = rdim
+        self.dim = 2* sdim + 2 * gdim + adim + rdim
+        self.data = np.zeros((self.capacity, T, self.dim))
+        self.pointer = 0
+        self.cnt = 0
+        self.future_p = 1 - (1. / (1 + replay_K))
+
+    def store_episode(self, episode):
+        index = self.pointer % self.capacity
+        self.data[index] = episode
+        self.pointer += 1
+        self.cnt += 1
+
+    def sample(self):
+        if self.pointer < self.capacity:
+            rollout_size = self.pointer
+        else:
+            rollout_size = self.capacity
+        assert rollout_size > self.batch_size, 'rollout is not enough'
+        episode_idx = np.random.randint(0, rollout_size, self.batch_size)
+        t_samples = np.random.randint(0, self.T, self.batch_size)
+        transitions = self.data[episode_idx, t_samples].copy()
+        her_index = np.where(np.random.uniform(size=self.batch_size) < self.future_p)
+        future_offset = np.random.uniform(size=self.batch_size) * (self.T - t_samples)
+        future_offset = future_offset.astype(int)
+        future_t = (t_samples + future_offset)[her_index]
+
+        future_ag = self.data[episode_idx[her_index], future_t, -self.gdim:].copy()
+        transitions[her_index, self.sdim:self.sdim+self.gdim] = future_ag
+
+        return transitions
+
+    def __len__(self):
+        return min(self.cnt, self.capacity)
+
+
 class Actor(nn.Module):
     """Actor (Policy) Model."""
 
@@ -129,7 +173,7 @@ class Critic(nn.Module):
 class TD3Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, max_action, min_action, actor_hidden, critic_hidden, random_seed,
+    def __init__(self, args, env, state_size, action_size, max_action, min_action, actor_hidden, critic_hidden, random_seed,
                  gamma=0.99, tau=5e-3, lr_actor=1e-3, lr_critic=1e-3, update_every_step=2, random_start=2000,
                  noise=0.2, noise_std=0.1, noise_clip=0.5, noise_drop_rate=500.,
                  buffer_size=int(1e7), batch_size=64):
@@ -146,7 +190,9 @@ class TD3Agent():
             noise_std (float): the range to generate random noise while performing action
             noise_clip (float): to clip random noise into this range
         """
-        self.state_size = state_size
+        self.args = args
+        self.env = env
+        self.state_size = state_size + 3
         self.action_size = action_size
         self.max_action = max_action
         self.min_action = min_action
@@ -161,27 +207,30 @@ class TD3Agent():
         self.seed = random.seed(random_seed)
 
         # Actor Network (w/ Target Network)
-        self.actor_local = Actor(state_size, action_size, actor_hidden, float(max_action[0])).to(device)
-        self.actor_target = Actor(state_size, action_size, actor_hidden, float(max_action[0])).to(device)
+        self.actor_local = Actor(self.state_size, action_size, actor_hidden, float(max_action[0])).to(device)
+        self.actor_target = Actor(self.state_size, action_size, actor_hidden, float(max_action[0])).to(device)
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=lr_actor)
 
         # Critic Network (w/ Target Network)
-        self.critic_local1 = Critic(state_size, action_size, critic_hidden).to(device)
-        self.critic_target1 = Critic(state_size, action_size, critic_hidden).to(device)
+        self.critic_local1 = Critic(self.state_size, action_size, critic_hidden).to(device)
+        self.critic_target1 = Critic(self.state_size, action_size, critic_hidden).to(device)
         self.critic_target1.load_state_dict(self.critic_local1.state_dict())
         self.critic_optimizer1 = optim.Adam(self.critic_local1.parameters(), lr=lr_critic)
 
-        self.critic_local2 = Critic(state_size, action_size, critic_hidden).to(device)
-        self.critic_target2 = Critic(state_size, action_size, critic_hidden).to(device)
+        self.critic_local2 = Critic(self.state_size, action_size, critic_hidden).to(device)
+        self.critic_target2 = Critic(self.state_size, action_size, critic_hidden).to(device)
         self.critic_target2.load_state_dict(self.critic_local2.state_dict())
         self.critic_optimizer2 = optim.Adam(self.critic_local2.parameters(), lr=lr_critic)
         # Replay memory
-        self.memory = ReplayBuffer(action_size, buffer_size, batch_size, random_seed)
+        # self.memory = ReplayBuffer(action_size, buffer_size, batch_size, random_seed)
 
-    def step(self, state, action, reward, next_state, done):
+        self.memory = HERBuffer(buffer_size, batch_size, random_seed,
+                                self.args.max_episode_steps, state_size, 3, action_size, 1, self.args.replay_K)
+
+    def step(self, episode):
         """Save experience in replay memory"""
         # Save experience / reward
-        self.memory.add(state, action, reward, next_state, done)
+        self.memory.store_episode(episode=episode)
 
     def act(self, state, episode_step=0, add_noise=True):
         """Returns actions for given state as per current policy."""
@@ -209,15 +258,23 @@ class TD3Agent():
 
         if len(self.memory) >= self.random_start:
             for i in range(n_iteraion):
-                state, action, reward, next_state, done = self.memory.sample()
-                # action_ = action.cpu().numpy()
+                transition = self.memory.sample()
+                state = transition[:, : self.state_size]
+                action = transition[:, self.state_size:self.state_size+self.action_size]
+                reward = transition[:, -self.state_size-1:-self.state_size]
+                next_state = transition[:, -self.state_size:]
+                reward = self.env.cal_reward(next_state[:, -3:], state[:, -3:])
+                next_state[:, -3:] = state[:, -3:]
+                state = torch.tensor(state, dtype=torch.float).to(device)
+                action = torch.tensor(action, dtype=torch.float).to(device)
+                reward = torch.tensor(reward, dtype=torch.float).to(device)
+                next_state = torch.tensor(next_state, dtype=torch.float).to(device)
 
                 # ---------------------------- update critic ---------------------------- #
                 # Get predicted next-state actions and Q values from target models
                 actions_next = self.actor_target(next_state)
 
                 # Generate a random noise
-                # noise = torch.FloatTensor(action_).data.normal_(0, self.noise).to(device)
                 noise = torch.normal(torch.zeros_like(actions_next), self.noise).to(device)
                 noise = noise.clamp(-self.noise_clip, self.noise_clip)
                 actions_next = (actions_next + noise).clamp(self.min_action[0].astype(float),
@@ -228,7 +285,7 @@ class TD3Agent():
 
                 Q_targets_next = torch.min(Q1_targets_next, Q2_targets_next)
                 # Compute Q targets for current states (y_i)
-                Q_targets = reward + (self.gamma * Q_targets_next * (1 - done)).detach()
+                Q_targets = reward + (self.gamma * Q_targets_next).detach()
                 # Compute critic loss
                 Q1_expected = self.critic_local1(state, action)
                 Q2_expected = self.critic_local2(state, action)
@@ -298,15 +355,20 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
     for i_episode in range(start_episode, n_episodes):
         time_a = time.time()
         state = env.reset()
+        g = env.goal
         score = 0
         episode_length = 0
+        rollout = np.zeros((max_episode_length, agent.memory.dim))
         for t in count():
+            state = np.hstack((state, g))
             if len(agent.memory) < args_.random_start:
                 action = env.action_space.sample()
             else:
                 action = agent.act(state, episode_step=i_episode)
             next_state, reward, done, info = env.step(action)
-            agent.step(state, action, reward, next_state, done)
+            ag = next_state[env.e_pos_idx]
+            rollout[t] = np.hstack((state, action, [reward], next_state, ag))
+            # agent.step(state, action, reward, next_state, done)
             state = next_state
             score += reward
             episode_length += 1
@@ -316,6 +378,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
                 if done and episode_length < max_episode_length and not any(info['collision_state']):
                     result = 1.
                 break
+        agent.step(rollout)
         result_deque.append(result)
         score_deque.append(score)
         success_rate = np.mean(result_deque)
@@ -338,9 +401,11 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         print(time_b - time_a)
         if i_episode % 5 == 0:
             state = env.reset()
+            g = env.goal
             eval_score = 0
             total_len = 0
             for t in count():
+                state = np.hstack((state, g))
                 action = agent.act(state, add_noise=False)
                 next_state, reward, done, info = env.step(action)
                 eval_score += reward

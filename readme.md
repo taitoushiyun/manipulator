@@ -153,6 +153,11 @@ td3_82 super hard goal gamma 0.99 noise 500 dense potential cc modle 3D model
 td3_83 super hard goal gamma 0.6  noise 500 dense potential cc model 3D model  
 平面内gamma太小会导致得到的策略非累积折扣奖励最大，gamma大的时候学习效果好  
 空间内gamma太大会导致学习缓慢且收敛不稳定，gamma小的时候反而学习效果要更好  
+python td3_run.py --code-version td3_75_rt --goal-set easy --cc-model --gamma 0.6 --headless-mode --train --scene-file simple_12_1_cc.ttt &  
+python td3_run.py --code-version td3_76_rt --goal-set hard --cc-model --gamma 0.6 --headless-mode --train --scene-file simple_12_1_cc.ttt &  
+python td3_run.py --code-version td3_81_rt --goal-set hard --cc-model --gamma 0.99 --plane-model --headless-mode --train --scene-file simple_12_1_cc.ttt &  
+python td3_run.py --code-version td3_82_rt --goal-set 'super hard' --gamma 0.99 --cc-model --headless-mode --train --scene-file simple_12_1_cc.ttt &  
+python td3_run.py --code-version td3_83_rt --goal-set 'super hard' --gamma 0.6 --cc-model --headless-mode --train --scene-file simple_12_1_cc.ttt &  
 td3_84 hard goal num_joints 24 gamma 0.6 dense potential not cc model 3D model  
 td3_85 hard goal num_joints 24 gamma 0.99 dense potential not cc model 3D model  
 td3_86 hard goal num_joints 24 gamma 0.99 dense potential not cc model 3D model  
