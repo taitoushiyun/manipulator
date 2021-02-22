@@ -66,7 +66,6 @@ class ReplayBuffer:
 class HERBuffer:
     def __init__(self, buffer_size, batch_size, seed, T, sdim, gdim, adim, rdim, replay_K):
         self.capacity = buffer_size
-        self.batch_size = batch_size
         self.T = T
         self.sdim = sdim
         self.gdim = gdim
@@ -263,12 +262,13 @@ class TD3Agent():
                 action = transition[:, self.state_size:self.state_size+self.action_size]
                 reward = transition[:, -self.state_size-1:-self.state_size]
                 next_state = transition[:, -self.state_size:]
-                reward = self.env.cal_reward(next_state[:, -3:], state[:, -3:])
+                reward = self.env.cal_rewardd(next_state[:, -3:], state[:, -3:])
                 next_state[:, -3:] = state[:, -3:]
                 state = torch.tensor(state, dtype=torch.float).to(device)
                 action = torch.tensor(action, dtype=torch.float).to(device)
                 reward = torch.tensor(reward, dtype=torch.float).to(device)
                 next_state = torch.tensor(next_state, dtype=torch.float).to(device)
+
 
                 # ---------------------------- update critic ---------------------------- #
                 # Get predicted next-state actions and Q values from target models
@@ -358,7 +358,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         g = env.goal
         score = 0
         episode_length = 0
-        rollout = np.zeros((max_episode_length, agent.memory.dim))
+        rollout = np.zeros((max_episode_length, agent.buffer.dim))
         for t in count():
             state = np.hstack((state, g))
             if len(agent.memory) < args_.random_start:
