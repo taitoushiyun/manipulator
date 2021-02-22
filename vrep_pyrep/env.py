@@ -183,10 +183,10 @@ class ManipulatorEnv(gym.Env):
         achieved_goal = observation[self.e_pos_idx]
         reward = self.cal_reward(achieved_goal, self.goal)
         done = np.linalg.norm(achieved_goal - self.goal, axis=-1) <= self.distance_threshold
-        if self._elapsed_steps >= self._max_episode_steps:
-            done = True
-        if any(info['collision_state']):
-            done = True
+        # if self._elapsed_steps >= self._max_episode_steps:
+        #     done = True
+        # if any(info['collision_state']):
+        #     done = True
         self.last_obs = observation
         return self.normalize(observation), reward, done, info
 
