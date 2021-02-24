@@ -160,7 +160,7 @@ td3_86 hard goal num_joints 24 gamma 0.99 dense potential not cc model 3D model
 td3_90 hard goal num_joints 12 gamma 0.6 dense potential not cc model 3D model 不提前done 现象螺旋丸  
 td3_91 hard goal num_joints 12 gamma 0.99 dense potential not cc model 3D model 不提前done  
 td3_92 hard goal num_joints 12 gamma 0.6 dense potential not cc model 3D model 不提前done distance threshold 0.05
-
+td3_93 hard goal num_joints 6 gamma 0.6 dense potential not cc model 3D model 不提前done 
 
 
 

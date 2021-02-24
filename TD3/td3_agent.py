@@ -311,6 +311,11 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
             score += reward
             episode_length += 1
             agent.learn(1)
+            # if done:
+            #     result = 0.
+            #     if done and episode_length < max_episode_length and not any(info['collision_state']):
+            #         result = 1.
+            #     break
             if i == max_episode_length - 1:
                 if done:
                     result = 1.
@@ -346,6 +351,11 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
                 eval_score += reward
                 total_len += 1
                 state = next_state
+                # if done:
+                #     eval_result = 0.
+                #     if done and total_len < max_episode_length and not any(info['collision_state']):
+                #         eval_result = 1.
+                #     break
                 if i == max_episode_length - 1:
                     if done:
                         eval_result = 1.
