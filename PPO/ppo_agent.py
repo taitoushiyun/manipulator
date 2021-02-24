@@ -4,7 +4,10 @@ import torch.optim as optim
 import numpy as np
 from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 import visdom
-from PPO.logger import logger
+import logging
+from collections import deque
+import os
+logger = logging.getLogger('mani')
 
 
 class ReplayBuffer(object):
@@ -45,20 +48,35 @@ class PPO_agent(object):
         self.clip_epsilon, self.gamma, self.ppo_epoch, self.weight_epsilon = clip_epsilon, gamma, ppo_epoch, weight_epsilon
         self.optimizer = optim.Adam(self.actor_critic.parameters(), lr=lr)
         self.iter_steps = 0
-        import os
-        os.makedirs('checkpoints', exist_ok=True)
-        self.vis = visdom.Visdom(port=self.args.visdom_port, env=self.args.code_version)
-
-        self.reward_cnt = []
+        self.model_dir = os.path.join('checkpoints', args.code_version)
+        os.makedirs(self.model_dir, exist_ok=True)
 
     def train(self):
-        for episode_t in range(self.num_episodes):
+        vis = visdom.Visdom(port=self.args.visdom_port, env=self.args.code_version)
+        vis.line(X=[0], Y=[0], win='result', opts=dict(Xlabel='episode', Ylabel='result', title='result'))
+        vis.line(X=[0], Y=[0], win='path len', opts=dict(Xlabel='episode', Ylabel='len', title='path len'))
+        vis.line(X=[0], Y=[0], win='success rate',
+                 opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='success rate'))
+        vis.line(X=[0], Y=[0], win='eval result',
+                 opts=dict(Xlabel='episode', Ylabel='eval result', title='eval result'))
+        vis.line(X=[0], Y=[0], win='eval path len', opts=dict(Xlabel='episode', Ylabel='len', title='eval path len'))
+        vis.line(X=[0], Y=[0], win='eval success rate',
+                 opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='eval success rate'))
+        if self.args.goal_set != 'random':
+            vis.line(X=[0], Y=[0], win='reward', opts=dict(Xlabel='episode', Ylabel='reward', title='reward'))
+            vis.line(X=[0], Y=[0], win='mean reward', opts=dict(Xlabel='episode', Ylabel='reward', title='mean reward'))
+            vis.line(X=[0], Y=[0], win='eval reward', opts=dict(Xlabel='episode', Ylabel='reward', title='eval reward'))
+        result_deque = deque(maxlen=20)
+        score_deque = deque(maxlen=10)
+        eval_result_queue = deque(maxlen=10)
+
+        for i_episode in range(self.num_episodes):
             cur_obs = self.env.reset()
             path_length, path_rewards = 0, 0.
             while True:
                 path_length += 1
                 action, old_log_prob, value = self.actor_critic.select_action(torch.FloatTensor(cur_obs[None]))
-                next_obs, reward, done, _ = self.env.step(action)
+                next_obs, reward, done, info = self.env.step(action)
                 self.pooling.store_data(cur_obs, action, reward, done, old_log_prob, value)
                 cur_obs = next_obs
 
@@ -72,84 +90,47 @@ class PPO_agent(object):
                     self._do_training(torch.FloatTensor(returns), torch.FloatTensor(values),
                                       torch.FloatTensor(old_log_probs), torch.FloatTensor(observations),
                                       torch.FloatTensor(actions))
-                    torch.save(self.actor_critic.state_dict(), f'checkpoints/{self.iter_steps}.pth')
+                    torch.save(self.actor_critic.state_dict(), os.path.join(self.model_dir, f'{i_episode}.pth'))
                     self.iter_steps += 1
                 path_rewards += reward
                 if done or self.max_steps_per_episodes == path_length:
+                    result = 0.
+                    if done and path_length < self.args.max_episode_steps and not any(info['collision_state']):
+                        result = 1.
                     break
-            self.rewards_learning_prcoess.append(path_rewards)
-            logger.info("Episode: %d,          Path length: %d       Reward: %f" % (episode_t + 1, path_length, path_rewards))
-            # print("Episode: %d,          Path length: %d       Reward: %f" % (episode_t + 1, path_length, path_rewards))
-            if len(self.reward_cnt) >= 10:
-                self.reward_cnt.pop(0)
-                self.reward_cnt.append(path_rewards)
-            else:
-                self.reward_cnt.append(path_rewards)
-            if episode_t == 0:
-                self.vis.line(
-                    X=np.array([0]),
-                    Y=np.array([100 * (path_rewards - self.env.max_rewards)]),
-                    win='mean rewards',
-                    opts=dict(
-                        xlabel='episodes',
-                        ylabel='mean rewards',
-                        title='mean rewards'))
-                self.vis.line(
-                    X=np.array([0]),
-                    Y=np.array([path_length]),
-                    win="path len",
-                    opts=dict(
-                        xlabel='episodes',
-                        ylabel='path len',
-                        title='path len'))
-                self.vis.line(
-                    X=np.array([0]),
-                    Y=np.array([100 * (path_rewards - self.env.max_rewards)]),
-                    win="rewards",
-                    opts=dict(
-                        xlabel='episodes',
-                        ylabel='rewards',
-                        title='rewards'))
-            else:
-                self.vis.line(
-                    X=np.array([episode_t + 1]),
-                    Y=np.array([100 * ((sum(self.reward_cnt) / len(self.reward_cnt) if len(self.reward_cnt) else 0) - self.env.max_rewards)]),
-                    win='mean rewards',
-                    update='append')
-                self.vis.line(
-                    X=np.array([episode_t + 1]),
-                    Y=np.array([path_length]),
-                    win="path len",
-                    update='append')
-                self.vis.line(
-                    X=np.array([episode_t + 1]),
-                    Y=np.array([100 * (path_rewards - self.env.max_rewards)]),
-                    win="rewards",
-                    update='append')
-            if episode_t % self.args.eval_freq == 0:
-                eval_path_len, eval_rewards = self.eval(num_episodes=self.args.eval_times)
-                if episode_t == 0:
-                    self.vis.line(X=np.array([episode_t]),
-                                  Y=np.array([eval_path_len]),
-                                  win='eval_path_len',
-                                  opts=dict(xlabel='iter steps',
-                                            ylabel='path length',
-                                            title='path length'))
-                    self.vis.line(X=np.array([episode_t]),
-                                  Y=np.array([100 * (eval_rewards - self.env.max_rewards)]),
-                                  win='eval_rewards',
-                                  opts=dict(xlabel='iter steps',
-                                            ylabel='eval rewards',
-                                            title='eval rewards'))
-                else:
-                    self.vis.line(X=np.array([episode_t]),
-                                  Y=np.array([eval_path_len]),
-                                  win='eval_path_len',
-                                  update='append')
-                    self.vis.line(X=np.array([episode_t]),
-                                  Y=np.array([100 * (eval_rewards - self.env.max_rewards)]),
-                                  win='eval_rewards',
-                                  update='append')
+            result_deque.append(result)
+            score_deque.append(path_rewards)
+            success_rate = np.mean(result_deque)
+            mean_score = np.mean(score_deque)
+            logger.info(
+                "Episode: %d,          Path length: %d       result: %f       reward: %f"
+                % (i_episode, path_length, result, path_rewards))
+            if self.args.goal_set != 'random':
+                if self.args.reward_type == 'dense potential':
+                    vis.line(X=[i_episode], Y=[(path_rewards - self.env.max_rewards) * 100], win='reward', update='append')
+                    vis.line(X=[i_episode], Y=[(mean_score - self.env.max_rewards) * 100], win='mean reward',
+                             update='append')
+                if self.args.reward_type == 'dense distance':
+                    vis.line(X=[i_episode], Y=[path_rewards], win='reward', update='append')
+                    vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
+            vis.line(X=[i_episode], Y=[result], win='result', update='append')
+            vis.line(X=[i_episode], Y=[path_length], win='path len', update='append')
+            vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
+            if i_episode % self.args.eval_freq == 0:
+                eval_path_len, eval_rewards, eval_result = self.eval(num_episodes=self.args.eval_times)
+                eval_result_queue.append(eval_result)
+                eval_success_rate = np.mean(eval_result_queue)
+                logger.info(
+                    "Eval Episode: %d,          Path length: %d       result: %f" % (i_episode, eval_path_len, eval_result))
+                vis.line(X=[i_episode], Y=[eval_result], win='eval result', update='append')
+                vis.line(X=[i_episode], Y=[eval_path_len], win='eval path len', update='append')
+                vis.line(X=[i_episode], Y=[eval_success_rate * 100], win='eval success rate', update='append')
+                if self.args.goal_set != 'random':
+                    if self.args.reward_type == 'dense potential':
+                        vis.line(X=[i_episode], Y=[100 * (eval_rewards - self.env.max_rewards)], win='eval reward',
+                                 update='append')
+                    if self.args.reward_type == 'dense distance':
+                        vis.line(X=[i_episode], Y=[eval_rewards], win='eval reward', update='append')
 
     def compute_gae(self, next_obs, rewards, values, dones, lammbda=0.95):
 
@@ -186,6 +167,7 @@ class PPO_agent(object):
     def eval(self, num_episodes=1):
         path_len = 0
         rewards = 0
+        result = 0
         for i in range(num_episodes):
             cur_obs = self.env.reset()
             while True:
@@ -195,8 +177,12 @@ class PPO_agent(object):
                 path_len += 1
                 cur_obs = next_obs
                 if done:
+                    eval_result = 0.
+                    if done and path_len < self.args.max_episode_steps and not any(info['collision_state']):
+                        eval_result = 1.
+                    result += eval_result
                     break
-        return path_len / num_episodes, rewards / num_episodes
+        return path_len / num_episodes, rewards / num_episodes, result / num_episodes
 
 
 

@@ -34,7 +34,7 @@ mani_28 ppo_single reward -d 势函数  super hard  gamma 0.6  修正goal 标错
 mani_29 ppo_single reward -d 非势函数  super hard  gamma 0.9  
 mani_31 ppo_single reward -d 非势函数  super hard  gamma 0.9  
 mani_30 ppo_single reward -d 非势函数  super hard  gamma 0.6  
-mani_32 ppo_single reward -d 势函数     super hard  gamma 0.99   with out max steps done true  
+mani_32 ppo_single reward -d 势函数    super hard  gamma 0.99   without max steps done true  
 
 
 -------------------------------------------------remote-----------------------------------------------------------  

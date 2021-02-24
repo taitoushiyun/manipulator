@@ -272,7 +272,6 @@ class TD3Agent():
 
 
 def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_):
-    os.makedirs('checkpoints/actor', exist_ok=True)
     vis.line(X=[0], Y=[0], win='result', opts=dict(Xlabel='episode', Ylabel='result', title='result'))
     vis.line(X=[0], Y=[0], win='path len', opts=dict(Xlabel='episode', Ylabel='len', title='path len'))
     vis.line(X=[0], Y=[0], win='success rate', opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='success rate'))
