@@ -150,7 +150,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code-version', type=str, default='td3_91')
+    parser.add_argument('--code-version', type=str, default='td3_93')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     #  TD3 config
@@ -170,14 +170,14 @@ if __name__ == "__main__":
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='dense potential')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
-    parser.add_argument('--num-joints', type=int, default=12)
+    parser.add_argument('--num-joints', type=int, default=6)
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
                         default='hard')
-    parser.add_argument('--collision-cnt', type=int, default=15)
-    parser.add_argument('--scene-file', type=str, default='simple_12_1.ttt')
+    parser.add_argument('--collision-cnt', type=int, default=9)
+    parser.add_argument('--scene-file', type=str, default='simple_6_1.ttt')
     parser.add_argument('--headless-mode', action='store_true')
 
     parser.add_argument('--train', action='store_true')
