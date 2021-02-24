@@ -7,6 +7,7 @@ import visdom
 import logging
 from collections import deque
 import os
+import time
 logger = logging.getLogger('mani')
 
 
@@ -93,11 +94,14 @@ class PPO_agent(object):
                     torch.save(self.actor_critic.state_dict(), os.path.join(self.model_dir, f'{i_episode}.pth'))
                     self.iter_steps += 1
                 path_rewards += reward
-                if done or self.max_steps_per_episodes == path_length:
-                    result = 0.
-                    if done and path_length < self.args.max_episode_steps and not any(info['collision_state']):
-                        result = 1.
+                # if done or self.max_steps_per_episodes == path_length:
+                #     result = 0.
+                #     if done and path_length < self.args.max_episode_steps and not any(info['collision_state']):
+                #         result = 1.
+                #     break
+                if self.max_steps_per_episodes == path_length:
                     break
+            result = 0
             result_deque.append(result)
             score_deque.append(path_rewards)
             success_rate = np.mean(result_deque)
@@ -164,25 +168,32 @@ class PPO_agent(object):
                 loss.backward()
                 self.optimizer.step()
 
-    def eval(self, num_episodes=1):
+    def eval(self, num_episodes=1, test=False):
         path_len = 0
         rewards = 0
         result = 0
         for i in range(num_episodes):
             cur_obs = self.env.reset()
-            while True:
+            for i in range(self.args.max_episode_steps):
                 action = self.actor_critic.eval_action(torch.FloatTensor(cur_obs[None]))
                 next_obs, reward, done, info = self.env.step(action)
+                if test:
+                    time.sleep(0.1)
                 rewards += reward
                 path_len += 1
                 cur_obs = next_obs
-                if done:
-                    eval_result = 0.
-                    if done and path_len < self.args.max_episode_steps and not any(info['collision_state']):
-                        eval_result = 1.
-                    result += eval_result
-                    break
+                # if done:
+                #     eval_result = 0.
+                #     if done and path_len < self.args.max_episode_steps and not any(info['collision_state']):
+                #         eval_result = 1.
+                #     result += eval_result
+                #     break
         return path_len / num_episodes, rewards / num_episodes, result / num_episodes
+
+    def eval_model(self, model_file, eval_times):
+        model = torch.load(model_file)
+        self.actor_critic.load_state_dict(model)
+        self.eval(eval_times, test=True)
 
 
 
