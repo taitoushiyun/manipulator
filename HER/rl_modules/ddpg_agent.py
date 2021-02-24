@@ -145,7 +145,7 @@ class ddpg_agent:
                     self.vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
                     self.vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
                     torch.save([self.o_norm.mean, self.o_norm.std, self.g_norm.mean, self.g_norm.std,
-                                self.actor_network.state_dict()], self.model_path + f'{i_episode}.pt')
+                                self.actor_network.state_dict()], self.model_path + f'/{i_episode}.pt')
 
                 # convert them into arrays
                 mb_obs = np.array(mb_obs)
