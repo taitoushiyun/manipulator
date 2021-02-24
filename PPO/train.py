@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from vrep_pyrep.env import ManipulatorEnv
 import random
 import numpy as np
+import time
 
 
 def get_logger(code_version):
@@ -97,6 +98,8 @@ def main(args_):
                     weight_epsilon=args_.ent_coef)
     if args_.train:
         ppo.train()
+        env.end_simulation()
+        time.sleep(2)
     else:
         # ppo.eval_model(f'/home/cq/code/manipulator/PPO/checkpoints/mani_34/994.pth', 10)
         path_len = 0

@@ -91,7 +91,7 @@ class PPO_agent(object):
                     self._do_training(torch.FloatTensor(returns), torch.FloatTensor(values),
                                       torch.FloatTensor(old_log_probs), torch.FloatTensor(observations),
                                       torch.FloatTensor(actions))
-                    torch.save(self.actor_critic.state_dict(), os.path.join(self.model_dir, f'{i_episode}.pth'))
+                    torch.save(self.actor_critic.state_dict(), os.path.join(self.model_dir, f'{self.iter_steps}.pth'))
                     self.iter_steps += 1
                 path_rewards += reward
                 if done or self.max_steps_per_episodes == path_length:
