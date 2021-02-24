@@ -100,10 +100,7 @@ class ddpg_agent:
                             pi = self.actor_network(input_tensor)
                             action = self._select_actions(pi)
                         # feed the actions into the environment
-                        time_1 = time.time()
                         observation_new, reward, done, info = self.env.step(action)
-                        time_2 = time.time()
-                        print(time_2 - time_1)
                         episode_length += 1
                         score += reward
                         if episode_length >= self.args.max_episode_steps:
