@@ -98,12 +98,33 @@ def main(args_):
     if args_.train:
         ppo.train()
     else:
-        ppo.eval_model(f'/home/cq/code/manipulator/PPO/checkpoints/mani_34/994.pth', 10)
+        # ppo.eval_model(f'/home/cq/code/manipulator/PPO/checkpoints/mani_34/994.pth', 10)
+        path_len = 0
+        rewards = 0
+        result = 0
+        model = torch.load(f'/home/cq/code/manipulator/PPO/checkpoints/mani_37/997.pth')
+        actor_critic.load_state_dict(model)
+        for i in range(10):
+            # model = torch.load(f'/home/cq/code/manipulator/PPO/checkpoints/mani_34/.pth')
+            # actor_critic.load_state_dict(model)
+            cur_obs = env.reset()
+            for i in range(args_.max_episode_steps):
+                action = actor_critic.eval_action(torch.FloatTensor(cur_obs[None]))
+                next_obs, reward, done, info = env.step(action)
+                rewards += reward
+                path_len += 1
+                cur_obs = next_obs
+                if done:
+                    eval_result = 0.
+                    if done and path_len < args_.max_episode_steps and not any(info['collision_state']):
+                        eval_result = 1.
+                    result += eval_result
+                    break
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--code-version', type=str, default='mani_34')
+    parser.add_argument('--code-version', type=str, default='mani_36')
     parser.add_argument('--visdom-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     # ppo config
@@ -123,7 +144,7 @@ if __name__ == '__main__':
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=100)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
-    parser.add_argument('--reward-type', type=str, default='dense distance')
+    parser.add_argument('--reward-type', type=str, default='dense potential')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
     parser.add_argument('--num-joints', type=int, default=12)
     parser.add_argument('--num-segments', type=int, default=2)

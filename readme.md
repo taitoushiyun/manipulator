@@ -36,8 +36,12 @@ mani_31 ppo_single reward -d 非势函数  super hard  gamma 0.9
 mani_30 ppo_single reward -d 非势函数  super hard  gamma 0.6  
 mani_32 ppo_single reward -d 势函数    super hard  gamma 0.99   without max steps done true  
 
-----------------------------------ppo pyrep --------------------------------------------
-mani_33 reward dense potential hard goal gamma 0.95 plane model
+----------------------------------ppo pyrep --------------------------------------------  
+mani_33 reward dense potential hard goal gamma 0.95 plane model  
+mani_34 reward dense distance hard goal gamma 0.95 plane model  
+mani_35 reward dense distance hard goal gamma 0.95 plane model run whole episode  
+mani_36 reward dense distance hard goal gamma 0.95 3D model  
+mani_37 reward dense distance hard goal gamma 0.6 3D model 
 
 
 -------------------------------------------------remote-----------------------------------------------------------  
