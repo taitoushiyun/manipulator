@@ -1,4 +1,8 @@
-import importmagic
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
+sys.path.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'PPO'))
+sys.path.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'vrep_pyrep'))
 import torch
 import torch.optim as optim
 import numpy as np
@@ -6,7 +10,6 @@ from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 import visdom
 import logging
 from collections import deque
-import os
 import time
 logger = logging.getLogger('mani')
 

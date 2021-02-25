@@ -1,4 +1,8 @@
-import importmagic
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
+sys.path.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'PPO'))
+sys.path.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'vrep_pyrep'))
 from ppo_agent import PPO_agent, ReplayBuffer
 from actor_critic import Actor_critic
 import argparse
