@@ -17,3 +17,4 @@
 #python train.py --train --code-version mani_55 --gamma 0.8 --max-episode-steps 20
 python train.py --train --code-version mani_56 --gamma 0.6 --max-episode-steps 20 --headless-mode &
 python train.py --train --code-version mani_57 --gamma 0.0 --max-episode-steps 20 --headless-mode &
+python train.py --train --code-version mani_58 --gamma 0.8 --max-episode-steps 30 --headless-mode --goal-set random --num-episodes 20000

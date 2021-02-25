@@ -137,9 +137,9 @@ if __name__ == '__main__':
     # ppo config
     parser.add_argument('--actor-hidden-dim', type=list, default=[128, 128])
     parser.add_argument('--critic-hidden-dim', type=list, default=[64, 64])
-    parser.add_argument('--eval_times', type=int, default=1)
-    parser.add_argument('--eval_freq', type=int, default=5)
-    parser.add_argument('--num_episodes', type=int, default=1000)
+    parser.add_argument('--eval-times', type=int, default=1)
+    parser.add_argument('--eval-freq', type=int, default=5)
+    parser.add_argument('--num-episodes', type=int, default=1000)
     parser.add_argument('--ppo-epoch', type=int, default=4)
     parser.add_argument('--clip-epsilon', type=int, default=0.2)
     parser.add_argument('--gamma', type=float, default=0.95)
