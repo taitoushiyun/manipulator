@@ -1,6 +1,6 @@
 import importmagic
-from PPO.ppo_agent import PPO_agent, ReplayBuffer
-from PPO.actor_critic import Actor_critic
+from ppo_agent import PPO_agent, ReplayBuffer
+from actor_critic import Actor_critic
 import argparse
 import torch
 import matplotlib.pyplot as plt
