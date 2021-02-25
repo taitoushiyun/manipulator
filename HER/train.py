@@ -61,6 +61,10 @@ def get_env_params(env):
 
 
 def launch(args):
+    # # create the ddpg_agent
+    # env = gym.make(args.env_name)
+    # # set random seeds for reproduce
+    # env.seed(args.seed)
     # set random seeds for reproduce
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -71,23 +75,23 @@ def launch(args):
     for key, value in vars(args).items():
         reg += str(key) + ': ' + str(value) + '\n'
     logger.info(reg)
-    # env_config = {
-    #     'distance_threshold': args.distance_threshold,
-    #     'reward_type': args.reward_type,
-    #     'max_angles_vel': args.max_angles_vel,  # 10degree/s
-    #     'num_joints': args.num_joints,
-    #     'num_segments': args.num_segments,
-    #     'cc_model': args.cc_model,
-    #     'plane_model': args.plane_model,
-    #     'goal_set': args.goal_set,
-    #     'max_episode_steps': args.max_episode_steps,
-    #     'collision_cnt': args.collision_cnt,
-    #     'headless_mode': args.headless_mode,
-    #     'scene_file': args.scene_file,
-    # }
-    # env = ManipulatorEnv(env_config)
-    # env.action_space.seed(args.seed)
-    env = gym.make(args.env_name)
+    env_config = {
+        'distance_threshold': args.distance_threshold,
+        'reward_type': args.reward_type,
+        'max_angles_vel': args.max_angles_vel,  # 10degree/s
+        'num_joints': args.num_joints,
+        'num_segments': args.num_segments,
+        'cc_model': args.cc_model,
+        'plane_model': args.plane_model,
+        'goal_set': args.goal_set,
+        'max_episode_steps': args.max_episode_steps,
+        'collision_cnt': args.collision_cnt,
+        'headless_mode': args.headless_mode,
+        'scene_file': args.scene_file,
+    }
+    env = ManipulatorEnv(env_config)
+    env.action_space.seed(args.seed)
+
     # get the environment parameters
     env_params = get_env_params(env)
     # create the ddpg agent to interact with the environment 

@@ -100,7 +100,7 @@ class ddpg_agent:
                             pi = self.actor_network(input_tensor)
                             action = self._select_actions(pi)
                         # feed the actions into the environment
-                        self.env.render()
+                        # self.env.render()
                         observation_new, reward, done, info = self.env.step(action)
                         episode_length += 1
                         score += reward
@@ -163,7 +163,7 @@ class ddpg_agent:
                 self._soft_update_target_network(self.actor_target_network, self.actor_network)
                 self._soft_update_target_network(self.critic_target_network, self.critic_network)
             # start to do the evaluation
-            self._eval_agent(i_episode)
+            self._eval_agent(epoch)
             # print('[{}] epoch is: {}, eval success rate is: {:.3f}'.format(datetime.now(), epoch, success_rate))
 
     # pre_process the inputs
@@ -217,8 +217,8 @@ class ddpg_agent:
         self.g_norm.recompute_stats()
 
     def _preproc_og(self, o, g):
-        # o = np.clip(o, -self.args.clip_obs, self.args.clip_obs)
-        # g = np.clip(g, -self.args.clip_obs, self.args.clip_obs)
+        o = np.clip(o, -self.args.clip_obs, self.args.clip_obs)
+        g = np.clip(g, -self.args.clip_obs, self.args.clip_obs)
         return o, g
 
     # soft update
@@ -282,40 +282,63 @@ class ddpg_agent:
         self.critic_optim.step()
 
     # do the evaluation
-    def _eval_agent(self, i_episode):
-        eval_score = 0
-        total_len = 0
-        per_success_rate = []
-        observation = self.env.reset()
-        obs = observation['observation']
-        g = observation['desired_goal']
-        for _ in range(self.env_params['max_timesteps']):
-            with torch.no_grad():
-                input_tensor = self._preproc_inputs(obs, g)
-                pi = self.actor_network(input_tensor)
-                # convert the actions
-                actions = pi.detach().cpu().numpy().squeeze()
-            observation_new, _, _, info = self.env.step(actions)
-            total_len += 1
-            if total_len >= self.args.max_episode_steps:
-                if info['is_success']:
-                    eval_result = 1.
-                else:
-                    eval_result = 0
-            obs = observation_new['observation']
-            g = observation_new['desired_goal']
-        self.eval_result_queue.append(eval_result)
-        eval_success_rate = np.mean(self.eval_result_queue)
-        logger.info(
-            "Eval Episode: %d,          Path length: %d       result: %f" % (i_episode, total_len, eval_result))
-        self.vis.line(X=[i_episode], Y=[eval_result], win='eval result', update='append')
-        self.vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
-        self.vis.line(X=[i_episode], Y=[eval_success_rate * 100], win='eval success rate', update='append')
-        if self.args.goal_set != 'random':
-            if self.args.reward_type == 'dense potential':
-                self.vis.line(X=[i_episode], Y=[100 * (eval_score - self.env.max_rewards)], win='eval reward', update='append')
-            if self.args.reward_type == 'dense distance':
-                self.vis.line(X=[i_episode], Y=[eval_score], win='eval reward', update='append')
+    def _eval_agent(self, n_epoch):
+        total_success_rate = []
+        for _ in range(self.args.n_test_rollouts):
+            per_success_rate = []
+            observation = self.env.reset()
+            obs = observation['observation']
+            g = observation['desired_goal']
+            for _ in range(self.env_params['max_timesteps']):
+                with torch.no_grad():
+                    input_tensor = self._preproc_inputs(obs, g)
+                    pi = self.actor_network(input_tensor)
+                    # convert the actions
+                    actions = pi.detach().cpu().numpy().squeeze()
+                observation_new, _, _, info = self.env.step(actions)
+                obs = observation_new['observation']
+                g = observation_new['desired_goal']
+                per_success_rate.append(info['is_success'])
+            total_success_rate.append(per_success_rate)
+        total_success_rate = np.array(total_success_rate)
+        local_success_rate = np.mean(total_success_rate[:, -1])
+        self.vis.line(X=[n_epoch], Y=[local_success_rate * 100], win='eval success rate', update='append')
+
+    # def _eval_agent(self, i_episode):
+    #     for i in range(self.args.n_test_rollouts):
+    #         eval_score = 0
+    #         total_len = 0
+    #         per_success_rate = []
+    #         observation = self.env.reset()
+    #         obs = observation['observation']
+    #         g = observation['desired_goal']
+    #         for _ in range(self.env_params['max_timesteps']):
+    #             with torch.no_grad():
+    #                 input_tensor = self._preproc_inputs(obs, g)
+    #                 pi = self.actor_network(input_tensor)
+    #                 # convert the actions
+    #                 actions = pi.detach().cpu().numpy().squeeze()
+    #             observation_new, _, _, info = self.env.step(actions)
+    #             total_len += 1
+    #             if total_len >= self.args.max_episode_steps:
+    #                 if info['is_success']:
+    #                     eval_result = 1.
+    #                 else:
+    #                     eval_result = 0
+    #             obs = observation_new['observation']
+    #             g = observation_new['desired_goal']
+    #     self.eval_result_queue.append(eval_result)
+    #     eval_success_rate = np.mean(self.eval_result_queue)
+    #     logger.info(
+    #         "Eval Episode: %d,          Path length: %d       result: %f" % (i_episode, total_len, eval_result))
+    #     self.vis.line(X=[i_episode], Y=[eval_result], win='eval result', update='append')
+    #     self.vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
+    #     self.vis.line(X=[i_episode], Y=[eval_success_rate * 100], win='eval success rate', update='append')
+    #     if self.args.goal_set != 'random':
+    #         if self.args.reward_type == 'dense potential':
+    #             self.vis.line(X=[i_episode], Y=[100 * (eval_score - self.env.max_rewards)], win='eval reward', update='append')
+    #         if self.args.reward_type == 'dense distance':
+    #             self.vis.line(X=[i_episode], Y=[eval_score], win='eval reward', update='append')
 
     def eval(self):
         model = torch.load('/home/cq/code/manipulator/HER/saved_models/her_0/10000.pt')

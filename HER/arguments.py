@@ -8,11 +8,11 @@ Here are the param for the training
 def get_args():
     parser = argparse.ArgumentParser()
     # the environment setting
-    parser.add_argument('--code-version', type=str, default='her_2')
+    parser.add_argument('--code-version', type=str, default='her_3')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--env-name', type=str, default='FetchReach-v1', help='the environment name')
-    parser.add_argument('--n-epochs', type=int, default=50, help='the number of epochs to train the agent')
-    parser.add_argument('--n-cycles', type=int, default=50, help='the times to collect samples per epoch')
+    parser.add_argument('--n-epochs', type=int, default=500, help='the number of epochs to train the agent')
+    parser.add_argument('--n-cycles', type=int, default=10, help='the times to collect samples per epoch')
     parser.add_argument('--n-batches', type=int, default=40, help='the times to update the network')
     parser.add_argument('--save-interval', type=int, default=5, help='the interval that save the trajectory')
     parser.add_argument('--seed', type=int, default=123, help='random seed')
@@ -37,7 +37,7 @@ def get_args():
     parser.add_argument('--num-rollouts-per-mpi', type=int, default=2, help='the rollouts per mpi')
 
     # env config
-    parser.add_argument('--max-episode-steps', type=int, default=100)
+    parser.add_argument('--max-episode-steps', type=int, default=50)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='sparse')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
@@ -48,7 +48,7 @@ def get_args():
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
                         default='random')
     parser.add_argument('--collision-cnt', type=int, default=15)
-    parser.add_argument('--scene-file', type=str, default='by_12_1.ttt')
+    parser.add_argument('--scene-file', type=str, default='simple_12_1.ttt')
     parser.add_argument('--headless-mode', action='store_true')
 
     parser.add_argument('--train', action='store_true')
