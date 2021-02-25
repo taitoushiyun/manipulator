@@ -133,7 +133,7 @@ class ddpg_agent:
                     time_b = time.time()
                     print(time_b - time_a)
                     logger.info("Episode: %d,          Path length: %d       result: %f       reward: %f"
-                                % (i_episode, 100, result, score))
+                                % (i_episode, episode_length, result, score))
                     if self.args.goal_set != 'random':
                         if self.args.reward_type == 'dense potential':
                             self.vis.line(X=[i_episode], Y=[(score - self.env.max_rewards) * 100], win='reward', update='append')
@@ -315,3 +315,9 @@ class ddpg_agent:
                 self.vis.line(X=[i_episode], Y=[100 * (eval_score - self.env.max_rewards)], win='eval reward', update='append')
             if self.args.reward_type == 'dense distance':
                 self.vis.line(X=[i_episode], Y=[eval_score], win='eval reward', update='append')
+
+    def eval(self):
+        model = torch.load('/home/cq/code/manipulator/HER/saved_models/her_0/10000.pt')
+        self.actor_network.load_state_dict(model[-1])
+        for i in range(10):
+            self._eval_agent(i)

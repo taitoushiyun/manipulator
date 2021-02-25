@@ -91,7 +91,10 @@ def launch(args):
     env_params = get_env_params(env)
     # create the ddpg agent to interact with the environment 
     ddpg_trainer = ddpg_agent(args, env, env_params)
-    ddpg_trainer.learn()
+    if args.train:
+        ddpg_trainer.learn()
+    else:
+        ddpg_trainer.eval()
 
 
 if __name__ == '__main__':
