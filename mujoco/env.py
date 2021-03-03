@@ -238,6 +238,8 @@ class ManipulatorEnv(gym.Env):
                 theta = theta.flatten()
             else:
                 raise ValueError
+        elif isinstance(self.goal_set, str) and self.goal_set.startswith('block'):
+            return None, np.array([0.7, 0, 0.8]), 0
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)
@@ -280,7 +282,7 @@ if __name__ == '__main__':
         'num_segments': 2,
         'cc_model': False,
         'plane_model': False,
-        'goal_set': 'random',
+        'goal_set': 'block0',
         'max_episode_steps': 20,
         'collision_cnt': 15,
         'scene_file': 'mani_env_24.xml',
