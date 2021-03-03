@@ -7,9 +7,11 @@ import random
 import torch
 main_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 sys.path.append(main_dir)
-sys.path.append(os.path.join(main_dir, 'vrep_pyrep'))
+# sys.path.append(os.path.join(main_dir, 'vrep_pyrep'))
+sys.path.append(os.path.join(main_dir, 'mujoco'))
 
-from vrep_pyrep.env import ManipulatorEnv
+# from vrep_pyrep.env import ManipulatorEnv
+from mujoco.env import ManipulatorEnv
 
 
 
@@ -88,9 +90,11 @@ def launch(args):
         'collision_cnt': args.collision_cnt,
         'headless_mode': args.headless_mode,
         'scene_file': args.scene_file,
+        'n_substeps': 100,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args.seed)
+    env.seed()
 
     # get the environment parameters
     env_params = get_env_params(env)

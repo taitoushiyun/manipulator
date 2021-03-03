@@ -101,6 +101,8 @@ class ddpg_agent:
                             action = self._select_actions(pi)
                         # feed the actions into the environment
                         # self.env.render()
+                        if not self.args.headless_mode:
+                            self.env.render()
                         observation_new, reward, done, info = self.env.step(action)
                         episode_length += 1
                         score += reward

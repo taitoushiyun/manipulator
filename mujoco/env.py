@@ -48,7 +48,7 @@ class ManipulatorEnv(gym.Env):
         self.collision_cnt = env_config['collision_cnt']
         self.headless_mode = env_config['headless_mode']
 
-        model_xml_path = os.path.join('mani', env_config['scene_file'])
+        model_xml_path = os.path.join(os.path.dirname(__file__), 'mani', env_config['scene_file'])
         if not os.path.exists(model_xml_path):
             raise IOError('File {} does not exist'.format(model_xml_path))
         model = mujoco_py.load_model_from_path(model_xml_path)
@@ -295,32 +295,39 @@ if __name__ == '__main__':
 
     time_a = time.time()
     lines = []
-    for i in range(2):
+    for i in range(1):
         line = []
         obs = env.reset()
+        last_obs = obs['observation'][1] * RAD2DEG
         for j in range(env_config['max_episode_steps']):
             time_a = time.time()
             env.render()
             if j<10:
-                action_ = np.array([0, 0, 0, 0, 0, 0, 0, -1, 0, -1, 0, -1])
-                # action_ = np.ones((6, )) * 10
+                # action_ = np.array([-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0])
+                action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]) * 2
+                # # action_ = np.ones((6, )) * j
+                # action_ = np.ones((12, )) * -1
             else:
                 action_ = np.zeros((env.action_dim, ))
             obs, reward, done, info = env.step(action_)
+            print(obs['observation'][1] * RAD2DEG - last_obs)
+            last_obs = obs['observation'][1] * RAD2DEG
             time_b = time.time()
             # print(time_b - time_a)
             # print(env.sim.model.opt.timestep)
-            # print(obs['observation'][1] * RAD2DEG)
+
             # print(obs['observation'].shape)
             line.append(obs['observation'][1] * RAD2DEG)
         lines.append(line)
+
+
     # time_b = time.time()
     # print(time_b - time_a)
 
-    from matplotlib import pyplot as plt
-    for i in range(1):
-        plt.plot(lines[0])
-    plt.show()
+    # from matplotlib import pyplot as plt
+    # for i in range(1):
+    #     plt.plot(lines[0])
+    # plt.show()
 
 
 

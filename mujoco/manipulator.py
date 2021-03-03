@@ -1,7 +1,7 @@
 
 
 class ManipulatorPlane:
-    def __init__(self, sim, num_joints=12, num_segments=2, collision_cnt=15):
+    def __init__(self, sim=None, num_joints=12, num_segments=2, collision_cnt=15):
         self.sim = sim
         self.joint_index = range(1, num_joints, 2)
 
@@ -23,7 +23,7 @@ class ManipulatorPlane:
 
 
 class Manipulator3D:
-    def __init__(self, sim, num_joints=12, num_segments=6, collision_cnt=15):
+    def __init__(self, sim=None, num_joints=12, num_segments=6, collision_cnt=15):
         self.sim = sim
         self.joint_index = list(range(num_joints))
         assert len(self.sim.data.ctrl) == num_joints
