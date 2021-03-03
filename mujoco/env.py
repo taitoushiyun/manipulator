@@ -276,19 +276,19 @@ if __name__ == '__main__':
         'distance_threshold': 0.02,
         'reward_type': 'dense distance',
         'max_angles_vel': 10,  # 10degree/s
-        'num_joints': 12,
+        'num_joints': 24,
         'num_segments': 2,
         'cc_model': False,
         'plane_model': False,
-        'goal_set': 'hard',
+        'goal_set': 'random',
         'max_episode_steps': 20,
         'collision_cnt': 15,
-        'scene_file': 'mani_env.xml',
+        'scene_file': 'mani_env_24.xml',
         'headless_mode': False,
         'n_substeps': 100,
     }
     env = ManipulatorEnv(env_config)
-    action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
+    # action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
     # obs = env.reset()
     # while True:
     #     pass
@@ -301,19 +301,19 @@ if __name__ == '__main__':
         last_obs = obs['observation'][1] * RAD2DEG
         for j in range(env_config['max_episode_steps']):
             time_a = time.time()
-            env.render()
+            # env.render()
             if j<10:
                 # action_ = np.array([-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0])
-                action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]) * 2
+                # action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]) * 2
                 # # action_ = np.ones((6, )) * j
-                # action_ = np.ones((12, )) * -1
+                action_ = np.ones((24, )) * -1
             else:
                 action_ = np.zeros((env.action_dim, ))
             obs, reward, done, info = env.step(action_)
-            print(obs['observation'][1] * RAD2DEG - last_obs)
-            last_obs = obs['observation'][1] * RAD2DEG
+            # print(obs['observation'][1] * RAD2DEG - last_obs)
+            # last_obs = obs['observation'][1] * RAD2DEG
             time_b = time.time()
-            # print(time_b - time_a)
+            print(time_b - time_a)
             # print(env.sim.model.opt.timestep)
 
             # print(obs['observation'].shape)

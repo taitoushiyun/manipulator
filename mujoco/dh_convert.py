@@ -26,7 +26,7 @@ class DHModel(object):
         self.num_joints = num_joints
 
     def forward_kinematics(self, theta):
-        assert len(theta) % 2 == 0 and len(theta) == self.num_joints
+        assert len(theta) % 2 == 0 and len(theta) == self.num_joints, f"len(theta)={len(theta)}, self.num_joints={self.num_joints}"
         L = 0.1
         temp = np.array([[1, 0, 0, 0.2],
                         [0, 1, 0, 0],
