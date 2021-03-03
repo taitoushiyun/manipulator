@@ -1,0 +1,12 @@
+		<velocity joint="robot0:joint1"/>
+		<velocity joint="robot0:joint2"/>
+		<velocity joint="robot0:joint3"/>
+		<velocity joint="robot0:joint4"/>
+		<velocity joint="robot0:joint5"/>
+		<velocity joint="robot0:joint6"/>
+		<velocity joint="robot0:joint7"/>
+		<velocity joint="robot0:joint8"/>
+		<velocity joint="robot0:joint9"/>
+		<velocity joint="robot0:joint10"/>
+		<velocity joint="robot0:joint11"/>
+		<velocity joint="robot0:joint12"/>
