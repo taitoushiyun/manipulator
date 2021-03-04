@@ -151,7 +151,7 @@ if __name__ == '__main__':
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=100)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
-    parser.add_argument('--reward-type', type=str, default='dense potential')
+    parser.add_argument('--reward-type', type=str, default='dense distance')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
     parser.add_argument('--num-joints', type=int, default=12)
     parser.add_argument('--num-segments', type=int, default=2)
