@@ -30,7 +30,7 @@ def get_args():
     parser.add_argument('--lr-actor', type=float, default=0.001, help='the learning rate of the actor')
     parser.add_argument('--lr-critic', type=float, default=0.001, help='the learning rate of the critic')
     parser.add_argument('--polyak', type=float, default=0.95, help='the average coefficient')  # TODO
-    parser.add_argument('--n-test-rollouts', type=int, default=3, help='the number of tests')
+    parser.add_argument('--n-test-rollouts', type=int, default=10, help='the number of tests')
     parser.add_argument('--clip-range', type=float, default=5, help='the clip range')  # TODO
     parser.add_argument('--demo-length', type=int, default=20, help='the demo length')
     parser.add_argument('--cuda', action='store_true', help='if use gpu do the acceleration')
