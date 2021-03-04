@@ -169,6 +169,8 @@ her_3 her on pyrep env num_joints 12
 her_4 her on pyrep env num_joints 24
 her_5 her on mujoco env  num_joints 12  
 her_6 her on mujoco env  num_joints 24
+her_7 her on mujoco env num_joints 12 hard goal 
+her_8 her on mucjoco env num_joints 12 block0 goal
 
 
  
