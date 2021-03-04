@@ -14,6 +14,7 @@
         <material name="robot0:head_mat" shininess="0.03" specular="0.4" reflectance="0"></material>
         <material name="robot0:torso_mat" shininess="0.03" specular="0.4" reflectance="0"></material>
         <material name="robot0:base_mat" shininess="0.03" specular="0.4" reflectance="0"></material>
+        <mesh file="hole0.stl" name="robot0:hole0"></mesh>
     </asset>
 
 
