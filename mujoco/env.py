@@ -239,7 +239,10 @@ class ManipulatorEnv(gym.Env):
             else:
                 raise ValueError
         elif isinstance(self.goal_set, str) and self.goal_set.startswith('block'):
-            return None, np.array([0.7, 0, 0.8]), 0
+            if self.goal_set == 'block0':
+                return None, np.array([0.7, 0, 0.8]), 0
+            elif self.goal_set == 'block1':
+                return None, np.array([0.6, 0, 1.2]), 0
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)
