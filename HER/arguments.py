@@ -8,7 +8,7 @@ Here are the param for the training
 def get_args():
     parser = argparse.ArgumentParser()
     # the environment setting
-    parser.add_argument('--code-version', type=str, default='her_7')
+    parser.add_argument('--code-version', type=str, default='her_9')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--env-name', type=str, default='FetchReach-v1', help='the environment name')
     parser.add_argument('--n-epochs', type=int, default=500, help='the number of epochs to train the agent')
@@ -30,7 +30,7 @@ def get_args():
     parser.add_argument('--lr-actor', type=float, default=0.001, help='the learning rate of the actor')
     parser.add_argument('--lr-critic', type=float, default=0.001, help='the learning rate of the critic')
     parser.add_argument('--polyak', type=float, default=0.95, help='the average coefficient')  # TODO
-    parser.add_argument('--n-test-rollouts', type=int, default=10, help='the number of tests')
+    parser.add_argument('--n-test-rollouts', type=int, default=3, help='the number of tests')
     parser.add_argument('--clip-range', type=float, default=5, help='the clip range')  # TODO
     parser.add_argument('--demo-length', type=int, default=20, help='the demo length')
     parser.add_argument('--cuda', action='store_true', help='if use gpu do the acceleration')
@@ -45,10 +45,10 @@ def get_args():
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
-                        default='hard')
+    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random', 'block0'],
+                        default='block0')
     parser.add_argument('--collision-cnt', type=int, default=15)
-    parser.add_argument('--scene-file', type=str, default='mani_env.xml')
+    parser.add_argument('--scene-file', type=str, default='mani_block_env.xml')
     parser.add_argument('--headless-mode', action='store_true')
 
     parser.add_argument('--train', action='store_true')

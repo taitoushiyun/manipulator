@@ -286,7 +286,7 @@ class ddpg_agent:
     # do the evaluation
     def _eval_agent(self, n_epoch):
         total_success_rate = []
-        for _ in range(self.args.n_test_rollouts):
+        for i in range(self.args.n_test_rollouts):
             per_success_rate = []
             observation = self.env.reset()
             obs = observation['observation']
@@ -297,6 +297,8 @@ class ddpg_agent:
                     pi = self.actor_network(input_tensor)
                     # convert the actions
                     actions = pi.detach().cpu().numpy().squeeze()
+                if not self.args.headless_mode:
+                    self.env.render()
                 observation_new, _, _, info = self.env.step(actions)
                 obs = observation_new['observation']
                 g = observation_new['desired_goal']
@@ -343,7 +345,7 @@ class ddpg_agent:
     #             self.vis.line(X=[i_episode], Y=[eval_score], win='eval reward', update='append')
 
     def eval(self):
-        model = torch.load('/home/cq/code/manipulator/HER/saved_models/her_0/10000.pt')
-        self.actor_network.load_state_dict(model[-1])
-        for i in range(10):
-            self._eval_agent(i)
+        for i in range(2150, 2188):
+            model = torch.load(f'/home/cq/code/manipulator/HER/saved_models/her_7/{i}.pt')
+            self.actor_network.load_state_dict(model[-1])
+            self._eval_agent(0)

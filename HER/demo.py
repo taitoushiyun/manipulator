@@ -3,6 +3,13 @@ from rl_modules.models import actor
 from arguments import get_args
 import gym
 import numpy as np
+import os
+import sys
+main_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+sys.path.append(main_dir)
+# sys.path.append(os.path.join(main_dir, 'vrep_pyrep'))
+sys.path.append(os.path.join(main_dir, 'mujoco'))
+from mujoco.env import ManipulatorEnv
 
 # process the inputs
 def process_inputs(o, g, o_mean, o_std, g_mean, g_std, args):
@@ -17,10 +24,27 @@ def process_inputs(o, g, o_mean, o_std, g_mean, g_std, args):
 if __name__ == '__main__':
     args = get_args()
     # load the model param
-    model_path = args.save_dir + args.env_name + '/model.pt'
+    model_path = 'saved_models/her_7/2188.pt'
     o_mean, o_std, g_mean, g_std, model = torch.load(model_path, map_location=lambda storage, loc: storage)
     # create the environment
-    env = gym.make(args.env_name)
+    env_config = {
+        'distance_threshold': args.distance_threshold,
+        'reward_type': args.reward_type,
+        'max_angles_vel': args.max_angles_vel,  # 10degree/s
+        'num_joints': args.num_joints,
+        'num_segments': args.num_segments,
+        'cc_model': args.cc_model,
+        'plane_model': args.plane_model,
+        'goal_set': args.goal_set,
+        'max_episode_steps': args.max_episode_steps,
+        'collision_cnt': args.collision_cnt,
+        'headless_mode': args.headless_mode,
+        'scene_file': args.scene_file,
+        'n_substeps': 100,
+    }
+    env = ManipulatorEnv(env_config)
+    env.action_space.seed(args.seed)
+    env.seed()
     # get the env param
     observation = env.reset()
     # get the environment params
@@ -30,6 +54,7 @@ if __name__ == '__main__':
                   'action_max': env.action_space.high[0],
                   }
     # create the actor network
+
     actor_network = actor(env_params)
     actor_network.load_state_dict(model)
     actor_network.eval()
