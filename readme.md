@@ -165,14 +165,19 @@ td3_86 hard goal num_joints 24 gamma 0.99 dense potential not cc model 3D model
 
 
 -------------------------------------her -------------------------------------------------  
-her_3 her on pyrep env num_joints 12
-her_4 her on pyrep env num_joints 24
+her_3 her on pyrep env num_joints 12  
+her_4 her on pyrep env num_joints 24  
 her_5 her on mujoco env  num_joints 12  
-her_6 her on mujoco env  num_joints 24
-her_7 her on mujoco env num_joints 12 hard goal 
-her_8 her on mujoco env num_joints 12 block0 goal
-her_9 her on mujoco env num_joints 12 block0 goal block env
-her_10 her on mujococ env num_joints 12 block1 goal 
+her_6 her on mujoco env  num_joints 24  
+her_7 her on mujoco env num_joints 12 hard goal   
+her_8 her on mujoco env num_joints 12 block0 goal  
+her_9 her on mujoco env num_joints 12 block0 goal block env  
+her_10 her on mujococ env num_joints 12 block1 goal  
+her_11 her on mujoco env num_joints 12 block1 goal block env  
+her_12 her on mujoco env num_joints 12 block2 goal block env  
+her_13 her on mujoco env num_joints 12 block2 goal  
+
+  
 
 
  

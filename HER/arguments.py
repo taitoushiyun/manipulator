@@ -8,7 +8,7 @@ Here are the param for the training
 def get_args():
     parser = argparse.ArgumentParser()
     # the environment setting
-    parser.add_argument('--code-version', type=str, default='her_11')
+    parser.add_argument('--code-version', type=str, default='her_13')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--env-name', type=str, default='FetchReach-v1', help='the environment name')
     parser.add_argument('--n-epochs', type=int, default=200, help='the number of epochs to train the agent')
@@ -45,10 +45,10 @@ def get_args():
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random', 'block0', 'block1'],
-                        default='block1')
+    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random', 'block0', 'block1', 'block2'],
+                        default='block2')
     parser.add_argument('--collision-cnt', type=int, default=15)
-    parser.add_argument('--scene-file', type=str, default='mani_block2_env.xml')
+    parser.add_argument('--scene-file', type=str, default='mani_env.xml')
     parser.add_argument('--headless-mode', action='store_true')
 
     parser.add_argument('--train', action='store_true')
