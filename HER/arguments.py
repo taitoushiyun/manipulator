@@ -8,7 +8,7 @@ Here are the param for the training
 def get_args():
     parser = argparse.ArgumentParser()
     # the environment setting
-    parser.add_argument('--code-version', type=str, default='her_16')
+    parser.add_argument('--code-version', type=str, default='her_17')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--env-name', type=str, default='FetchReach-v1', help='the environment name')
     parser.add_argument('--n-epochs', type=int, default=500, help='the number of epochs to train the agent')

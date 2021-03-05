@@ -15,6 +15,43 @@ import logging
 logger = logging.getLogger('mani')
 
 
+class HeatBuffer:
+    def __init__(self, buffer_size=2000):
+        self.heat_map = np.zeros((201, 121))
+        self.buffer_size = buffer_size
+        self.achieved_goal = np.zeros((self.buffer_size, 3))
+        self._top = 0
+        self._size = 0
+
+    def add_sample(self, obs):
+        assert obs.shape[0] == 3
+        old_obs = self.achieved_goal[self._top]
+        old_index = self._get_index(old_obs)
+        new_index = self._get_index(obs)
+        self.heat_map[old_index] = max(self.heat_map[old_index] - 1, 0)
+        self.heat_map[new_index] = self.heat_map[new_index] + 1
+        self.achieved_goal[self._top] = obs.copy()
+        self._advance()
+
+    def _get_index(self, obs):
+        index_x = self.clamp((obs[0] - 0.2) // 0.01, 0, 120)
+        index_y = self.clamp(obs[2] // 0.01, 0, 200)
+        return int(index_y), int(index_x)
+
+    def _advance(self):
+        self._top = (self._top + 1) % self.buffer_size
+        if self._size < self.buffer_size:
+            self._size += 1
+
+    @staticmethod
+    def clamp(n, minn, maxn):
+        return max(min(maxn,  n), minn)
+
+    @property
+    def total_size(self):
+        return self._size
+
+
 class ddpg_agent:
     def __init__(self, args, env, env_params):
         self.args = args
@@ -70,6 +107,7 @@ class ddpg_agent:
         self.result_deque = deque(maxlen=20)
         self.score_deque = deque(maxlen=10)
         self.eval_result_queue = deque(maxlen=10)
+        self.heat_buffer = HeatBuffer(buffer_size=2000)
 
     def learn(self):
         """
@@ -104,6 +142,7 @@ class ddpg_agent:
                         if not self.args.headless_mode:
                             self.env.render()
                         observation_new, reward, done, info = self.env.step(action)
+                        self.heat_buffer.add_sample(observation_new['achieved_goal'])
                         episode_length += 1
                         score += reward
                         if episode_length >= self.args.max_episode_steps:
@@ -166,6 +205,19 @@ class ddpg_agent:
                 self._soft_update_target_network(self.critic_target_network, self.critic_network)
             # start to do the evaluation
             self._eval_agent(epoch)
+            if epoch % 2 == 0:
+                self.vis.heatmap(
+                    X=self.heat_buffer.heat_map,
+                    win=f'epoch{epoch}',
+                    opts={
+                        'Xlable': 'X',
+                        'Ylable': 'Y',
+                        'title': f'epoch{epoch}',
+                        'columnnames': list(map(lambda x: '%.2f' % x, list(np.linspace(0.2, 1.4, num=121, endpoint=True)))),
+                        'rownames': list(map(lambda x: '%.2f' % x, list(np.linspace(0, 2, num=201, endpoint=True)))),
+                        'colormap': 'Viridis',  # 'Electric'
+                    }
+                )
             # print('[{}] epoch is: {}, eval success rate is: {:.3f}'.format(datetime.now(), epoch, success_rate))
 
     # pre_process the inputs
