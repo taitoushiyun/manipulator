@@ -41,14 +41,15 @@ def get_args():
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='sparse')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
-    parser.add_argument('--num-joints', type=int, default=12)
+    parser.add_argument('--num-joints', type=int, default=24)
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random', 'block0', 'block1', 'block2'],
-                        default='block2')
+    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random',
+                                                         'block0', 'block1', 'block2', 'block3'],
+                        default='block3')
     parser.add_argument('--collision-cnt', type=int, default=15)
-    parser.add_argument('--scene-file', type=str, default='mani_env.xml')
+    parser.add_argument('--scene-file', type=str, default='mani_env_24.xml')
     parser.add_argument('--headless-mode', action='store_true')
 
     parser.add_argument('--train', action='store_true')
