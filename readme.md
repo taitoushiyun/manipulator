@@ -176,7 +176,7 @@ her_10 her on mujococ env num_joints 12 block1 goal
 her_11 her on mujoco env num_joints 12 block1 goal block env  
 her_12 her on mujoco env num_joints 12 block2 goal block env  
 her_13 her on mujoco env num_joints 12 block2 goal  
-
+her_14 her on mujoco env num_joints 24 block3 goal
   
 
 
