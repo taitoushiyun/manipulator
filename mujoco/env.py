@@ -247,6 +247,8 @@ class ManipulatorEnv(gym.Env):
                 return None, np.array([0.5, 0, 0.73]), 0
             elif self.goal_set == 'block3':
                 return None, np.array([0.8, 0, 0.73]), 0
+            elif self.goal_set == 'block4':
+                return None, np.array([1.2, 0, 0.8]), 0
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)

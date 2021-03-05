@@ -25,7 +25,7 @@ if __name__ == '__main__':
     args = get_args()
     # load the model param
     # model_path = 'saved_models/her_9/1488.pt'
-    model_path = 'saved_models/her_13/3840.pt'
+    model_path = 'saved_models/her_14/1160.pt'
     o_mean, o_std, g_mean, g_std, model = torch.load(model_path, map_location=lambda storage, loc: storage)
     # create the environment
     env_config = {
