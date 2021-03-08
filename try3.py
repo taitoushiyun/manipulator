@@ -1,18 +1,18 @@
 import visdom
 import numpy as np
 import time
-Y = np.random.rand(100)
-Y = (Y[Y > 0] + 1.5).astype(int),  # 100个标签1和2
-viz = visdom.Visdom(port=6016, env='a_test')
-viz.scatter(
-    X=np.random.rand(100, 3),
-    Y=np.concatenate([np.ones((50, ))*1, np.ones((50, ))*2], axis=-1),
-    opts={
-        'title': '3D Scatter',
-        'legend': ['Men', 'Women'],
-        'markersize': 5
-    }
-)
+# Y = np.random.rand(100)
+# Y = (Y[Y > 0] + 1.5).astype(int),  # 100个标签1和2
+# viz = visdom.Visdom(port=6016, env='a_test')
+# viz.scatter(
+#     X=np.random.rand(100, 3),
+#     Y=np.concatenate([np.ones((50, ))*1, np.ones((50, ))*2], axis=-1),
+#     opts={
+#         'title': '3D Scatter',
+#         'legend': ['Men', 'Women'],
+#         'markersize': 5
+#     }
+# )
 # time_a = time.time()
 # viz.heatmap(
 #     X=np.random.randint(1, 10, (200, 120)),
@@ -39,3 +39,4 @@ viz.scatter(
 # c = ['%.2f'% 0.1234]
 # print(c)
 # print((1.4 - 0.2) // 0.01)
+print(np.random.randint(1, 10, size=(1, 3)))

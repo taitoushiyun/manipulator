@@ -113,8 +113,8 @@ def playGame(args_, train=True, episode_count=2000):
             vis.line(X=[0], Y=[0], win='success rate',
                      opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='success rate'))
             vis.scatter(
-                X=[],
-                Y=[],
+                X=np.array([[0.8, 0, 1]]),
+                Y=[2],
                 win='cnt',
                 opts={
                     'title': 'if success',
@@ -127,7 +127,7 @@ def playGame(args_, train=True, episode_count=2000):
             goal_list = []
             result_list = []
             model = torch.load(
-                f'/home/cq/code/manipulator/TD3/checkpoints/td3_100/9999.pth')  # 'PPO/checkpoints/40.pth'
+                f'/home/cq/code/manipulator/TD3/checkpoints/td3_101/9999.pth')  # 'PPO/checkpoints/40.pth'
             # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
             agent.actor_local.load_state_dict(model)
 
@@ -160,24 +160,28 @@ def playGame(args_, train=True, episode_count=2000):
                 vis.line(X=[i], Y=[result], win='result', update='append')
                 vis.line(X=[i], Y=[path_length], win='path len', update='append')
                 vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
-                vis.scatter(
-                    X=state['desired_goal'],
-                    Y=[result+1],
-                    win='cnt',
-                    update='append',
-                )
+                # vis.scatter(
+                #     X=goal_list,
+                #     Y=result_list,
+                #     win='cnt',
+                #     opts={
+                #         'title': 'if success',
+                #         'legend': ['fail', 'success'],
+                #         'markersize': 5
+                #     }
+                # )
             result_list = np.array(result_list)
             goal_list = np.array(goal_list)
-            # from matplotlib import pyplot as plt
-            # vis.scatter(
-            #     X=goal_list,
-            #     Y=result_list,
-            #     opts={
-            #         'title': 'if success',
-            #         'legend': ['fail', 'success'],
-            #         'markersize': 5
-            #     }
-            # )
+            from matplotlib import pyplot as plt
+            vis.scatter(
+                X=goal_list,
+                Y=result_list,
+                opts={
+                    'title': 'if success',
+                    'legend': ['fail', 'success'],
+                    'markersize': 5
+                }
+            )
 
 
     finally:
@@ -187,7 +191,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code-version', type=str, default='td3_102')
+    parser.add_argument('--code-version', type=str, default='td3_104')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     #  TD3 config
