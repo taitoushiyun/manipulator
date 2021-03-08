@@ -47,6 +47,7 @@ class ManipulatorEnv(gym.Env):
         self._max_episode_steps = env_config['max_episode_steps']
         self.collision_cnt = env_config['collision_cnt']
         self.headless_mode = env_config['headless_mode']
+        self.random_initial_state = env_config.get('random_initial_state', False)
 
         model_xml_path = os.path.join(os.path.dirname(__file__), 'mani', env_config['scene_file'])
         if not os.path.exists(model_xml_path):
@@ -94,7 +95,8 @@ class ManipulatorEnv(gym.Env):
         self.action_dim = self.joint_state_dim // 2
 
         self.dh_model = DHModel(self.num_joints)
-        _, self.goal, _ = self._sample_goal()
+        self.goal = None
+        self.goal_index = -1
         obs = self._get_obs()
         self.observation_space = spaces.Dict(dict(
             desired_goal=spaces.Box(-np.inf, np.inf, shape=obs['achieved_goal'].shape, dtype='float32'),
@@ -140,8 +142,8 @@ class ManipulatorEnv(gym.Env):
 
     def reset(self):
         self._elapsed_steps = 0
-        self._reset_sim()
         self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
+        self._reset_sim()
         obs = self._get_obs()
         self.last_obs = obs
         return obs
@@ -198,7 +200,7 @@ class ManipulatorEnv(gym.Env):
         return {
             'observation': obs.copy(),
             'achieved_goal': achieved_goal.copy(),
-            'desired_goal': self.goal.copy(),
+            'desired_goal': self.goal.copy() if self.goal is not None else self.goal,
         }
 
     def _set_action(self, action):
@@ -215,6 +217,15 @@ class ManipulatorEnv(gym.Env):
         self.manipulator.set_joint_target_velocities(action)
 
     def _reset_sim(self):
+        if self.random_initial_state:
+            return
+        #     # if self.goal is not None:
+        #     #     initial_state_joints, _, _ = self._sample_goal()
+        #     #     # TODO set initial position
+        #     #     initial_state = initial_state_joints * RAD2DEG
+        #     #     assert len(self.initial_state.qpos) == len(initial_state)
+        #     #     for i in range(len(initial_state)):
+        #     #         self.initial_state.qpos[i] = initial_state[i]
         self.sim.set_state(self.initial_state)
         self.sim.forward()
 
@@ -251,6 +262,12 @@ class ManipulatorEnv(gym.Env):
                 return None, np.array([0.8, 0, 0.73]), 0
             elif self.goal_set == 'block4':
                 return None, np.array([1.2, 0, 0.8]), 0
+        elif isinstance(self.goal_set, str) and self.goal_set.startswith('draw'):
+            if self.goal_set == 'draw0':
+                self.goal_index += 1
+                goal = np.array([0.7 + 0.1 * np.cos(self.goal_index * np.pi / 2), 0.1 * np.sin(self.goal_index * np.pi / 2), 1])
+                print(goal)
+                return None, goal, 0
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)
@@ -289,16 +306,17 @@ if __name__ == '__main__':
         'distance_threshold': 0.02,
         'reward_type': 'dense distance',
         'max_angles_vel': 10,  # 10degree/s
-        'num_joints': 24,
+        'num_joints': 12,
         'num_segments': 2,
         'cc_model': False,
         'plane_model': False,
-        'goal_set': 'block0',
+        'goal_set': 'random',
         'max_episode_steps': 20,
         'collision_cnt': 15,
-        'scene_file': 'mani_env_24.xml',
+        'scene_file': 'mani_env.xml',
         'headless_mode': False,
         'n_substeps': 100,
+        'random_initial_state': True,
     }
     env = ManipulatorEnv(env_config)
     # action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
@@ -311,27 +329,30 @@ if __name__ == '__main__':
     for i in range(1):
         line = []
         obs = env.reset()
-        last_obs = obs['observation'][1] * RAD2DEG
-        for j in range(env_config['max_episode_steps']):
-            time_a = time.time()
-            # env.render()
-            if j<10:
-                # action_ = np.array([-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0])
-                # action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]) * 2
-                # # action_ = np.ones((6, )) * j
-                action_ = np.ones((24, )) * -1
-            else:
-                action_ = np.zeros((env.action_dim, ))
-            obs, reward, done, info = env.step(action_)
-            # print(obs['observation'][1] * RAD2DEG - last_obs)
-            # last_obs = obs['observation'][1] * RAD2DEG
-            time_b = time.time()
-            print(time_b - time_a)
-            # print(env.sim.model.opt.timestep)
-
-            # print(obs['observation'].shape)
-            line.append(obs['observation'][1] * RAD2DEG)
-        lines.append(line)
+        env.render()
+        while True:
+            pass
+        # last_obs = obs['observation'][1] * RAD2DEG
+        # for j in range(env_config['max_episode_steps']):
+        #     time_a = time.time()
+        #     env.render()
+        #     if j<10:
+        #         # action_ = np.array([-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0])
+        #         # action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]) * 2
+        #         # # action_ = np.ones((6, )) * j
+        #         action_ = np.ones((24, )) * -1
+        #     else:
+        #         action_ = np.zeros((env.action_dim, ))
+        #     obs, reward, done, info = env.step(action_)
+        #     # print(obs['observation'][1] * RAD2DEG - last_obs)
+        #     # last_obs = obs['observation'][1] * RAD2DEG
+        #     time_b = time.time()
+        #     print(time_b - time_a)
+        #     # print(env.sim.model.opt.timestep)
+        #
+        #     # print(obs['observation'].shape)
+        #     line.append(obs['observation'][1] * RAD2DEG)
+        # lines.append(line)
 
 
     # time_b = time.time()

@@ -344,93 +344,93 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         vis.line(X=[i_episode], Y=[result], win='result', update='append')
         vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
         vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
-        torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'{i_episode}.pth'))
+        if i_episode % 10 == 0:
+            torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'{i_episode}.pth'))
         time_b = time.time()
         print(time_b - time_a)
-        if i_episode % args_.test_interval == 0:
-            total_result = 0
-            total_reward = 0
-            for _ in range(args_.n_test_rollouts):
-                state = env.reset()
-                state = np.concatenate([state['observation'], state['desired_goal']])
-                eval_score = 0
-                total_len = 0
-                for i in range(max_episode_length):
-                    action = agent.act(state, add_noise=False)
-                    next_state, reward, done, info = env.step(action)
-                    next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
-                    eval_score += reward
-                    total_len += 1
-                    state = next_state
-                    if done:
-                        eval_result = 0.
-                        if done and total_len < max_episode_length:
-                            eval_result = 1.
-                        break
-
-                    # if done:
-                    #     eval_result = 0.
-                    #     if done and total_len < max_episode_length and not any(info['collision_state']):
-                    #         eval_result = 1.
-                    #     break
-
-                    # if i == max_episode_length - 1:
-                    #     if done:
-                    #         eval_result = 1.
-                    #     else:
-                    #         eval_result = 0.
-                total_result += eval_result
-                total_reward += eval_score
-            eval_success_rate = total_result / args_.n_test_rollouts
-            eval_reward = total_reward / args_.n_test_rollouts
-            logger.info(
-                "Eval Epoch: %d, mean_result: %f" % (i_episode // args_.test_interval, eval_success_rate))
-            vis.line(X=[i_episode // args_.test_interval], Y=[eval_success_rate * 100], win='eval success rate', update='append')
-            if args_.goal_set != 'random':
-                if args_.reward_type == 'dense potential':
-                    vis.line(X=[i_episode // args_.test_interval], Y=[100 * (eval_reward - env.max_rewards)], win='eval reward', update='append')
-                if args_.reward_type == 'dense distance':
-                    vis.line(X=[i_episode // args_.test_interval], Y=[eval_reward], win='eval reward', update='append')
-
-        # if i_episode % 5 == 0:
-        #     state = env.reset()
-        #     state = np.concatenate([state['observation'], state['desired_goal']])
-        #     eval_score = 0
-        #     total_len = 0
-        #     for i in range(max_episode_length):
-        #         action = agent.act(state, add_noise=False)
-        #         next_state, reward, done, info = env.step(action)
-        #         next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
-        #         eval_score += reward
-        #         total_len += 1
-        #         state = next_state
-        #         if done:
-        #             eval_result = 0.
-        #             if done and total_len < max_episode_length:
-        #                 eval_result = 1.
-        #             break
+        # if i_episode % args_.test_interval == 0:
+        #     total_result = 0
+        #     total_reward = 0
+        #     for _ in range(args_.n_test_rollouts):
+        #         state = env.reset()
+        #         state = np.concatenate([state['observation'], state['desired_goal']])
+        #         eval_score = 0
+        #         total_len = 0
+        #         for i in range(max_episode_length):
+        #             action = agent.act(state, add_noise=False)
+        #             next_state, reward, done, info = env.step(action)
+        #             next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
+        #             eval_score += reward
+        #             total_len += 1
+        #             state = next_state
+        #             if done:
+        #                 eval_result = 0.
+        #                 if done and total_len < max_episode_length:
+        #                     eval_result = 1.
+        #                 break
         #
-        #         # if done:
-        #         #     eval_result = 0.
-        #         #     if done and total_len < max_episode_length and not any(info['collision_state']):
-        #         #         eval_result = 1.
-        #         #     break
+        #             # if done:
+        #             #     eval_result = 0.
+        #             #     if done and total_len < max_episode_length and not any(info['collision_state']):
+        #             #         eval_result = 1.
+        #             #     break
         #
-        #         # if i == max_episode_length - 1:
-        #         #     if done:
-        #         #         eval_result = 1.
-        #         #     else:
-        #         #         eval_result = 0.
-        #     eval_result_queue.append(eval_result)
-        #     eval_success_rate = np.mean(eval_result_queue)
+        #             # if i == max_episode_length - 1:
+        #             #     if done:
+        #             #         eval_result = 1.
+        #             #     else:
+        #             #         eval_result = 0.
+        #         total_result += eval_result
+        #         total_reward += eval_score
+        #     eval_success_rate = total_result / args_.n_test_rollouts
+        #     eval_reward = total_reward / args_.n_test_rollouts
         #     logger.info(
-        #         "Eval Episode: %d,          Path length: %d       result: %f" % (i_episode, total_len, eval_result))
-        #     vis.line(X=[i_episode], Y=[eval_result], win='eval result', update='append')
-        #     vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
-        #     vis.line(X=[i_episode], Y=[eval_success_rate * 100], win='eval success rate', update='append')
+        #         "Eval Epoch: %d, mean_result: %f" % (i_episode // args_.test_interval, eval_success_rate))
+        #     vis.line(X=[i_episode // args_.test_interval], Y=[eval_success_rate * 100], win='eval success rate', update='append')
         #     if args_.goal_set != 'random':
         #         if args_.reward_type == 'dense potential':
-        #             vis.line(X=[i_episode], Y=[100 * (eval_score - env.max_rewards)], win='eval reward', update='append')
+        #             vis.line(X=[i_episode // args_.test_interval], Y=[100 * (eval_reward - env.max_rewards)], win='eval reward', update='append')
         #         if args_.reward_type == 'dense distance':
-        #             vis.line(X=[i_episode], Y=[eval_score], win='eval reward', update='append')
+        #             vis.line(X=[i_episode // args_.test_interval], Y=[eval_reward], win='eval reward', update='append')
+
+        if i_episode % 5 == 0:
+            state = env.reset()
+            state = np.concatenate([state['observation'], state['desired_goal']])
+            eval_score = 0
+            total_len = 0
+            for i in range(max_episode_length):
+                action = agent.act(state, add_noise=False)
+                next_state, reward, done, info = env.step(action)
+                next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
+                eval_score += reward
+                total_len += 1
+                state = next_state
+                if done:
+                    eval_result = 0.
+                    if done and total_len < max_episode_length:
+                        eval_result = 1.
+                    break
+                # if done:
+                #     eval_result = 0.
+                #     if done and total_len < max_episode_length and not any(info['collision_state']):
+                #         eval_result = 1.
+                #     break
+
+                # if i == max_episode_length - 1:
+                #     if done:
+                #         eval_result = 1.
+                #     else:
+                #         eval_result = 0.
+            eval_result_queue.append(eval_result)
+            eval_success_rate = np.mean(eval_result_queue)
+            logger.info(
+                "Eval Episode: %d,          Path length: %d       result: %f" % (i_episode, total_len, eval_result))
+            vis.line(X=[i_episode], Y=[eval_result], win='eval result', update='append')
+            vis.line(X=[i_episode], Y=[total_len], win='eval path len', update='append')
+            vis.line(X=[i_episode], Y=[eval_success_rate * 100], win='eval success rate', update='append')
+            if args_.goal_set != 'random':
+                if args_.reward_type == 'dense potential':
+                    vis.line(X=[i_episode], Y=[100 * (eval_score - env.max_rewards)], win='eval reward', update='append')
+                if args_.reward_type == 'dense distance':
+                    vis.line(X=[i_episode], Y=[eval_score], win='eval reward', update='append')
 

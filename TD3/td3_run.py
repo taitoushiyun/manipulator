@@ -71,7 +71,8 @@ def playGame(args_, train=True, episode_count=2000):
         'collision_cnt': args_.collision_cnt,
         'headless_mode': args_.headless_mode,
         'scene_file': args_.scene_file,
-        'n_substeps': 100,
+        'n_substeps': args_.n_substeps,
+        'random_initial_state': args_.random_initial_state,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args_.seed)
@@ -131,15 +132,18 @@ def playGame(args_, train=True, episode_count=2000):
             # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
             agent.actor_local.load_state_dict(model)
 
-            for i in range(1000):
+            for i in range(4):
                 state = env.reset()
                 goal_list.append(state['desired_goal'])
                 state = np.concatenate([state['observation'], state['desired_goal']])
                 total_reward = 0
                 path_length = 0
                 for _ in range(args_.max_episode_steps):
+                    if not args_.headless_mode:
+                        env.render()
                     action = agent.act(state, add_noise=False)
                     next_state, reward, done, info = env.step(action)
+                    # time.sleep(3)
                     next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
                     total_reward += reward
                     path_length += 1
@@ -189,7 +193,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code-version', type=str, default='td3_104')
+    parser.add_argument('--code-version', type=str, default='td3_105')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     #  TD3 config
@@ -203,7 +207,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr-critic', type=float, default=1e-3)
     parser.add_argument('--update-every-step', type=int, default=2)
     parser.add_argument('--random-start', type=int, default=2000)
-    parser.add_argument('--noise-decay-period', type=float, default=1000.)
+    parser.add_argument('--noise-decay-period', type=float, default=2000.)
     parser.add_argument('--n-test-rollouts', type=int, default=10)
     parser.add_argument('--test-interval', type=int, default=20)
     # env config
@@ -215,11 +219,14 @@ if __name__ == "__main__":
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
+    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random',
+                                                         'draw0'],
                         default='random')
     parser.add_argument('--collision-cnt', type=int, default=15)
     parser.add_argument('--scene-file', type=str, default='mani_env.xml')
     parser.add_argument('--headless-mode', action='store_true')
+    parser.add_argument('--n-substeps', type=int, default=100)
+    parser.add_argument('--random-initial-state', action='store_true')
 
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--load-model', type=str, default=None)

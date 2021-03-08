@@ -167,7 +167,7 @@ python td3_run.py --code-version td3_82_rt --goal-set 'super hard' --gamma 0.99 
 python td3_run.py --code-version td3_83_rt --goal-set 'super hard' --gamma 0.6 --cc-model --headless-mode --train --scene-file simple_12_1_cc.ttt &  
 td3_84 hard goal num_joints 24 gamma 0.6 dense potential not cc model 3D model  
 td3_85 hard goal num_joints 24 gamma 0.99 dense potential not cc model 3D model  
-td3_86 hard goal num_joints 24 gamma 0.99 dense potential not cc model 3D model  
+td3_86 hard goal num_joints 24 gamma 0.5 dense potential not cc model 3D model  
 
 td3_90 hard goal num_joints 12 gamma 0.6 dense potential not cc model 3D model 不提前done 现象螺旋丸  
 td3_91 hard goal num_joints 12 gamma 0.99 dense potential not cc model 3D model 不提前done  
@@ -177,7 +177,10 @@ td3_93 hard goal num_joints 6 gamma 0.6 dense potential not cc model 3D model �
 ---------------------------------------td3 mujoco env-------------------------------------  
 td3_100 random  goal num_joints 12  gamma 0.6 dense potential 3D model max_episode_steps 50  
 td3_101 random  goal num_joints 12  gamma 0.6 dense potential 3D model max_episode_steps 100  
-td3_102 td2_100 eval
+td3_102 td3_100 eval  
+td3_103 td3_101 eval  
+td3_104 random goal num_joints 12  gamma 0.6 dense potential 3D model max_episode_steps 100 eval按照her来  
+
 
 -------------------------------------her -------------------------------------------------  
 her_3 her on pyrep env num_joints 12  
