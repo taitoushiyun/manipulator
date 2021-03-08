@@ -67,7 +67,7 @@ class ManipulatorEnv(gym.Env):
         else:
             raise ValueError
 
-        self.state_dim = self.joint_state_dim + 9  # EE_point_position, EE_point_vel, goal_position, base_position
+        self.state_dim = self.joint_state_dim + 6  # EE_point_position, EE_point_vel, goal_position, base_position
         self.action_dim = self.joint_state_dim // 2
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_dim,), dtype=np.float32)
         self.action_space = spaces.Box(low=-1.0, high=1, shape=(self.action_dim,), dtype=np.float32)
@@ -75,7 +75,7 @@ class ManipulatorEnv(gym.Env):
         self.j_vel_idx = range(self.joint_state_dim // 2, self.joint_state_dim)
         self.e_pos_idx = range(self.joint_state_dim, self.joint_state_dim + 3)
         self.e_vel_idx = range(self.joint_state_dim + 3, self.joint_state_dim + 6)
-        self.g_pos_idx = range(self.joint_state_dim + 6, self.joint_state_dim + 9)
+        # self.g_pos_idx = range(self.joint_state_dim + 6, self.joint_state_dim + 9)
         # self.b_pos_idx = range(self.joint_state_dim + 9, self.joint_state_dim + 12)
 
         self.dh_model = DHModel(self.num_joints)
@@ -86,15 +86,15 @@ class ManipulatorEnv(gym.Env):
         self.pr = PyRep()
         self.pr.launch(join(dirname(abspath(__file__)), env_config['scene_file']), headless=self.headless_mode)
         self.pr.start()
-        self.agent = mani_cls(num_joints=self.num_joints,
-                              num_segments=self.num_segments,
-                              collision_cnt=self.collision_cnt)
-        self.agent.set_control_loop_enabled(False)
-        self.agent.set_motor_locked_at_zero_velocity(True)
-        self.agent_ee_tip = self.agent.get_tip()
-        self.agent_target = Shape("target")
-        self.agent_base = self.agent.get_base()
-        self.initial_config_tree = self.agent.get_configuration_tree()
+        self.manipulator = mani_cls(num_joints=self.num_joints,
+                                    num_segments=self.num_segments,
+                                    collision_cnt=self.collision_cnt)
+        self.manipulator.set_control_loop_enabled(False)
+        self.manipulator.set_motor_locked_at_zero_velocity(True)
+        self.manipulator_ee_tip = self.manipulator.get_tip()
+        self.manipulator_target = Shape("target")
+        self.manipulator_base = self.manipulator.get_base()
+        self.initial_config_tree = self.manipulator.get_configuration_tree()
 
     def _sample_goal(self):
         if self.goal_set in ['easy', 'hard', 'super hard']:
@@ -128,13 +128,13 @@ class ManipulatorEnv(gym.Env):
 
     def _get_state(self):
         state = np.zeros(self.state_dim)
-        state[self.j_ang_idx] = np.asarray(self.agent.get_joint_positions()) * RAD2DEG
-        state[self.j_vel_idx] = np.asarray(self.agent.get_joint_velocities()) * RAD2DEG
-        state[self.e_pos_idx] = np.asarray(self.agent_ee_tip.get_position())
-        state[self.e_vel_idx] = np.asarray(self.agent_ee_tip.get_velocity()[0])
-        state[self.g_pos_idx] = self.observation[self.g_pos_idx]
+        state[self.j_ang_idx] = np.asarray(self.manipulator.get_joint_positions()) * RAD2DEG
+        state[self.j_vel_idx] = np.asarray(self.manipulator.get_joint_velocities()) * RAD2DEG
+        state[self.e_pos_idx] = np.asarray(self.manipulator_ee_tip.get_position())
+        state[self.e_vel_idx] = np.asarray(self.manipulator_ee_tip.get_velocity()[0])
+        # state[self.g_pos_idx] = self.observation[self.g_pos_idx]
         # state[self.b_pos_idx] = self.observation[self.b_pos_idx]
-        info = {'collision_state': self.agent.get_collision_result()}
+        info = {'collision_state': self.manipulator.get_collision_result()}
         return state, info
 
     def normalize(self, obs):
@@ -144,8 +144,8 @@ class ManipulatorEnv(gym.Env):
         state[self.e_pos_idx[0]] = (state[self.e_pos_idx[0]] - 0.4) / .4
         state[self.e_pos_idx[2]] = (state[self.e_pos_idx[2]] - 1.) / 1.
         state[self.e_vel_idx] /= 0.5
-        state[self.g_pos_idx[0]] = (state[self.g_pos_idx[0]] - 0.4) / .4
-        state[self.g_pos_idx[2]] = (state[self.g_pos_idx[2]] - 1.) / 1.
+        # state[self.g_pos_idx[0]] = (state[self.g_pos_idx[0]] - 0.4) / .4
+        # state[self.g_pos_idx[2]] = (state[self.g_pos_idx[2]] - 1.) / 1.
         return state
 
     def reset(self):
@@ -156,13 +156,15 @@ class ManipulatorEnv(gym.Env):
             self.pr.set_configuration_tree(self.initial_config_tree)
         self._elapsed_steps = 0
         self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
-        self.observation[self.g_pos_idx] = np.asarray(self.goal)
+        # self.observation[self.g_pos_idx] = np.asarray(self.goal)
         # self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])
-        self.agent_target.set_position(self.goal)
-        self.agent.set_initial_joint_positions(self.initial_joint_positions)
+        self.manipulator_target.set_position(self.goal)
+        self.manipulator.set_initial_joint_positions(self.initial_joint_positions)
         observation, _ = self._get_state()
         self.last_obs = observation
-        return self.normalize(observation)
+        return {'observation': observation.copy(),
+                'achieved_goal': observation[self.e_pos_idx].copy(),
+                'desired_goal': self.goal.copy()}
 
     def step(self, action):
         assert self._elapsed_steps is not None
@@ -177,20 +179,24 @@ class ManipulatorEnv(gym.Env):
             action = np.concatenate((np.zeros((self.num_segments, 1)), action), axis=-1).flatten()
         else:
             action = self.max_angles_vel * DEG2RAD * np.asarray(action)
-        self.agent.set_joint_target_velocities(action)  # Execute action on arm
+        self.manipulator.set_joint_target_velocities(action)  # Execute action on arm
         self.pr.step()  # Step the physics simulation
         observation, info = self._get_state()
         achieved_goal = observation[self.e_pos_idx]
-        reward = self.cal_reward(achieved_goal, self.goal)
+        reward = self.compute_reward(achieved_goal, self.goal, None)
         done = np.linalg.norm(achieved_goal - self.goal, axis=-1) <= self.distance_threshold
+        info['is_success'] = done
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
         if any(info['collision_state']):
             done = True
         self.last_obs = observation
-        return self.normalize(observation), reward, done, info
+        obs_dict = {'observation': observation.copy(),
+                    'achieved_goal': observation[self.e_pos_idx].copy(),
+                    'desired_goal': self.goal.copy()}
+        return obs_dict, reward, done, info
 
-    def cal_reward(self, achieved_goal, goal):
+    def compute_reward(self, achieved_goal, goal, info):
         d = np.linalg.norm(achieved_goal - goal, axis=-1)
 
         if self.reward_type == 'sparse':
