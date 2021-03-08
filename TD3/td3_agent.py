@@ -381,16 +381,16 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
                     #         eval_result = 0.
                 total_result += eval_result
                 total_reward += eval_score
-                eval_success_rate = total_result / args_.n_test_rollouts
-                eval_reward = total_reward / args_.n_test_rollouts
-                logger.info(
-                    "Eval Epoch: %d, mean_result: %f" % (i_episode // args_.test_interval, eval_success_rate))
-                vis.line(X=[i_episode // args_.test_interval], Y=[eval_success_rate * 100], win='eval success rate', update='append')
-                if args_.goal_set != 'random':
-                    if args_.reward_type == 'dense potential':
-                        vis.line(X=[i_episode // args_.test_interval], Y=[100 * (eval_reward - env.max_rewards)], win='eval reward', update='append')
-                    if args_.reward_type == 'dense distance':
-                        vis.line(X=[i_episode // args_.test_interval], Y=[eval_reward], win='eval reward', update='append')
+            eval_success_rate = total_result / args_.n_test_rollouts
+            eval_reward = total_reward / args_.n_test_rollouts
+            logger.info(
+                "Eval Epoch: %d, mean_result: %f" % (i_episode // args_.test_interval, eval_success_rate))
+            vis.line(X=[i_episode // args_.test_interval], Y=[eval_success_rate * 100], win='eval success rate', update='append')
+            if args_.goal_set != 'random':
+                if args_.reward_type == 'dense potential':
+                    vis.line(X=[i_episode // args_.test_interval], Y=[100 * (eval_reward - env.max_rewards)], win='eval reward', update='append')
+                if args_.reward_type == 'dense distance':
+                    vis.line(X=[i_episode // args_.test_interval], Y=[eval_reward], win='eval reward', update='append')
 
         # if i_episode % 5 == 0:
         #     state = env.reset()

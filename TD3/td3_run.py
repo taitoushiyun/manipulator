@@ -132,8 +132,6 @@ def playGame(args_, train=True, episode_count=2000):
             agent.actor_local.load_state_dict(model)
 
             for i in range(1000):
-
-
                 state = env.reset()
                 goal_list.append(state['desired_goal'])
                 state = np.concatenate([state['observation'], state['desired_goal']])
