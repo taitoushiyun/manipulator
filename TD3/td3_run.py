@@ -112,37 +112,73 @@ def playGame(args_, train=True, episode_count=2000):
             vis.line(X=[0], Y=[0], win='path len', opts=dict(Xlabel='episode', Ylabel='len', title='path len'))
             vis.line(X=[0], Y=[0], win='success rate',
                      opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='success rate'))
+            vis.scatter(
+                X=[],
+                Y=[],
+                win='cnt',
+                opts={
+                    'title': 'if success',
+                    'legend': ['fail', 'success'],
+                    'markersize': 5
+                }
+            )
             from _collections import deque
             result_queue = deque(maxlen=20)
-            for i in range(100):
-                # if i % 5 == 0:
-                model = torch.load(
-                    f'/home/cq/code/manipulator/TD3/checkpoints/td3_69/9999.pth')  # 'PPO/checkpoints/40.pth'
-                    # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
-                agent.actor_local.load_state_dict(model)
+            goal_list = []
+            result_list = []
+            model = torch.load(
+                f'/home/cq/code/manipulator/TD3/checkpoints/td3_100/9999.pth')  # 'PPO/checkpoints/40.pth'
+            # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
+            agent.actor_local.load_state_dict(model)
+
+            for i in range(1000):
+
 
                 state = env.reset()
+                goal_list.append(state['desired_goal'])
+                state = np.concatenate([state['observation'], state['desired_goal']])
                 total_reward = 0
                 path_length = 0
-                for t in count():
+                for _ in range(args_.max_episode_steps):
                     action = agent.act(state, add_noise=False)
                     next_state, reward, done, info = env.step(action)
-                    time.sleep(0.1)
+                    next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
                     total_reward += reward
                     path_length += 1
                     state = next_state
                     if done:
                         # print(f"Episode length: {t+1}")
                         result = 0
-                        if done and path_length < args.max_episode_steps and not any(info['collision_state']):
+                        # if done and path_length < args.max_episode_steps and not any(info['collision_state']):
+                        if done and path_length < args.max_episode_steps:
                             result = 1
                         break
+                result_list.append(result+1)
                 result_queue.append(result)
                 eval_success_rate = sum(result_queue) / len(result_queue)
                 print(f'episode {i} result {result} path len {path_length}')
                 vis.line(X=[i], Y=[result], win='result', update='append')
                 vis.line(X=[i], Y=[path_length], win='path len', update='append')
                 vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
+                vis.scatter(
+                    X=state['desired_goal'],
+                    Y=[result+1],
+                    win='cnt',
+                    update='append',
+                )
+            result_list = np.array(result_list)
+            goal_list = np.array(goal_list)
+            # from matplotlib import pyplot as plt
+            # vis.scatter(
+            #     X=goal_list,
+            #     Y=result_list,
+            #     opts={
+            #         'title': 'if success',
+            #         'legend': ['fail', 'success'],
+            #         'markersize': 5
+            #     }
+            # )
+
 
     finally:
         # env.end_simulation()  # This is for shutting down TORCS
@@ -151,7 +187,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code-version', type=str, default='td3_100')
+    parser.add_argument('--code-version', type=str, default='td3_102')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     #  TD3 config
@@ -166,8 +202,10 @@ if __name__ == "__main__":
     parser.add_argument('--update-every-step', type=int, default=2)
     parser.add_argument('--random-start', type=int, default=2000)
     parser.add_argument('--noise-decay-period', type=float, default=1000.)
+    parser.add_argument('--n-test-rollouts', type=int, default=10)
+    parser.add_argument('--test-interval', type=int, default=20)
     # env config
-    parser.add_argument('--max-episode-steps', type=int, default=50)
+    parser.add_argument('--max-episode-steps', type=int, default=100)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='dense potential')
     parser.add_argument('--max-angles-vel', type=float, default=10.)

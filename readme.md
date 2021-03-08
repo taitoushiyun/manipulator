@@ -174,7 +174,10 @@ td3_91 hard goal num_joints 12 gamma 0.99 dense potential not cc model 3D model 
 td3_92 hard goal num_joints 12 gamma 0.6 dense potential not cc model 3D model 不提前done distance threshold 0.05
 td3_93 hard goal num_joints 6 gamma 0.6 dense potential not cc model 3D model 不提前done 
 
-
+---------------------------------------td3 mujoco env-------------------------------------  
+td3_100 random  goal num_joints 12  gamma 0.6 dense potential 3D model max_episode_steps 50  
+td3_101 random  goal num_joints 12  gamma 0.6 dense potential 3D model max_episode_steps 100  
+td3_102 td2_100 eval
 
 -------------------------------------her -------------------------------------------------  
 her_3 her on pyrep env num_joints 12  
