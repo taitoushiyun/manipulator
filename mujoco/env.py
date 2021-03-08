@@ -128,12 +128,14 @@ class ManipulatorEnv(gym.Env):
         self.sim.step()
         self._step_callback()
         obs = self._get_obs()
-        self.last_obs = obs
-        done = False
         info = {
             'is_success': self._is_success(obs['achieved_goal'], self.goal),
         }
         reward = self.compute_reward(obs['achieved_goal'], self.goal, info)
+        done = np.linalg.norm(obs['achieved_goal'] - self.goal, axis=-1) <= self.distance_threshold
+        if self._elapsed_steps >= self._max_episode_steps:
+            done = True
+        self.last_obs = obs
         return obs, reward, done, info
 
     def reset(self):

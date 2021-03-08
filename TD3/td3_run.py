@@ -1,5 +1,5 @@
 import importmagic
-from vrep_pyrep.env import ManipulatorEnv
+from mujoco.env import ManipulatorEnv
 from TD3.td3_agent import TD3Agent, td3_torcs
 import visdom
 import numpy as np
@@ -71,12 +71,13 @@ def playGame(args_, train=True, episode_count=2000):
         'collision_cnt': args_.collision_cnt,
         'headless_mode': args_.headless_mode,
         'scene_file': args_.scene_file,
+        'n_substeps': 100,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args_.seed)
     # env = gym.make('LunarLanderContinuous-v2')
-
-    agent = TD3Agent(state_size=env.observation_space.shape[0],
+    obs = env.reset()
+    agent = TD3Agent(state_size=obs['observation'].shape[0] + obs['desired_goal'].shape[0],
                      action_size=env.action_space.shape[0],
                      max_action=env.action_space.high,
                      min_action=env.action_space.low,
@@ -144,13 +145,13 @@ def playGame(args_, train=True, episode_count=2000):
                 vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
 
     finally:
-        env.end_simulation()  # This is for shutting down TORCS
+        # env.end_simulation()  # This is for shutting down TORCS
         print("Finish.")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code-version', type=str, default='td3_93')
+    parser.add_argument('--code-version', type=str, default='td3_100')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     #  TD3 config
@@ -158,31 +159,31 @@ if __name__ == "__main__":
     parser.add_argument('--critic-hidden', type=list, default=[64, 64])
     parser.add_argument('--buffer-size', type=int, default=int(1e7))
     parser.add_argument('--batch-size', type=int, default=64)
-    parser.add_argument('--gamma', type=float, default=0.99)
+    parser.add_argument('--gamma', type=float, default=0.6)
     parser.add_argument('--tau', type=float, default=5e-3)
     parser.add_argument('--lr-actor', type=float, default=1e-3)
     parser.add_argument('--lr-critic', type=float, default=1e-3)
     parser.add_argument('--update-every-step', type=int, default=2)
     parser.add_argument('--random-start', type=int, default=2000)
-    parser.add_argument('--noise-decay-period', type=float, default=500.)
+    parser.add_argument('--noise-decay-period', type=float, default=1000.)
     # env config
-    parser.add_argument('--max-episode-steps', type=int, default=100)
+    parser.add_argument('--max-episode-steps', type=int, default=50)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='dense potential')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
-    parser.add_argument('--num-joints', type=int, default=6)
+    parser.add_argument('--num-joints', type=int, default=12)
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
-                        default='hard')
-    parser.add_argument('--collision-cnt', type=int, default=9)
-    parser.add_argument('--scene-file', type=str, default='simple_6_1.ttt')
+                        default='random')
+    parser.add_argument('--collision-cnt', type=int, default=15)
+    parser.add_argument('--scene-file', type=str, default='mani_env.xml')
     parser.add_argument('--headless-mode', action='store_true')
 
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--load-model', type=str, default=None)
-    parser.add_argument('--episodes', type=int, default=1000)
+    parser.add_argument('--episodes', type=int, default=10000)
 
     args = parser.parse_args()
     # write the selected car to configuration file

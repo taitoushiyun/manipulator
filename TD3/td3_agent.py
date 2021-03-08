@@ -297,6 +297,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
     for i_episode in range(start_episode, n_episodes):
         time_a = time.time()
         state = env.reset()
+        state = np.concatenate([state['observation'], state['desired_goal']])
         score = 0
         episode_length = 0
         for i in range(max_episode_length):
@@ -305,21 +306,27 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
             else:
                 action = agent.act(state, episode_step=i_episode)
             next_state, reward, done, info = env.step(action)
+            next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
             agent.step(state, action, reward, next_state, done)
             state = next_state
             score += reward
             episode_length += 1
             agent.learn(1)
+            if done:
+                result = 0.
+                if done and episode_length < max_episode_length:
+                    result = 1.
+                break
             # if done:
             #     result = 0.
             #     if done and episode_length < max_episode_length and not any(info['collision_state']):
             #         result = 1.
             #     break
-            if i == max_episode_length - 1:
-                if done:
-                    result = 1.
-                else:
-                    result = 0
+            # if i == max_episode_length - 1:
+            #     if done:
+            #         result = 1.
+            #     else:
+            #         result = 0
         result_deque.append(result)
         score_deque.append(score)
         success_rate = np.mean(result_deque)
@@ -342,24 +349,33 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         print(time_b - time_a)
         if i_episode % 5 == 0:
             state = env.reset()
+            state = np.concatenate([state['observation'], state['desired_goal']])
             eval_score = 0
             total_len = 0
             for i in range(max_episode_length):
                 action = agent.act(state, add_noise=False)
                 next_state, reward, done, info = env.step(action)
+                next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
                 eval_score += reward
                 total_len += 1
                 state = next_state
+                if done:
+                    eval_result = 0.
+                    if done and total_len < max_episode_length:
+                        eval_result = 1.
+                    break
+
                 # if done:
                 #     eval_result = 0.
                 #     if done and total_len < max_episode_length and not any(info['collision_state']):
                 #         eval_result = 1.
                 #     break
-                if i == max_episode_length - 1:
-                    if done:
-                        eval_result = 1.
-                    else:
-                        eval_result = 0.
+
+                # if i == max_episode_length - 1:
+                #     if done:
+                #         eval_result = 1.
+                #     else:
+                #         eval_result = 0.
             eval_result_queue.append(eval_result)
             eval_success_rate = np.mean(eval_result_queue)
             logger.info(
