@@ -197,6 +197,10 @@ her_13 her on mujoco env num_joints 12 block2 goal
 her_14 her on mujoco env num_joints 24 block3 goal
 her_15 her on mujoco env num_joints 24 block3 goal block env
 her_16 her on mujoco env num_joints 24 block0 goal block env plane model
+her_17 her on mujoco env num_joints 24 block0 goal block env plane model with heatmap
+her_19 her on mujoco env num_joints 24 random goal distance-threshold 0.005 epoch 1000  
+her_20 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000  
+
   
 
 

@@ -1,14 +1,16 @@
 import visdom
 import numpy as np
+DEG2RAD = np.pi / 180.
+RAD2DEG = 180. / np.pi
 import time
 # Y = np.random.rand(100)
 # Y = (Y[Y > 0] + 1.5).astype(int),  # 100个标签1和2
-goal_list = []
-for goal_index in range(4):
-    goal = np.array([0.7 + 0.1 * np.cos(goal_index * np.pi / 4), 0.1 * np.sin(goal_index * np.pi / 4), 1])
-    print(goal)
-    goal_list.append(goal)
-goal_list = np.array(goal_list)
+# goal_list = []
+# for goal_index in range(4):
+#     goal = np.array([0.7 + 0.1 * np.cos(goal_index * np.pi / 4), 0.1 * np.sin(goal_index * np.pi / 4), 1])
+#     print(goal)
+#     goal_list.append(goal)
+# goal_list = np.array(goal_list)
 
 # viz = visdom.Visdom(port=6016, env='a_test')
 # viz.scatter(
@@ -47,6 +49,6 @@ goal_list = np.array(goal_list)
 # print(c)
 # print((1.4 - 0.2) // 0.01)
 # print(np.random.randint(1, 10, size=(1, 3)))
-DEG2RAD = np.pi / 180.
-RAD2DEG = 180. / np.pi
-print(DEG2RAD*RAD2DEG)
+
+# print(DEG2RAD*RAD2DEG)
+print(np.vstack([np.ones((3, )), np.ones((3,))]))

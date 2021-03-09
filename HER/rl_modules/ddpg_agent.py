@@ -205,19 +205,19 @@ class ddpg_agent:
                 self._soft_update_target_network(self.critic_target_network, self.critic_network)
             # start to do the evaluation
             self._eval_agent(epoch)
-            if epoch % 2 == 0:
-                self.vis.heatmap(
-                    X=self.heat_buffer.heat_map,
-                    win=f'epoch{epoch}',
-                    opts={
-                        'Xlable': 'X',
-                        'Ylable': 'Y',
-                        'title': f'epoch{epoch}',
-                        'columnnames': list(map(lambda x: '%.2f' % x, list(np.linspace(0.2, 1.4, num=121, endpoint=True)))),
-                        'rownames': list(map(lambda x: '%.2f' % x, list(np.linspace(0, 2, num=201, endpoint=True)))),
-                        'colormap': 'Viridis',  # 'Electric'
-                    }
-                )
+            # if epoch % 2 == 0:
+            #     self.vis.heatmap(
+            #         X=self.heat_buffer.heat_map,
+            #         win=f'epoch{epoch}',
+            #         opts={
+            #             'Xlable': 'X',
+            #             'Ylable': 'Y',
+            #             'title': f'epoch{epoch}',
+            #             'columnnames': list(map(lambda x: '%.2f' % x, list(np.linspace(0.2, 1.4, num=121, endpoint=True)))),
+            #             'rownames': list(map(lambda x: '%.2f' % x, list(np.linspace(0, 2, num=201, endpoint=True)))),
+            #             'colormap': 'Viridis',  # 'Electric'
+            #         }
+            #     )
             # print('[{}] epoch is: {}, eval success rate is: {:.3f}'.format(datetime.now(), epoch, success_rate))
 
     # pre_process the inputs

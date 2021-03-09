@@ -97,6 +97,7 @@ class ManipulatorEnv(gym.Env):
         self.dh_model = DHModel(self.num_joints)
         self.goal = None
         self.goal_index = -1
+        self.has_reset = False
         obs = self._get_obs()
         self.observation_space = spaces.Dict(dict(
             desired_goal=spaces.Box(-np.inf, np.inf, shape=obs['achieved_goal'].shape, dtype='float32'),
@@ -218,7 +219,10 @@ class ManipulatorEnv(gym.Env):
 
     def _reset_sim(self):
         if self.random_initial_state:
-            return
+            if self.has_reset:
+                return
+            else:
+                self.has_reset = True
         #     # if self.goal is not None:
         #     #     initial_state_joints, _, _ = self._sample_goal()
         #     #     # TODO set initial position
@@ -265,8 +269,8 @@ class ManipulatorEnv(gym.Env):
         elif isinstance(self.goal_set, str) and self.goal_set.startswith('draw'):
             if self.goal_set == 'draw0':
                 self.goal_index += 1
-                goal = np.array([0.7 + 0.1 * np.cos(self.goal_index * np.pi / 2), 0.1 * np.sin(self.goal_index * np.pi / 2), 1])
-                print(goal)
+                goal = np.array([1.2 + 0.2 * np.cos(self.goal_index * 2 * np.pi / 18), 0.2 * np.sin(self.goal_index * 2 * np.pi / 18), 1])
+                # print(goal)
                 return None, goal, 0
         else:
             raise ValueError
@@ -306,17 +310,17 @@ if __name__ == '__main__':
         'distance_threshold': 0.02,
         'reward_type': 'dense distance',
         'max_angles_vel': 10,  # 10degree/s
-        'num_joints': 12,
+        'num_joints': 24,
         'num_segments': 2,
         'cc_model': False,
         'plane_model': False,
         'goal_set': 'random',
         'max_episode_steps': 20,
         'collision_cnt': 15,
-        'scene_file': 'mani_env.xml',
+        'scene_file': 'mani_env_24.xml',
         'headless_mode': False,
         'n_substeps': 100,
-        'random_initial_state': True,
+        'random_initial_state': False,
     }
     env = ManipulatorEnv(env_config)
     # action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
@@ -329,7 +333,8 @@ if __name__ == '__main__':
     for i in range(1):
         line = []
         obs = env.reset()
-        env.render()
+        print(obs['achieved_goal'])
+        # env.render()
         while True:
             pass
         # last_obs = obs['observation'][1] * RAD2DEG

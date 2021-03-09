@@ -15,6 +15,7 @@
 		</body>
 
 		<include file="mani_24.xml"></include>
+		<camera euler="0 0 0" fovy="30" name="external_camera0" pos="0.6 0 4"></camera>
 
 
 
