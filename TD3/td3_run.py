@@ -78,7 +78,8 @@ def playGame(args_, train=True, episode_count=2000):
     env.action_space.seed(args_.seed)
     # env = gym.make('LunarLanderContinuous-v2')
     obs = env.reset()
-    agent = TD3Agent(state_size=obs['observation'].shape[0] + obs['desired_goal'].shape[0],
+    agent = TD3Agent(args=args_,
+                     state_size=obs['observation'].shape[0] + obs['desired_goal'].shape[0],
                      action_size=env.action_space.shape[0],
                      max_action=env.action_space.high,
                      min_action=env.action_space.low,
@@ -193,7 +194,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code-version', type=str, default='td3_105')
+    parser.add_argument('--code-version', type=str, default='td3_118')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     #  TD3 config
@@ -207,30 +208,30 @@ if __name__ == "__main__":
     parser.add_argument('--lr-critic', type=float, default=1e-3)
     parser.add_argument('--update-every-step', type=int, default=2)
     parser.add_argument('--random-start', type=int, default=2000)
-    parser.add_argument('--noise-decay-period', type=float, default=2000.)
+    parser.add_argument('--noise-decay-period', type=float, default=1000.)
     parser.add_argument('--n-test-rollouts', type=int, default=10)
     parser.add_argument('--test-interval', type=int, default=20)
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=100)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
-    parser.add_argument('--reward-type', type=str, default='dense potential')
+    parser.add_argument('--reward-type', type=str, default='dense mix')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
-    parser.add_argument('--num-joints', type=int, default=12)
+    parser.add_argument('--num-joints', type=int, default=24)
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random',
                                                          'draw0'],
-                        default='random')
+                        default='hard')
     parser.add_argument('--collision-cnt', type=int, default=15)
-    parser.add_argument('--scene-file', type=str, default='mani_env.xml')
+    parser.add_argument('--scene-file', type=str, default='mani_env_24.xml')
     parser.add_argument('--headless-mode', action='store_true')
     parser.add_argument('--n-substeps', type=int, default=100)
     parser.add_argument('--random-initial-state', action='store_true')
 
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--load-model', type=str, default=None)
-    parser.add_argument('--episodes', type=int, default=10000)
+    parser.add_argument('--episodes', type=int, default=4000)
 
     args = parser.parse_args()
     # write the selected car to configuration file

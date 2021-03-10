@@ -155,16 +155,17 @@ td3_78 super hard goal 困难版本 gamma 0.6 noise_drop_rate 500 reward dense  
 td3_79 super hard goal 困难版本 gamma 0.99 noise_drop_rate 500 reward dense  potential cc model plane model  
 td3_80 super hard goal 困难版本 gamma 0.6 noise_drop_rate 500 reward dense  potential cc model plane model  collision reward -0.1  
 
-td3_81 hard goal gamma 0.99 noise 500 reward dense potential cc model plane model  
-td3_82 super hard goal gamma 0.99 noise 500 dense potential cc modle 3D model  
-td3_83 super hard goal gamma 0.6  noise 500 dense potential cc model 3D model  
+
 平面内gamma太小会导致得到的策略非累积折扣奖励最大，gamma大的时候学习效果好  
 空间内gamma太大会导致学习缓慢且收敛不稳定，gamma小的时候反而学习效果要更好  
-python td3_run.py --code-version td3_75_rt --goal-set easy --cc-model --gamma 0.6 --headless-mode --train --scene-file simple_12_1_cc.ttt &  
-python td3_run.py --code-version td3_76_rt --goal-set hard --cc-model --gamma 0.6 --headless-mode --train --scene-file simple_12_1_cc.ttt &  
-python td3_run.py --code-version td3_81_rt --goal-set hard --cc-model --gamma 0.99 --plane-model --headless-mode --train --scene-file simple_12_1_cc.ttt &  
-python td3_run.py --code-version td3_82_rt --goal-set 'super hard' --gamma 0.99 --cc-model --headless-mode --train --scene-file simple_12_1_cc.ttt &  
-python td3_run.py --code-version td3_83_rt --goal-set 'super hard' --gamma 0.6 --cc-model --headless-mode --train --scene-file simple_12_1_cc.ttt &  
+
+td3_81 hard goal gamma 0.99 noise 500 reward dense potential cc model plane model  collision reward -0.1 
+td3_81_rt hard goal gamma 0.99 dense potential cc_model plane_model  
+td3_82 super hard goal gamma 0.99 noise 500 dense potential cc modle 3D model  collision reward -0.1 
+td3_82_rt super hard goal gamma 0.99 dense potential cc_model 3D model
+td3_83 super hard goal gamma 0.6  noise 500 dense potential cc model 3D model collision reward -0.1 
+td3_83_rt super hard goal gamma 0.6 dense potential cc_model 3D model
+
 td3_84 hard goal num_joints 24 gamma 0.6 dense potential not cc model 3D model  
 td3_85 hard goal num_joints 24 gamma 0.99 dense potential not cc model 3D model  
 td3_86 hard goal num_joints 24 gamma 0.5 dense potential not cc model 3D model  
@@ -180,6 +181,24 @@ td3_101 random  goal num_joints 12  gamma 0.6 dense potential 3D model max_episo
 td3_102 td3_100 eval  
 td3_103 td3_101 eval  
 td3_104 random goal num_joints 12  gamma 0.6 dense potential 3D model max_episode_steps 100 eval按照her来  
+td3_105 random goal num_joints 12 gamma 0.6 dense potential 3D model max_episode_steps 100 distance-threshold 0.01 episodes 20000
+td3_106 random goal num_joints 12 gamma 0.6 dense potential 3D model max_episode_steps 100 distance-threshold 0.005 episodes 20000
+td3_107 random goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance-threshold 0.02 episode 20000  
+td3_108 random goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance-threshold 0.01 episode 20000  
+
+td3_111 hard goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance threshold 0.02 episode 2000  
+td3_117 hard goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance threshold 0.02 episode 4000  
+td3_112 hard goal num_joints 24 gamma 0.6 dense mix 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
+td3_118 hard goal num_joints 24 gamma 0.6 dense mix 3D model max_episode_steps 100 distance threshold 0.02 episode 4000
+td3_113 hard goal num_joints 24 gamma 0.6 dense 2x 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
+td3_116 hard goal num_joints 24 gamma 0.6 dense 2x 3D model max_episode_steps 100 distance threshold 0.02 episode 4000
+td3_114 hard goal num_joints 24 gamma 0.6 dense 4x 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
+td3_115 hard goal num_joints 24 gamma 0.6 dense distance 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
+
+
+
+
+
 
 
 -------------------------------------her -------------------------------------------------  
@@ -198,8 +217,12 @@ her_14 her on mujoco env num_joints 24 block3 goal
 her_15 her on mujoco env num_joints 24 block3 goal block env
 her_16 her on mujoco env num_joints 24 block0 goal block env plane model
 her_17 her on mujoco env num_joints 24 block0 goal block env plane model with heatmap
-her_19 her on mujoco env num_joints 24 random goal distance-threshold 0.005 epoch 1000  
+her_21 her on mujoco env num_joints 24 randomd goal distance-threshold 0.02 epoch 500
+her_22 her on mujoco env num_joints 24 randomd goal distance-threshold 0.015 epoch 1000
 her_20 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000  
+her_19 her on mujoco env num_joints 24 random goal distance-threshold 0.005 epoch 1000 
+her_23 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 new sample method  
+ 
 
   
 

@@ -51,7 +51,7 @@ def get_logger(code_version):
 
 
 def get_env_params(env):
-    obs = env.reset()
+    obs = env.reset('random')
     # close the environment
     params = {'obs': obs['observation'].shape[0],
             'goal': obs['desired_goal'].shape[0],

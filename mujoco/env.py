@@ -30,7 +30,7 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
                         'hard': [0, 20, 0, 15, 0,  20, 0,  20, 0, 20, 0, -10],
                         'super hard': [0, -50, 0, -50, 0, -20, 0, 40, 0, 30, 0, 0]},
         (False, False): {'easy': [20, 20, 20, 20, -10, -10, -15, -15, 20, 20, 0, 0],
-                         'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
+                         'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10, 20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                          'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
 
 
@@ -142,9 +142,9 @@ class ManipulatorEnv(gym.Env):
         self.last_obs = obs
         return obs, reward, done, info
 
-    def reset(self):
+    def reset(self, goal_set=None):
         self._elapsed_steps = 0
-        self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
+        self.goal_theta, self.goal, self.max_rewards = self._sample_goal(goal_set)
         self._reset_sim()
         obs = self._get_obs()
         self.last_obs = obs
@@ -178,6 +178,18 @@ class ManipulatorEnv(gym.Env):
             last_achieved_goal = self.last_obs['achieved_goal']
             d_last = np.linalg.norm(last_achieved_goal - self.goal, axis=-1)
             return -d + d_last
+        elif self.reward_type == 'dense mix':
+            last_achieved_goal = self.last_obs['achieved_goal']
+            d_last = np.linalg.norm(last_achieved_goal - self.goal, axis=-1)
+            return -2 * d + d_last
+        elif self.reward_type == 'dense 2x':
+            last_achieved_goal = self.last_obs['achieved_goal']
+            d_last = np.linalg.norm(last_achieved_goal - self.goal, axis=-1)
+            return -pow(d, 2) + pow(d_last, 2)
+        elif self.reward_type == 'dense 4x':
+            last_achieved_goal = self.last_obs['achieved_goal']
+            d_last = np.linalg.norm(last_achieved_goal - self.goal, axis=-1)
+            return -pow(d, 4) + pow(d_last, 4)
         else:
             raise ValueError('reward type wrong')
 
@@ -234,15 +246,17 @@ class ManipulatorEnv(gym.Env):
         self.sim.set_state(self.initial_state)
         self.sim.forward()
 
-    def _sample_goal(self):
-        if self.goal_set in ['easy', 'hard', 'super hard']:
+    def _sample_goal(self, goal_set):
+        if goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][self.goal_set]) * DEG2RAD
-        elif self.goal_set == 'random':
+        elif goal_set == 'random':
             if self.plane_model and not self.cc_model:
                 theta = np.vstack((np.zeros((self.action_dim,)),
                                    45 * DEG2RAD * np.random.uniform(low=-1, high=1,
                                                                     size=(self.action_dim,)))).T.flatten()
             elif not self.plane_model and not self.cc_model:
+                # theta = 45 * DEG2RAD * (5 - 1 / np.random.uniform(low=0.2, high=1.2, size=(self.action_dim,))) / (
+                #             5 - (1 / 1.2)) * np.random.choice([-1, 1], size=(self.action_dim,))
                 theta = 45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.action_dim, ))
             elif self.plane_model and self.cc_model:
                 theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
@@ -256,23 +270,26 @@ class ManipulatorEnv(gym.Env):
                 theta = theta.flatten()
             else:
                 raise ValueError
-        elif isinstance(self.goal_set, str) and self.goal_set.startswith('block'):
-            if self.goal_set == 'block0':
+        elif isinstance(goal_set, str) and goal_set.startswith('block'):
+            if goal_set == 'block0':
                 return None, np.array([0.7, 0, 0.8]), 0
-            elif self.goal_set == 'block1':
+            elif goal_set == 'block1':
                 return None, np.array([0.6, 0, 1.2]), 0
-            elif self.goal_set == 'block2':
+            elif goal_set == 'block2':
                 return None, np.array([0.5, 0, 0.73]), 0
-            elif self.goal_set == 'block3':
+            elif goal_set == 'block3':
                 return None, np.array([0.8, 0, 0.73]), 0
-            elif self.goal_set == 'block4':
+            elif goal_set == 'block4':
                 return None, np.array([1.2, 0, 0.8]), 0
-        elif isinstance(self.goal_set, str) and self.goal_set.startswith('draw'):
+        elif isinstance(goal_set, str) and goal_set.startswith('draw'):
             path_index = int(self.goal_set.strip('draw'))
             self.goal_index += 1
             return None, PATH_LIST[path_index][self.goal_index], 0
+        elif goal_set == 'special':
+            theta = 0.5 * 45 * DEG2RAD * np.random.randn(self.action_dim).clip(-2, 2).T.flatten()
         else:
-            raise ValueError
+            raise ValueError(f'goal_set is {goal_set}')
+
         goal_theta = np.clip(theta, -3, 3)
         goal = self.dh_model.forward_kinematics(goal_theta)
         reset_state = self.dh_model.forward_kinematics(np.zeros((self.num_joints, )))

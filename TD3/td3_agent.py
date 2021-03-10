@@ -129,7 +129,7 @@ class Critic(nn.Module):
 class TD3Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, max_action, min_action, actor_hidden, critic_hidden, random_seed,
+    def __init__(self, args, state_size, action_size, max_action, min_action, actor_hidden, critic_hidden, random_seed,
                  gamma=0.99, tau=5e-3, lr_actor=1e-3, lr_critic=1e-3, update_every_step=2, random_start=2000,
                  noise=0.2, noise_std=0.1, noise_clip=0.5, noise_drop_rate=500.,
                  buffer_size=int(1e7), batch_size=64):
@@ -146,6 +146,7 @@ class TD3Agent():
             noise_std (float): the range to generate random noise while performing action
             noise_clip (float): to clip random noise into this range
         """
+        self.args = args
         self.state_size = state_size
         self.action_size = action_size
         self.max_action = max_action
@@ -272,16 +273,17 @@ class TD3Agent():
 
 
 def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_):
-    vis.line(X=[0], Y=[0], win='result', opts=dict(Xlabel='episode', Ylabel='result', title='result'))
-    vis.line(X=[0], Y=[0], win='path len', opts=dict(Xlabel='episode', Ylabel='len', title='path len'))
-    vis.line(X=[0], Y=[0], win='success rate', opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='success rate'))
-    vis.line(X=[0], Y=[0], win='eval result', opts=dict(Xlabel='episode', Ylabel='eval result', title='eval result'))
-    vis.line(X=[0], Y=[0], win='eval path len', opts=dict(Xlabel='episode', Ylabel='len', title='eval path len'))
-    vis.line(X=[0], Y=[0], win='eval success rate', opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='eval success rate'))
-    if args_.goal_set != 'random':
-        vis.line(X=[0], Y=[0], win='reward', opts=dict(Xlabel='episode', Ylabel='reward', title='reward'))
-        vis.line(X=[0], Y=[0], win='mean reward', opts=dict(Xlabel='episode', Ylabel='reward', title='mean reward'))
-        vis.line(X=[0], Y=[0], win='eval reward', opts=dict(Xlabel='episode', Ylabel='reward', title='eval reward'))
+    if args_.load_model is None:
+        vis.line(X=[0], Y=[0], win='result', opts=dict(Xlabel='episode', Ylabel='result', title='result'))
+        vis.line(X=[0], Y=[0], win='path len', opts=dict(Xlabel='episode', Ylabel='len', title='path len'))
+        vis.line(X=[0], Y=[0], win='success rate', opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='success rate'))
+        vis.line(X=[0], Y=[0], win='eval result', opts=dict(Xlabel='episode', Ylabel='eval result', title='eval result'))
+        vis.line(X=[0], Y=[0], win='eval path len', opts=dict(Xlabel='episode', Ylabel='len', title='eval path len'))
+        vis.line(X=[0], Y=[0], win='eval success rate', opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='eval success rate'))
+        if args_.goal_set != 'random':
+            vis.line(X=[0], Y=[0], win='reward', opts=dict(Xlabel='episode', Ylabel='reward', title='reward'))
+            vis.line(X=[0], Y=[0], win='mean reward', opts=dict(Xlabel='episode', Ylabel='reward', title='mean reward'))
+            vis.line(X=[0], Y=[0], win='eval reward', opts=dict(Xlabel='episode', Ylabel='reward', title='eval reward'))
     result_deque = deque(maxlen=20)
     score_deque = deque(maxlen=10)
     eval_result_queue = deque(maxlen=10)
@@ -289,9 +291,9 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
 
     if args_.load_model is not None:
         model = torch.load(args_.load_model)
-        agent.actor_local.load_state_dict(model.state_dict())
-        agent.actor_target.load_state_dict(model.state_dict())
-        start_episode = int(args_.load_model.split('/')[-1].split('.')[0])
+        agent.actor_local.load_state_dict(model)
+        agent.actor_target.load_state_dict(model)
+        start_episode = int(args_.load_model.split('/')[-1].split('.')[0]) + 1
     else:
         start_episode = 0
     for i_episode in range(start_episode, n_episodes):
@@ -301,7 +303,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         score = 0
         episode_length = 0
         for i in range(max_episode_length):
-            if len(agent.memory) < args_.random_start:
+            if len(agent.memory) < args_.random_start and args_.load_model is None:
                 action = env.action_space.sample()
             else:
                 action = agent.act(state, episode_step=i_episode)
@@ -338,7 +340,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
             if args_.reward_type == 'dense potential':
                 vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
                 vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
-            if args_.reward_type == 'dense distance':
+            else:
                 vis.line(X=[i_episode], Y=[score], win='reward', update='append')
                 vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
         vis.line(X=[i_episode], Y=[result], win='result', update='append')
@@ -431,6 +433,6 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
             if args_.goal_set != 'random':
                 if args_.reward_type == 'dense potential':
                     vis.line(X=[i_episode], Y=[100 * (eval_score - env.max_rewards)], win='eval reward', update='append')
-                if args_.reward_type == 'dense distance':
+                else:
                     vis.line(X=[i_episode], Y=[eval_score], win='eval reward', update='append')
 

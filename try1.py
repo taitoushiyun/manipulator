@@ -1,6 +1,6 @@
 import gym
 import numpy as np
-
+import visdom
 from matplotlib import pyplot as plt
 from vrep_con.dh_convert import DHModel
 import time
@@ -14,13 +14,17 @@ time_a = time.time()
 joints = 24
 dh = DHModel(0, joints)
 sample_list = []
-for i in range(5000):
+num_sample = 500000
+for i in range(num_sample):
     # 平面关节均匀分布采样
-    theta = np.vstack((np.zeros((joints//2,)),
-                       45 * DEG2RAD * np.random.uniform(low=-1, high=1,
-                                                        size=(joints//2,)))).T.flatten()
+    # theta = np.vstack((np.zeros((joints//2,)),
+    #                    45 * DEG2RAD * np.random.uniform(low=-1, high=1,
+    #                                                     size=(joints//2,)))).T.flatten()
+    theta = 45 * DEG2RAD * (5 - 1 / np.random.uniform(low=0.2, high=1.2, size=(joints // 2,))) / (5 - (1 / 1.2)) * np.random.choice([-1, 1], size=(joints // 2, ))
+    theta = np.vstack((np.zeros((joints // 2,)),
+                       theta)).T.flatten()
 
-    # 平面关节正态分布采样
+    # 平面关节正态分布采样45 * DEG2RAD
     # theta = np.vstack((np.zeros((joints // 2,)),
     #                    0.5 * 45 * DEG2RAD * np.random.randn(joints // 2).clip(-2, 2))).T.flatten()
 
@@ -65,5 +69,25 @@ plt.show()
 time_b = time.time()
 print(time_b - time_a)
 # print(dh.forward_kinematics(np.zeros(joints)))
+heat_map = np.zeros((301, 201))
 
+def clamp(n, minn, maxn):
+    return max(min(maxn, n), minn)
 
+for i in range(num_sample):
+    index_z = clamp((sample_list[i][2] + 0.5) // 0.01, 0, 300)
+    index_x = clamp((sample_list[i][0] + 0.5) // 0.01, 0, 200)
+    heat_map[(int(index_z), int(index_x))] = heat_map[(int(index_z), int(index_x))] + 1
+vis = visdom.Visdom(port=6016, env='a_test')
+vis.heatmap(
+    X=heat_map,
+    # win='heat map',
+    opts={
+        'Xlable': 'X',
+        'Ylable': 'Y',
+        'title': 'heat map',
+        'columnnames': list(map(lambda x: '%.2f'% x, list(np.linspace(-0.5, 1.5, num=201, endpoint=True)))),
+        'rownames': list(map(lambda x: '%.2f'% x, list(np.linspace(-0.5, 2.5, num=301, endpoint=True)))),
+        'colormap': 'Viridis',       # 'Electric'
+    }
+)

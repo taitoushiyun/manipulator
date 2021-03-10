@@ -52,4 +52,17 @@ import time
 
 # print(DEG2RAD*RAD2DEG)
 # print(np.vstack([np.ones((3, )), np.ones((3,))]))
-print(np.linalg.norm(np.array([1.2, 0, 1.2])-np.array([0.2, 0, 1]), axis=-1))
+# print(np.linalg.norm(np.array([1.2, 0, 1.2])-np.array([0.2, 0, 1]), axis=-1))
+# print(np.power(np.array([1,2 ]), 0.1))
+# import matplotlib.pyplot as plt
+# a = np.linspace(0.01, 2, num=100)
+# print(a)
+# b = 1 / np.power(a, 1)
+# c = 1 / np.power(a, 2)
+# plt.plot(a,b, color='b')
+# # plt.plot(a, c, color='r')
+# plt.show()
+a = np.random.choice([-1, 1], size=10)
+b = np.ones((10, ))
+c = a * b
+print(c.shape, c)

@@ -125,7 +125,7 @@ class ddpg_agent:
                     # reset the rollouts
                     ep_obs, ep_ag, ep_g, ep_actions = [], [], [], []
                     # reset the environment
-                    observation = self.env.reset()
+                    observation = self.env.reset(self.args.goal_set)
                     obs = observation['observation']
                     ag = observation['achieved_goal']
                     g = observation['desired_goal']
@@ -340,7 +340,7 @@ class ddpg_agent:
         total_success_rate = []
         for i in range(self.args.n_test_rollouts):
             per_success_rate = []
-            observation = self.env.reset()
+            observation = self.env.reset(self.args.eval_goal_set)
             obs = observation['observation']
             g = observation['desired_goal']
             for _ in range(self.env_params['max_timesteps']):
