@@ -248,15 +248,13 @@ class ManipulatorEnv(gym.Env):
 
     def _sample_goal(self, goal_set):
         if goal_set in ['easy', 'hard', 'super hard']:
-            theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][self.goal_set]) * DEG2RAD
+            theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][goal_set]) * DEG2RAD
         elif goal_set == 'random':
             if self.plane_model and not self.cc_model:
                 theta = np.vstack((np.zeros((self.action_dim,)),
                                    45 * DEG2RAD * np.random.uniform(low=-1, high=1,
                                                                     size=(self.action_dim,)))).T.flatten()
             elif not self.plane_model and not self.cc_model:
-                # theta = 45 * DEG2RAD * (5 - 1 / np.random.uniform(low=0.2, high=1.2, size=(self.action_dim,))) / (
-                #             5 - (1 / 1.2)) * np.random.choice([-1, 1], size=(self.action_dim,))
                 theta = 45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.action_dim, ))
             elif self.plane_model and self.cc_model:
                 theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
@@ -282,11 +280,14 @@ class ManipulatorEnv(gym.Env):
             elif goal_set == 'block4':
                 return None, np.array([1.2, 0, 0.8]), 0
         elif isinstance(goal_set, str) and goal_set.startswith('draw'):
-            path_index = int(self.goal_set.strip('draw'))
+            path_index = int(goal_set.strip('draw'))
             self.goal_index += 1
             return None, PATH_LIST[path_index][self.goal_index], 0
         elif goal_set == 'special':
             theta = 0.5 * 45 * DEG2RAD * np.random.randn(self.action_dim).clip(-2, 2).T.flatten()
+        elif goal_set == 'special1':
+            theta = 45 * DEG2RAD * (5 - 1 / np.random.uniform(low=0.2, high=1.2, size=(self.action_dim,))) / (
+                        5 - (1 / 1.2)) * np.random.choice([-1, 1], size=(self.action_dim,))
         else:
             raise ValueError(f'goal_set is {goal_set}')
 

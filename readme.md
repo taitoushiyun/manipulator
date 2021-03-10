@@ -221,7 +221,9 @@ her_21 her on mujoco env num_joints 24 randomd goal distance-threshold 0.02 epoc
 her_22 her on mujoco env num_joints 24 randomd goal distance-threshold 0.015 epoch 1000
 her_20 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000  
 her_19 her on mujoco env num_joints 24 random goal distance-threshold 0.005 epoch 1000 
-her_23 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 new sample method  
+her_23 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 均匀 sample method   
+her_24 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 尖峰 sample method  
+her_25 her_6 9800 eval
  
 
   
