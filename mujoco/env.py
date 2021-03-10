@@ -10,6 +10,7 @@ from gym.utils import seeding
 from gym import utils
 import mujoco_py
 import logging
+from goal import PATH_LIST
 
 
 logger = logging.getLogger('mani')
@@ -267,11 +268,9 @@ class ManipulatorEnv(gym.Env):
             elif self.goal_set == 'block4':
                 return None, np.array([1.2, 0, 0.8]), 0
         elif isinstance(self.goal_set, str) and self.goal_set.startswith('draw'):
-            if self.goal_set == 'draw0':
-                self.goal_index += 1
-                goal = np.array([1.2 + 0.2 * np.cos(self.goal_index * 2 * np.pi / 18), 0.2 * np.sin(self.goal_index * 2 * np.pi / 18), 1])
-                # print(goal)
-                return None, goal, 0
+            path_index = int(self.goal_set.strip('draw'))
+            self.goal_index += 1
+            return None, PATH_LIST[path_index][self.goal_index], 0
         else:
             raise ValueError
         goal_theta = np.clip(theta, -3, 3)

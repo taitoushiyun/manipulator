@@ -51,4 +51,5 @@ import time
 # print(np.random.randint(1, 10, size=(1, 3)))
 
 # print(DEG2RAD*RAD2DEG)
-print(np.vstack([np.ones((3, )), np.ones((3,))]))
+# print(np.vstack([np.ones((3, )), np.ones((3,))]))
+print(np.linalg.norm(np.array([1.2, 0, 1.2])-np.array([0.2, 0, 1]), axis=-1))

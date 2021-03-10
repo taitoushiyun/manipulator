@@ -94,7 +94,7 @@ def launch(args):
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args.seed)
-    env.seed()
+    # env.seed()
 
     # get the environment parameters
     env_params = get_env_params(env)
