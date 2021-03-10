@@ -155,6 +155,19 @@ if __name__ == '__main__':
         vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
         print('the episode is: {}, length is {}, is success: {}'.format(i, length, info['is_success']))
 
+    # 目标达成情况
+    result_list = np.array(result_list)
+    goal_list = np.array(goal_list)
+    vis.scatter(
+        X=goal_list,
+        Y=result_list,
+        win='if success',
+        opts={
+            'title': 'if success',
+            'legend': ['fail', 'success'],
+            'markersize': 5
+        }
+    )
     # 示教路线和实际路线
     goal_list = np.array(goal_list)
     achieved_path = np.array(achieved_path)

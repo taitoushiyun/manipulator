@@ -224,6 +224,8 @@ her_19 her on mujoco env num_joints 24 random goal distance-threshold 0.005 epoc
 her_23 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 均匀 sample method   
 her_24 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 尖峰 sample method  
 her_25 her_6 9800 eval
+her_26 her on mujoco env num_joints 24 randomd goal distance-threshold 0.02 epoch 500 DenseNet简化版本  
+her_27 her on mujoco env num_joints 24 randomd goal distance-threshold 0.02 epoch 500 DenseNet
  
 
   

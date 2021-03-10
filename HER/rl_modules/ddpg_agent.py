@@ -120,8 +120,9 @@ class ddpg_agent:
         for epoch in range(self.args.n_epochs):
             for n_cycle in range(self.args.n_cycles):
                 mb_obs, mb_ag, mb_g, mb_actions = [], [], [], []
+                time_a = time.time()
                 for _ in range(self.args.num_rollouts_per_mpi):
-                    time_a = time.time()
+
                     # reset the rollouts
                     ep_obs, ep_ag, ep_g, ep_actions = [], [], [], []
                     # reset the environment
@@ -172,8 +173,7 @@ class ddpg_agent:
                     self.score_deque.append(score)
                     success_rate = np.mean(self.result_deque)
                     mean_score = np.mean(self.score_deque)
-                    time_b = time.time()
-                    print(time_b - time_a)
+
                     logger.info("Episode: %d,          Path length: %d       result: %f       reward: %f"
                                 % (i_episode, episode_length, result, score))
                     if self.args.goal_set != 'random':
@@ -203,6 +203,8 @@ class ddpg_agent:
                 # soft update
                 self._soft_update_target_network(self.actor_target_network, self.actor_network)
                 self._soft_update_target_network(self.critic_target_network, self.critic_network)
+                time_b = time.time()
+                print(time_b - time_a)
             # start to do the evaluation
             self._eval_agent(epoch)
             # if epoch % 2 == 0:
