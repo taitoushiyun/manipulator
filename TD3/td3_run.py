@@ -75,6 +75,7 @@ def playGame(args_, train=True, episode_count=2000):
         'random_initial_state': args_.random_initial_state,
         'add_ta': args_.add_ta,
         'add_peb': args_.add_peb,
+        'is_her': args_.is_her,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args_.seed)
@@ -200,7 +201,6 @@ if __name__ == "__main__":
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     #  TD3 config
-    parser.add_argument('--clip-range', type=float, default=5, help='the clip range')  # TODO
     parser.add_argument('--actor-hidden', type=list, default=[128, 128])
     parser.add_argument('--critic-hidden', type=list, default=[64, 64])
     parser.add_argument('--buffer-size', type=int, default=int(1e7))
@@ -234,6 +234,8 @@ if __name__ == "__main__":
     parser.add_argument('--random-initial-state', action='store_true')
     parser.add_argument('--add-ta', action='store_true')
     parser.add_argument('--add_peb', action='store_true')
+    parser.add_argument('--is_her', type=bool, default=False)
+
 
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--load-model', type=str, default=None)

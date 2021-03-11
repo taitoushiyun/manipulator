@@ -186,17 +186,20 @@ td3_106 random goal num_joints 12 gamma 0.6 dense potential 3D model max_episode
 td3_107 random goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance-threshold 0.02 episode 20000  
 td3_108 random goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance-threshold 0.01 episode 20000  
 
-td3_111 hard goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance threshold 0.02 episode 2000  
-td3_117 hard goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance threshold 0.02 episode 4000  
+~~td3_111 hard goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance threshold 0.02 episode 2000~~  
+td3_117 hard goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance threshold 0.02 episode 4000   
 td3_112 hard goal num_joints 24 gamma 0.6 dense mix 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
 td3_118 hard goal num_joints 24 gamma 0.6 dense mix 3D model max_episode_steps 100 distance threshold 0.02 episode 4000
 td3_113 hard goal num_joints 24 gamma 0.6 dense 2x 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
 td3_116 hard goal num_joints 24 gamma 0.6 dense 2x 3D model max_episode_steps 100 distance threshold 0.02 episode 4000
 td3_114 hard goal num_joints 24 gamma 0.6 dense 4x 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
-td3_115 hard goal num_joints 24 gamma 0.6 dense distance 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
+td3_115 hard goal num_joints 24 gamma 0.6 dense distance 3D model max_episode_steps 100 distance threshold 0.02 episode 2000  
+<font color=#FF0000> td3_111与td3_115对比表明势函数比-d好 </font>  
+
 
 td3_119 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_ta add_peb  验证time aware和peb
-td3_120 hard goal num_joints 24 gamma 0.6 dense potential 3D model 
+td3_120 hard goal num_joints 24 gamma 0.6 dense potential 3D model 存在种子没对齐的bug
+td3_121 hard goal num_joints 24 gamma 0.6 dense potential 3D model 与td3_111对齐，加入简单归一化
 
 -------------------------------------her -------------------------------------------------  
 her_3 her on pyrep env num_joints 12  
