@@ -132,12 +132,12 @@ def playGame(args_, train=True, episode_count=2000):
             goal_list = []
             result_list = []
             model = torch.load(
-                f'/home/cq/code/manipulator/TD3/checkpoints/td3_101/9999.pth')  # 'PPO/checkpoints/40.pth'
+                f'/home/cq/code/manipulator/TD3/checkpoints/td3_122/1830.pth')  # 'PPO/checkpoints/40.pth'
             # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
             agent.actor_local.load_state_dict(model)
 
-            for i in range(4):
-                state = env.reset()
+            for i in range(2000):
+                state = env.reset(args_.eval_goal_set)
                 goal_list.append(state['desired_goal'])
                 state = np.concatenate([state['observation'], state['desired_goal']])
                 total_reward = 0
@@ -145,20 +145,26 @@ def playGame(args_, train=True, episode_count=2000):
                 for _ in range(args_.max_episode_steps):
                     if not args_.headless_mode:
                         env.render()
-                    action = agent.act(state, add_noise=False)
+                    action = agent.act(state, episode_step=i)
                     next_state, reward, done, info = env.step(action)
-                    # time.sleep(3)
                     next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
                     total_reward += reward
                     path_length += 1
                     state = next_state
-                    if done:
-                        # print(f"Episode length: {t+1}")
-                        result = 0
-                        # if done and path_length < args.max_episode_steps and not any(info['collision_state']):
-                        if done and path_length < args.max_episode_steps:
-                            result = 1
-                        break
+                    if args_.add_peb:
+                        if done or i == args_.max_episode_steps - 1:
+                            result = 0.
+                            if done:
+                                result = 1.
+                            break
+                    else:
+                        if done:
+                            # env.render()
+                            result = 0.
+                            if done and path_length < args_.max_episode_steps:
+                                # if done and total_len < max_episode_length and not any(info['collision_state']):
+                                result = 1.
+                            break
                 result_list.append(result+1)
                 result_queue.append(result)
                 eval_success_rate = sum(result_queue) / len(result_queue)
@@ -211,7 +217,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr-critic', type=float, default=1e-3)
     parser.add_argument('--update-every-step', type=int, default=2)
     parser.add_argument('--random-start', type=int, default=2000)
-    parser.add_argument('--noise-decay-period', type=float, default=1000.)
+    parser.add_argument('--noise-decay-period', type=float, default=500.)
     parser.add_argument('--n-test-rollouts', type=int, default=10)
     parser.add_argument('--test-interval', type=int, default=20)
     # env config
@@ -233,7 +239,7 @@ if __name__ == "__main__":
     parser.add_argument('--n-substeps', type=int, default=100)
     parser.add_argument('--random-initial-state', action='store_true')
     parser.add_argument('--add-ta', action='store_true')
-    parser.add_argument('--add_peb', action='store_true')
+    parser.add_argument('--add-peb', action='store_true')
     parser.add_argument('--is_her', type=bool, default=False)
 
 

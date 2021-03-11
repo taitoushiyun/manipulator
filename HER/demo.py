@@ -137,6 +137,9 @@ if __name__ == '__main__':
             with torch.no_grad():
                 pi = actor_network(inputs)
             action = pi.detach().numpy().squeeze()
+            noise = np.random.normal(0, 0.05, size=action.shape)
+            # Add noise to the action for exploration
+            action = (action + noise).clip(min_action[0], max_action[0])
             # put actions into the environment
             observation_new, reward, done, info = env.step(action)
             # print(observation_new['achieved_goal'])

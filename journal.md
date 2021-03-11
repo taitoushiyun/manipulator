@@ -16,5 +16,6 @@
 |13|测试her策略在24关节下随机初始化随机目标的完成度| done |
 |14|看完google-research kaggle分享|
 |15|尝试reward clip和reward scale 并调研相关文献 |
+|16|补充低次势函数的实验|
 
 

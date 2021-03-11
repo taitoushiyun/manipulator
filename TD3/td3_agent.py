@@ -192,7 +192,7 @@ class TD3Agent():
             action = self.actor_local(state).cpu().data.numpy()
         if add_noise:
             # Generate a random noise
-            sigma = 1. - (1. - .05) * min(1., episode_step / self.noise_drop_rate)
+            sigma = 1. - (1. - 0.05) * min(1., episode_step / self.noise_drop_rate)
             noise = np.random.normal(0, sigma, size=self.action_size)
             # Add noise to the action for exploration
             action = (action + noise).clip(self.min_action[0], self.max_action[0])
@@ -400,7 +400,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
             eval_score = 0
             total_len = 0
             for i in range(max_episode_length):
-                action = agent.act(state, add_noise=False)
+                action = agent.act(state, args_.noise_decay_period + 1)
                 next_state, reward, done, info = env.step(action)
                 next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
                 eval_score += reward
