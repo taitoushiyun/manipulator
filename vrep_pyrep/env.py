@@ -137,16 +137,20 @@ class ManipulatorEnv(gym.Env):
         info = {'collision_state': self.manipulator.get_collision_result()}
         return state, info
 
-    def normalize(self, obs):
+    def normalize(self, observation, desired_goal, achieved_goal):
         state = copy.deepcopy(obs)
         state[self.j_ang_idx] /= 90.
         state[self.j_vel_idx] /= 10.
         state[self.e_pos_idx[0]] = (state[self.e_pos_idx[0]] - 0.4) / .4
         state[self.e_pos_idx[2]] = (state[self.e_pos_idx[2]] - 1.) / 1.
         state[self.e_vel_idx] /= 0.5
-        # state[self.g_pos_idx[0]] = (state[self.g_pos_idx[0]] - 0.4) / .4
-        # state[self.g_pos_idx[2]] = (state[self.g_pos_idx[2]] - 1.) / 1.
-        return state
+
+        desired_goal = self.goal.copy()
+        desired_goal[0] = (desired_goal[0] - 0.4) / .4
+        desired_goal[2] = (desired_goal[2] - 1.) / 1.
+
+        achieved_goal = state[self.e_pos_idx].copy()
+        return state,  desired_goal, achieved_goal
 
     def reset(self, goal_set=None):
         if self.cc_model:

@@ -79,7 +79,7 @@ def playGame(args_, train=True, episode_count=2000):
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args_.seed)
     # env = gym.make('LunarLanderContinuous-v2')
-    obs = env.reset('random')
+    obs = env.reset(args_.goal_set)
     agent = TD3Agent(args=args_,
                      state_size=obs['observation'].shape[0] + obs['desired_goal'].shape[0],
                      action_size=env.action_space.shape[0],
@@ -200,6 +200,7 @@ if __name__ == "__main__":
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     #  TD3 config
+    parser.add_argument('--clip-range', type=float, default=5, help='the clip range')  # TODO
     parser.add_argument('--actor-hidden', type=list, default=[128, 128])
     parser.add_argument('--critic-hidden', type=list, default=[64, 64])
     parser.add_argument('--buffer-size', type=int, default=int(1e7))
@@ -210,7 +211,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr-critic', type=float, default=1e-3)
     parser.add_argument('--update-every-step', type=int, default=2)
     parser.add_argument('--random-start', type=int, default=2000)
-    parser.add_argument('--noise-decay-period', type=float, default=500.)
+    parser.add_argument('--noise-decay-period', type=float, default=1000.)
     parser.add_argument('--n-test-rollouts', type=int, default=10)
     parser.add_argument('--test-interval', type=int, default=20)
     # env config

@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from itertools import count
 import logging
 import time
+from normalizer import normalizer
 
 logger = logging.getLogger('mani')
 

@@ -50,8 +50,8 @@ def get_logger(code_version):
     return logger
 
 
-def get_env_params(env):
-    obs = env.reset('random')
+def get_env_params(env, goal_set):
+    obs = env.reset(goal_set)
     # close the environment
     params = {'obs': obs['observation'].shape[0],
             'goal': obs['desired_goal'].shape[0],
@@ -97,7 +97,7 @@ def launch(args):
     # env.seed()
 
     # get the environment parameters
-    env_params = get_env_params(env)
+    env_params = get_env_params(env, args.goal_set)
     # create the ddpg agent to interact with the environment 
     ddpg_trainer = ddpg_agent(args, env, env_params)
     if args.train:
