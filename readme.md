@@ -196,7 +196,7 @@ td3_114 hard goal num_joints 24 gamma 0.6 dense 4x 3D model max_episode_steps 10
 td3_115 hard goal num_joints 24 gamma 0.6 dense distance 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
 
 td3_119 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_ta add_peb  验证time aware和peb
-
+td3_120 hard goal num_joints 24 gamma 0.6 dense potential 3D model 
 
 -------------------------------------her -------------------------------------------------  
 her_3 her on pyrep env num_joints 12  
