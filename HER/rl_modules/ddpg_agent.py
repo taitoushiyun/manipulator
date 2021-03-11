@@ -186,8 +186,6 @@ class ddpg_agent:
                     self.vis.line(X=[i_episode], Y=[result], win='result', update='append')
                     self.vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
                     self.vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
-                    torch.save([self.o_norm.mean, self.o_norm.std, self.g_norm.mean, self.g_norm.std,
-                                self.actor_network.state_dict()], self.model_path + f'/{i_episode}.pt')
 
                 # convert them into arrays
                 mb_obs = np.array(mb_obs)
@@ -206,6 +204,9 @@ class ddpg_agent:
                 time_b = time.time()
                 print(time_b - time_a)
             # start to do the evaluation
+            if epoch > 0.9 * self.args.n_epochs:
+                torch.save([self.o_norm.mean, self.o_norm.std, self.g_norm.mean, self.g_norm.std,
+                            self.actor_network.state_dict()], self.model_path + f'/{i_episode}.pt')
             self._eval_agent(epoch)
             # if epoch % 2 == 0:
             #     self.vis.heatmap(

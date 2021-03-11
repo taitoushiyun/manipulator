@@ -8,10 +8,10 @@ Here are the param for the training
 def get_args():
     parser = argparse.ArgumentParser()
     # the environment setting
-    parser.add_argument('--code-version', type=str, default='her_27')
+    parser.add_argument('--code-version', type=str, default='her_29')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--env-name', type=str, default='FetchReach-v1', help='the environment name')
-    parser.add_argument('--n-epochs', type=int, default=500, help='the number of epochs to train the agent')
+    parser.add_argument('--n-epochs', type=int, default=1000, help='the number of epochs to train the agent')
     parser.add_argument('--n-cycles', type=int, default=10, help='the times to collect samples per epoch')
     parser.add_argument('--n-batches', type=int, default=40, help='the times to update the network')
     parser.add_argument('--save-interval', type=int, default=5, help='the interval that save the trajectory')
@@ -40,7 +40,7 @@ def get_args():
 
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=50)
-    parser.add_argument('--distance-threshold', type=float, default=0.02)
+    parser.add_argument('--distance-threshold', type=float, default=0.01)
     parser.add_argument('--reward-type', type=str, default='sparse')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
     parser.add_argument('--num-joints', type=int, default=24)

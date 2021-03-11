@@ -226,6 +226,8 @@ her_24 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch
 her_25 her_6 9800 eval
 her_26 her on mujoco env num_joints 24 randomd goal distance-threshold 0.02 epoch 500 DenseNet简化版本  
 her_27 her on mujoco env num_joints 24 randomd goal distance-threshold 0.02 epoch 500 DenseNet
+her_28 her on mujoco env num_joints 24 randomd goal distance-threshold 0.015 epoch 1000 DenseNet
+her_29 her on mujoco env num_joints 24 randomd goal distance-threshold 0.01 epoch 1000 DenseNet
  
 
   
