@@ -298,7 +298,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         start_episode = 0
     for i_episode in range(start_episode, n_episodes):
         time_a = time.time()
-        state = env.reset()
+        state = env.reset(args_.goal_set)
         state = np.concatenate([state['observation'], state['desired_goal']])
         score = 0
         episode_length = 0
@@ -314,21 +314,20 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
             score += reward
             episode_length += 1
             agent.learn(1)
-            if done:
-                result = 0.
-                if done and episode_length < max_episode_length:
-                    result = 1.
-                break
-            # if done:
-            #     result = 0.
-            #     if done and episode_length < max_episode_length and not any(info['collision_state']):
-            #         result = 1.
-            #     break
-            # if i == max_episode_length - 1:
-            #     if done:
-            #         result = 1.
-            #     else:
-            #         result = 0
+            if args_.add_peb:
+                if done or i == max_episode_length - 1:
+                    result = 0.
+                    if done:
+                        result = 1.
+                    break
+            else:
+                if done:
+                    result = 0.
+                    if done and episode_length < max_episode_length:
+                    # if done and episode_length < max_episode_length and not any(info['collision_state']):
+                        result = 1.
+                    break
+
         result_deque.append(result)
         score_deque.append(score)
         success_rate = np.mean(result_deque)
@@ -346,7 +345,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         vis.line(X=[i_episode], Y=[result], win='result', update='append')
         vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
         vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
-        if i_episode % 10 == 0:
+        if i_episode % 10 == 0 and i_episode > 0.9 * n_episodes:
             torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'{i_episode}.pth'))
         time_b = time.time()
         print(time_b - time_a)
@@ -354,7 +353,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         #     total_result = 0
         #     total_reward = 0
         #     for _ in range(args_.n_test_rollouts):
-        #         state = env.reset()
+        #         state = env.reset(args_.eval_goal_set)
         #         state = np.concatenate([state['observation'], state['desired_goal']])
         #         eval_score = 0
         #         total_len = 0
@@ -396,7 +395,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         #             vis.line(X=[i_episode // args_.test_interval], Y=[eval_reward], win='eval reward', update='append')
 
         if i_episode % 5 == 0:
-            state = env.reset()
+            state = env.reset(args_.eval_goal_set)
             state = np.concatenate([state['observation'], state['desired_goal']])
             eval_score = 0
             total_len = 0
@@ -407,22 +406,20 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
                 eval_score += reward
                 total_len += 1
                 state = next_state
-                if done:
-                    eval_result = 0.
-                    if done and total_len < max_episode_length:
-                        eval_result = 1.
-                    break
-                # if done:
-                #     eval_result = 0.
-                #     if done and total_len < max_episode_length and not any(info['collision_state']):
-                #         eval_result = 1.
-                #     break
+                if args_.add_peb:
+                    if done or i == max_episode_length - 1:
+                        eval_result = 0.
+                        if done:
+                            eval_result = 1.
+                        break
+                else:
+                    if done:
+                        eval_result = 0.
+                        if done and total_len < max_episode_length:
+                        # if done and total_len < max_episode_length and not any(info['collision_state']):
+                            eval_result = 1.
+                        break
 
-                # if i == max_episode_length - 1:
-                #     if done:
-                #         eval_result = 1.
-                #     else:
-                #         eval_result = 0.
             eval_result_queue.append(eval_result)
             eval_success_rate = np.mean(eval_result_queue)
             logger.info(

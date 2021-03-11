@@ -26,7 +26,7 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
                         'hard': [0, 20, 0, 15, 0,  20, 0,  20, 0, 20, 0, -10],
                         'super hard': [0, -50, 0, -50, 0, -20, 0, 40, 0, 30, 0, 0]},
         (False, False): {'easy': [20, 20, 20, 20, -10, -10, -15, -15, 20, 20, 0, 0],
-                         'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
+                         'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10, 20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                          'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
 
 
@@ -96,10 +96,10 @@ class ManipulatorEnv(gym.Env):
         self.manipulator_base = self.manipulator.get_base()
         self.initial_config_tree = self.manipulator.get_configuration_tree()
 
-    def _sample_goal(self):
-        if self.goal_set in ['easy', 'hard', 'super hard']:
-            theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][self.goal_set]) * DEG2RAD
-        elif self.goal_set == 'random':
+    def _sample_goal(self, goal_set):
+        if goal_set in ['easy', 'hard', 'super hard']:
+            theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][goal_set]) * DEG2RAD
+        elif goal_set == 'random':
             if self.plane_model and not self.cc_model:
                 theta = np.vstack((np.zeros((self.action_dim,)),
                                    45 * DEG2RAD * np.random.uniform(low=-1, high=1,
@@ -148,14 +148,14 @@ class ManipulatorEnv(gym.Env):
         # state[self.g_pos_idx[2]] = (state[self.g_pos_idx[2]] - 1.) / 1.
         return state
 
-    def reset(self):
+    def reset(self, goal_set=None):
         if self.cc_model:
             self.pr.stop()
             self.pr.start()
         else:
             self.pr.set_configuration_tree(self.initial_config_tree)
         self._elapsed_steps = 0
-        self.goal_theta, self.goal, self.max_rewards = self._sample_goal()
+        self.goal_theta, self.goal, self.max_rewards = self._sample_goal(goal_set)
         # self.observation[self.g_pos_idx] = np.asarray(self.goal)
         # self.observation[self.b_pos_idx] = np.asarray([0.2, 0, 1])
         self.manipulator_target.set_position(self.goal)

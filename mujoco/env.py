@@ -49,6 +49,8 @@ class ManipulatorEnv(gym.Env):
         self.collision_cnt = env_config['collision_cnt']
         self.headless_mode = env_config['headless_mode']
         self.random_initial_state = env_config.get('random_initial_state', False)
+        self.add_ta = env_config['add_ta']
+        self.add_peb = env_config['add_peb']
 
         model_xml_path = os.path.join(os.path.dirname(__file__), 'mani', env_config['scene_file'])
         if not os.path.exists(model_xml_path):
@@ -99,6 +101,7 @@ class ManipulatorEnv(gym.Env):
         self.goal = None
         self.goal_index = -1
         self.has_reset = False
+        self._elapsed_steps = 0
         obs = self._get_obs()
         self.observation_space = spaces.Dict(dict(
             desired_goal=spaces.Box(-np.inf, np.inf, shape=obs['achieved_goal'].shape, dtype='float32'),
@@ -114,7 +117,7 @@ class ManipulatorEnv(gym.Env):
         # self.g_pos_idx = range(self.joint_state_dim + 6, self.joint_state_dim + 9)
 
         self.last_obs = None
-        self._elapsed_steps = None
+
 
     @property
     def dt(self):
@@ -125,7 +128,6 @@ class ManipulatorEnv(gym.Env):
         return [seed]
 
     def step(self, action):
-        assert self._elapsed_steps is not None
         self._elapsed_steps += 1
         # action = np.clip(action, self.action_space.low, self.action_space.high)
         self._set_action(action)
@@ -137,8 +139,9 @@ class ManipulatorEnv(gym.Env):
         }
         reward = self.compute_reward(obs['achieved_goal'], self.goal, info)
         done = np.linalg.norm(obs['achieved_goal'] - self.goal, axis=-1) <= self.distance_threshold
-        if self._elapsed_steps >= self._max_episode_steps:
-            done = True
+        if not self.add_peb:
+            if self._elapsed_steps >= self._max_episode_steps:
+                done = True
         self.last_obs = obs
         return obs, reward, done, info
 
@@ -210,7 +213,11 @@ class ManipulatorEnv(gym.Env):
         end_pos = self.sim.data.get_site_xpos('robot0:tip')
         end_vel = self.sim.data.get_site_xvelp('robot0:tip')
         achieved_goal = end_pos
-        obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel])
+        time_aware = self._elapsed_steps / ((self._max_episode_steps - 1) / 2.) - 1.
+        if self.add_ta:
+            obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel, np.array([time_aware])])
+        else:
+            obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel])
         return {
             'observation': obs.copy(),
             'achieved_goal': achieved_goal.copy(),

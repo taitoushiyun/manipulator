@@ -195,10 +195,7 @@ td3_116 hard goal num_joints 24 gamma 0.6 dense 2x 3D model max_episode_steps 10
 td3_114 hard goal num_joints 24 gamma 0.6 dense 4x 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
 td3_115 hard goal num_joints 24 gamma 0.6 dense distance 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
 
-
-
-
-
+td3_119 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_ta add_peb  验证time aware和peb
 
 
 -------------------------------------her -------------------------------------------------  
@@ -227,7 +224,7 @@ her_25 her_6 9800 eval
 her_26 her on mujoco env num_joints 24 randomd goal distance-threshold 0.02 epoch 500 DenseNet简化版本  
 her_27 her on mujoco env num_joints 24 randomd goal distance-threshold 0.02 epoch 500 DenseNet
 her_28 her on mujoco env num_joints 24 randomd goal distance-threshold 0.015 epoch 1000 DenseNet
-her_29 her on mujoco env num_joints 24 randomd goal distance-threshold 0.01 epoch 1000 DenseNet
+her_29 her on mujoco env num_joints 24 randomd goal distance-threshold 0.01 epoch 1000 DenseNet 
  
 
   
