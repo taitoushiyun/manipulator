@@ -63,6 +63,37 @@ class ReplayBuffer:
         return len(self.memory)
 
 
+# class Actor(nn.Module):
+#     """Actor (Policy) Model."""
+#
+#     def __init__(self, state_size, action_size, actor_hidden, max_action):
+#         """Initialize parameters and build model.
+#         Params
+#         ======
+#             state_size (int): Dimension of each state
+#             action_size (int): Dimension of each action
+#             max_action (float): the maximum valid value for action
+#             fc1_units (int): Number of nodes in first hidden layer
+#             fc2_units (int): Number of nodes in second hidden layer
+#         """
+#         super(Actor, self).__init__()
+#         self.actor_fcs = []
+#         actor_in_size = state_size
+#         for i, actor_next_size in enumerate(actor_hidden):
+#             actor_fc = nn.Linear(actor_in_size, actor_next_size)
+#             actor_in_size = actor_next_size
+#             self.__setattr__("actor_fc_{}".format(i), actor_fc)
+#             self.actor_fcs.append(actor_fc)
+#         self.actor_last = nn.Linear(actor_in_size, action_size)
+#         self.max_action = max_action
+#
+#     def forward(self, state):
+#         """Build an actor (policy) network that maps states -> actions."""
+#         h = state
+#         for fc in self.actor_fcs:
+#             h = torch.relu(fc(h))
+#         return self.max_action * torch.tanh(self.actor_last(h))
+
 class Actor(nn.Module):
     """Actor (Policy) Model."""
 
@@ -77,6 +108,7 @@ class Actor(nn.Module):
             fc2_units (int): Number of nodes in second hidden layer
         """
         super(Actor, self).__init__()
+        self.action_size = action_size
         self.actor_fcs = []
         actor_in_size = state_size
         for i, actor_next_size in enumerate(actor_hidden):
@@ -84,15 +116,26 @@ class Actor(nn.Module):
             actor_in_size = actor_next_size
             self.__setattr__("actor_fc_{}".format(i), actor_fc)
             self.actor_fcs.append(actor_fc)
+        self.attention = nn.Sequential(nn.Linear(state_size+action_size, 64),
+                                       nn.ReLU(),
+                                       nn.Linear(64, state_size),
+                                       nn.ReLU(),
+                                       )
         self.actor_last = nn.Linear(actor_in_size, action_size)
         self.max_action = max_action
 
     def forward(self, state):
         """Build an actor (policy) network that maps states -> actions."""
-        h = state
+        state = state.unsqueeze(-2).expand(*state.shape[:-1], self.action_size, state.shape[-1])
+        h = torch.cat([state, torch.eye(self.action_size).unsqueeze(0).expand((*state.shape[:-2], self.action_size, self.action_size)).to(device)], dim=-1)
+        h = self.attention(h).softmax(dim=-1)
+        h = state * h
         for fc in self.actor_fcs:
             h = torch.relu(fc(h))
-        return self.max_action * torch.tanh(self.actor_last(h))
+        h = self.actor_last(h)
+        h = h * torch.eye(self.action_size).unsqueeze(0).expand((*h.shape[:-2], self.action_size, self.action_size)).to(device)
+        h = h.sum(dim=-1)
+        return self.max_action * torch.tanh(h)
 
 
 class Critic(nn.Module):
@@ -186,13 +229,13 @@ class TD3Agent():
 
     def act(self, state, episode_step=0, add_noise=True):
         """Returns actions for given state as per current policy."""
-        state = torch.from_numpy(state).float().to(device)
+        state = torch.from_numpy(state[None]).float().to(device)
         self.actor_local.eval()
         with torch.no_grad():
-            action = self.actor_local(state).cpu().data.numpy()
+            action = self.actor_local(state).squeeze(0).cpu().data.numpy()
         if add_noise:
             # Generate a random noise
-            sigma = 1. - (1. - 0.05) * min(1., episode_step / self.noise_drop_rate)
+            sigma = 1. - (1. - .05) * min(1., episode_step / self.noise_drop_rate)
             noise = np.random.normal(0, sigma, size=self.action_size)
             # Add noise to the action for exploration
             action = (action + noise).clip(self.min_action[0], self.max_action[0])

@@ -202,6 +202,7 @@ td3_117,td3_116,td3_114表明高次势函数效果差，可以补充低次势函
 td3_119 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_ta add_peb  验证time aware和peb,没有归一化  
 td3_120 hard goal num_joints 24 gamma 0.6 dense potential 3D model 存在种子没对齐的bug
 td3_121 hard goal num_joints 24 gamma 0.6 dense potential 3D model 种子与td3_111对齐，加入简单归一化，功能与td3_84对齐，效果和td3_111差不多  
+td3_130 修改了一些不重要地方产生了新的随机序列  对齐 td3_121  
 td3_122 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_ta 
 td3_123 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_peb  
 td3_124 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_ta add_peb  
@@ -213,6 +214,8 @@ td3_125 eval td3_122/1990.pth on 1000 epsilon decay rate  1 -> 0.05
 td3_127 eval td3_122/1830.pth on 1000 epsilon decay rate  1 -> 0.05  
 td3_128 eval td3_122/1830.pth on 1000 epsilon decay rate  1 -> 0  
 td3_129 eval td3_122/1990.pth on 1000 epsilon decay rate  1 -> 0  
+
+td3_131  td3_130加入ASF
 
 -------------------------------------her -------------------------------------------------  
 her_3 her on pyrep env num_joints 12  
@@ -237,13 +240,14 @@ her_19 her on mujoco env num_joints 24 random goal distance-threshold 0.005 epoc
 her_23 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 均匀 sample method   
 her_24 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 尖峰 sample method  
 her_25 her_6 9800 eval
-her_26 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet简化版本  
-her_27 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet
-her_28 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNet
-her_29 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000 DenseNet 
+her_26 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet简化版本  seed 1  
+her_27 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet seed 1  
+her_28 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNet seed  
+her_29 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000 DenseNet seed  
  
-her_30 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 1000 DenseNet  
-her_31 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  
+her_30 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 1000 DenseNet  random-initial-state
+her_31 her on mujoco env num_joints 12 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  跑错了实验  
+her_32 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征 
 
 
   

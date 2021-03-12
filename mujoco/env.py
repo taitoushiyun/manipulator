@@ -111,10 +111,17 @@ class ManipulatorEnv(gym.Env):
         ))
         self.action_space = spaces.Box(low=-1., high=1, shape=(self.action_dim,), dtype=np.float32)
 
-        self.j_ang_idx = range(self.joint_state_dim // 2)
-        self.j_vel_idx = range(self.joint_state_dim // 2, self.joint_state_dim)
-        self.e_pos_idx = range(self.joint_state_dim, self.joint_state_dim + 3)
-        self.e_vel_idx = range(self.joint_state_dim + 3, self.joint_state_dim + 6)
+        self.ftg_idx = range(0, 3)
+        self.j_ang_idx = range(3, self.joint_state_dim // 2 + 3)
+        self.j_vel_idx = range(self.joint_state_dim // 2 + 3, self.joint_state_dim + 3)
+        self.e_pos_idx = range(self.joint_state_dim + 3, self.joint_state_dim + 6)
+        self.e_vel_idx = range(self.joint_state_dim + 6, self.joint_state_dim + 9)
+
+        # self.j_ang_idx = range(self.joint_state_dim // 2)
+        # self.j_vel_idx = range(self.joint_state_dim // 2, self.joint_state_dim)
+        # self.e_pos_idx = range(self.joint_state_dim, self.joint_state_dim + 3)
+        # self.e_vel_idx = range(self.joint_state_dim + 3, self.joint_state_dim + 6)
+        # self.ftg_idx = range(self.joint_state_dim + 6, self.joint_state_dim + 9)
         # self.g_pos_idx = range(self.joint_state_dim + 6, self.joint_state_dim + 9)
 
         self.last_obs = None
@@ -243,15 +250,14 @@ class ManipulatorEnv(gym.Env):
         time_aware = self._elapsed_steps / ((self._max_episode_steps - 1) / 2.) - 1.
         ftg = self.goal - achieved_goal
         if self.add_ta:
-            obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel, ftg, np.array([time_aware])])
+            obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel, np.array([time_aware])])
         else:
-            obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel])
+            obs = np.concatenate([ftg, joint_pos, joint_vel, end_pos, end_vel])
         return {
             'observation': obs.copy(),
             'achieved_goal': achieved_goal.copy(),
             'desired_goal': self.goal.copy(),
         }
-
 
     def _set_action(self, action):
         if self.plane_model and not self.cc_model:

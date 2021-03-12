@@ -62,7 +62,59 @@ import time
 # plt.plot(a,b, color='b')
 # # plt.plot(a, c, color='r')
 # plt.show()
-a = np.random.choice([-1, 1], size=10)
-b = np.ones((10, ))
-c = a * b
-print(c.shape, c)
+import torch
+import torch.nn as nn
+
+class Actor(nn.Module):
+    """Actor (Policy) Model."""
+
+    def __init__(self, state_size, action_size, actor_hidden, max_action):
+        """Initialize parameters and build model.
+        Params
+        ======
+            state_size (int): Dimension of each state
+            action_size (int): Dimension of each action
+            max_action (float): the maximum valid value for action
+            fc1_units (int): Number of nodes in first hidden layer
+            fc2_units (int): Number of nodes in second hidden layer
+        """
+        super(Actor, self).__init__()
+        self.action_size = action_size
+        self.actor_fcs = []
+        actor_in_size = state_size
+        for i, actor_next_size in enumerate(actor_hidden):
+            actor_fc = nn.Linear(actor_in_size, actor_next_size)
+            actor_in_size = actor_next_size
+            self.__setattr__("actor_fc_{}".format(i), actor_fc)
+            self.actor_fcs.append(actor_fc)
+        self.attention = nn.Sequential(nn.Linear(state_size+action_size, 64),
+                                       nn.ReLU(),
+                                       nn.Linear(64, 1),
+                                       nn.ReLU(),
+                                       )
+        self.actor_last = nn.Linear(actor_in_size, action_size)
+        self.max_action = max_action
+
+    def forward(self, state):
+        """Build an actor (policy) network that maps states -> actions."""
+
+        state = state.unsqueeze(-2).expand(*state.shape[:-1], self.action_size, state.shape[-1])
+        a = torch.eye(self.action_size).unsqueeze(0).expand((*state.shape[:-2], self.action_size, self.action_size))
+        print(a.shape)
+        print(state.shape)
+        h = torch.cat([state, torch.eye(self.action_size).unsqueeze(0).expand((*state.shape[:-2], self.action_size, self.action_size))], dim=-1)
+        h = self.attention(h).squeeze(-1)
+
+        h = state * h
+        for fc in self.actor_fcs:
+            h = torch.relu(fc(h))
+        h = self.actor_last(h)
+        h = h * torch.eye(self.action_size).unsqueeze(0).expand((*h.shape[:-2], self.action_size, self.action_size))
+        h = h.sum(dim=-1)
+        return self.max_action * torch.tanh(h)
+
+
+actor = Actor(48, 24, [128, 64], 1)
+input = torch.ones((2, 48))
+print(actor(input).shape)
+# print(torch.ones(2,2).reshape(2,2,2))
