@@ -249,7 +249,7 @@ her_30 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch
 her_31 her on mujoco env num_joints 12 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  跑错了实验  
 her_32 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征 
 
-
+her_33 her on mujoco env num_joints 12 random goal distance-threshold 0.02 epoch 500 DenseNet plane model 
   
 
 
