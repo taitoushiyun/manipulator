@@ -352,6 +352,9 @@ class ddpg_agent:
                     pi = self.actor_network(input_tensor)
                     # convert the actions
                     actions = pi.detach().cpu().numpy().squeeze()
+                    # noise = np.random.normal(0, 0.05, size=actions.shape)
+                    # # Add noise to the action for exploration
+                    # actions = (actions + noise).clip(self.env.action_space.low, self.env.action_space.high)
                 if not self.args.headless_mode:
                     self.env.render()
                 observation_new, _, _, info = self.env.step(actions)

@@ -91,6 +91,10 @@ def launch(args):
         'headless_mode': args.headless_mode,
         'scene_file': args.scene_file,
         'n_substeps': 100,
+        'random_initial_state': args.random_initial_state,
+        'add_ta': False,
+        'add_peb': False,
+        'is_her': True,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args.seed)

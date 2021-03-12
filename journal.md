@@ -17,5 +17,7 @@
 |14|看完google-research kaggle分享|
 |15|尝试reward clip和reward scale 并调研相关文献 |
 |16|补充低次势函数的实验|
+|17|添加末端 距离矢量特征| done |
+|18|减去关节速度特征| done |
 
 

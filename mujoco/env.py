@@ -99,7 +99,7 @@ class ManipulatorEnv(gym.Env):
         self.action_dim = self.joint_state_dim // 2
 
         self.dh_model = DHModel(self.num_joints)
-        self.goal = None
+        _, self.goal, _ = self._sample_goal(self.goal_set)
         self.goal_index = -1
         self.has_reset = False
         self._elapsed_steps = 0
@@ -241,14 +241,15 @@ class ManipulatorEnv(gym.Env):
         end_vel = self.sim.data.get_site_xvelp('robot0:tip')
         achieved_goal = end_pos
         time_aware = self._elapsed_steps / ((self._max_episode_steps - 1) / 2.) - 1.
+        ftg = self.goal - achieved_goal
         if self.add_ta:
-            obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel, np.array([time_aware])])
+            obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel, ftg, np.array([time_aware])])
         else:
             obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel])
         return {
             'observation': obs.copy(),
             'achieved_goal': achieved_goal.copy(),
-            'desired_goal': self.goal.copy() if self.goal is not None else self.goal,
+            'desired_goal': self.goal.copy(),
         }
 
 

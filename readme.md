@@ -230,18 +230,21 @@ her_14 her on mujoco env num_joints 24 block3 goal
 her_15 her on mujoco env num_joints 24 block3 goal block env
 her_16 her on mujoco env num_joints 24 block0 goal block env plane model
 her_17 her on mujoco env num_joints 24 block0 goal block env plane model with heatmap
-her_21 her on mujoco env num_joints 24 randomd goal distance-threshold 0.02 epoch 500
-her_22 her on mujoco env num_joints 24 randomd goal distance-threshold 0.015 epoch 1000
+her_21 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500
+her_22 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000
 her_20 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000  
 her_19 her on mujoco env num_joints 24 random goal distance-threshold 0.005 epoch 1000 
 her_23 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 均匀 sample method   
 her_24 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 尖峰 sample method  
 her_25 her_6 9800 eval
-her_26 her on mujoco env num_joints 24 randomd goal distance-threshold 0.02 epoch 500 DenseNet简化版本  
-her_27 her on mujoco env num_joints 24 randomd goal distance-threshold 0.02 epoch 500 DenseNet
-her_28 her on mujoco env num_joints 24 randomd goal distance-threshold 0.015 epoch 1000 DenseNet
-her_29 her on mujoco env num_joints 24 randomd goal distance-threshold 0.01 epoch 1000 DenseNet 
+her_26 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet简化版本  
+her_27 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet
+her_28 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNet
+her_29 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000 DenseNet 
  
+her_30 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 1000 DenseNet  
+her_31 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  
+
 
   
 

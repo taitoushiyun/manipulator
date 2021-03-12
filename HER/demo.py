@@ -139,7 +139,8 @@ if __name__ == '__main__':
             action = pi.detach().numpy().squeeze()
             noise = np.random.normal(0, 0.05, size=action.shape)
             # Add noise to the action for exploration
-            action = (action + noise).clip(min_action[0], max_action[0])
+            action = (action + noise).clip(env.action_space.low, env.action_space.high)
+
             # put actions into the environment
             observation_new, reward, done, info = env.step(action)
             # print(observation_new['achieved_goal'])

@@ -63,3 +63,17 @@ class replay_buffer:
         if inc == 1:
             idx = idx[0]
         return idx
+
+    def sample_init_state(self, joints_index):
+        temp_buffers = {}
+        with self.lock:
+            for key in self.buffers.keys():
+                temp_buffers[key] = self.buffers[key][:self.current_size]
+        # temp_buffers['obs_next'] = temp_buffers['obs'][:, 1:, :]
+        # temp_buffers['ag_next'] = temp_buffers['ag'][:, 1:, :]
+        T = temp_buffers['actions'].shape[1]
+        rollout_batch_size = temp_buffers['actions'].shape[0]
+        episode_idxs = np.random.randint(rollout_batch_size, 1)
+        t_samples = np.random.randint(T, size=1)
+        obs = temp_buffers['obs'][episode_idxs, t_samples]
+        return obs[:joints_index].copy()
