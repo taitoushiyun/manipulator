@@ -60,7 +60,7 @@ def set_axes_equal(ax):
 
 if __name__ == '__main__':
     args = get_args()
-    model_path = 'saved_models/her_57/model.pt'
+    model_path = 'saved_models/her_75/model.pt'
     # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_46/model.pt'
     o_mean, o_std, g_mean, g_std, model = torch.load(model_path, map_location=lambda storage, loc: storage)
     env_config = {
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-    observation = env.reset('random')
+    observation = env.reset('random', 300)
     env_params = {'obs': observation['observation'].shape[0], 
                   'goal': observation['desired_goal'].shape[0], 
                   'action': env.action_space.shape[0], 
@@ -106,7 +106,7 @@ if __name__ == '__main__':
         actor = ActorDenseASF
     else:
         raise ValueError
-    actor_network = actor(env_params)
+    actor_network = actor(args, env_params)
     actor_network.load_state_dict(model)
     actor_network.eval()
 
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     result_list = []
 
     for i in range(args.demo_length):
-        observation = env.reset(args.eval_goal_set)
+        observation = env.reset(args.eval_goal_set, 300)
         achieved_path.append(observation['achieved_goal'])
         # env.render()
         goal_list.append(observation['desired_goal'])
@@ -161,6 +161,8 @@ if __name__ == '__main__':
             achieved_path.append(observation_new['achieved_goal'])
             obs = observation_new['observation']
             if done:
+                if not args.headless_mode:
+                    env.render()
                 # if done and path_length < args.max_episode_steps and not any(info['collision_state']):
                 if done and length < args.max_episode_steps:
                     result = 1

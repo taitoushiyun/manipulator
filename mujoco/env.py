@@ -51,7 +51,8 @@ class ManipulatorEnv(gym.Env):
         self.random_initial_state = env_config.get('random_initial_state', False)
         self.add_peb = env_config['add_peb']
         self.is_her = env_config['is_her']
-        self.zero_reset_period = env_config['reset_period']
+        # self.zero_reset_period = env_config['reset_period']
+        self.zero_reset_period = 1
 
         model_xml_path = os.path.join(os.path.dirname(__file__), 'mani', env_config['scene_file'])
         if not os.path.exists(model_xml_path):
@@ -180,6 +181,7 @@ class ManipulatorEnv(gym.Env):
 
     def reset(self, goal_set=None, i_epoch=0):
         self._elapsed_steps = 0
+        self.zero_reset_period = 1 + min(9, i_epoch // 40)
         self.goal_theta, self.goal, self.max_rewards = self._sample_goal(goal_set, i_epoch)
         self._reset_sim()
         obs = self._get_obs()
@@ -250,7 +252,7 @@ class ManipulatorEnv(gym.Env):
         end_vel = self.sim.data.get_site_xvelp('robot0:tip')
         achieved_goal = end_pos
         ftg = self.goal - achieved_goal
-        obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel])
+        obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel, ftg])
         return {
             'observation': obs.copy(),
             'achieved_goal': achieved_goal.copy(),
@@ -290,7 +292,7 @@ class ManipulatorEnv(gym.Env):
         self.sim.forward()
 
     def _sample_goal(self, goal_set, i_epoch):
-        # sample_range = 0.3 + 0.7 * min(.7, i_epoch / 60)
+        # sample_range = 0.3 + 0.7 * min(1, i_epoch / 60)
         sample_range = 1
         if goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][goal_set]) * DEG2RAD

@@ -293,6 +293,7 @@ her_71 joints 10 random goal dt .02 denseASF hidden [16] random init_10 3D  crit
 her_72 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt max_joint_speed 20  
 her_73 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt 1500 episode sample cnt decay
 her_74 retry her_66
+her_75 joints 12 random goal dr .02 denseASF hidden [16] random init_1-->10(30) 3D add_dtt 
  
 
 

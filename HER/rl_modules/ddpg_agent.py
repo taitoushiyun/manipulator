@@ -80,13 +80,13 @@ class ddpg_agent:
         self.env = env
         self.env_params = env_params
         # create the network
-        self.actor_network = actor(env_params)
+        self.actor_network = actor(args, env_params)
         self.critic_network = critic(env_params)
         # sync the networks across the cpus
         # sync_networks(self.actor_network)
         # sync_networks(self.critic_network)
         # build up the target network
-        self.actor_target_network = actor(env_params)
+        self.actor_target_network = actor(args, env_params)
         self.critic_target_network = critic(env_params)
         # load the weights into the target networks
         self.actor_target_network.load_state_dict(self.actor_network.state_dict())
@@ -94,6 +94,7 @@ class ddpg_agent:
 
         self.critic2_network = critic(env_params)
         self.critic2_target_network = critic(env_params)
+
         self.critic2_target_network.load_state_dict(self.critic2_network.state_dict())
         # if use gpu
         if self.args.cuda:

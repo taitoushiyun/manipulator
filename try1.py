@@ -11,18 +11,18 @@ RAD2DEG = 180. / np.pi
 45度均匀采样的平面样本分布
 '''
 time_a = time.time()
-joints = 24
+joints = 12
 dh = DHModel(0, joints)
 sample_list = []
-num_sample = 500000
+num_sample = 5000
 for i in range(num_sample):
     # 平面关节均匀分布采样
-    # theta = np.vstack((np.zeros((joints//2,)),
-    #                    45 * DEG2RAD * np.random.uniform(low=-1, high=1,
-    #                                                     size=(joints//2,)))).T.flatten()
-    theta = 45 * DEG2RAD * (5 - 1 / np.random.uniform(low=0.2, high=1.2, size=(joints // 2,))) / (5 - (1 / 1.2)) * np.random.choice([-1, 1], size=(joints // 2, ))
-    theta = np.vstack((np.zeros((joints // 2,)),
-                       theta)).T.flatten()
+    theta = np.vstack((np.zeros((joints//2,)),
+                       60 * DEG2RAD * np.random.uniform(low=-1, high=1,
+                                                        size=(joints//2,)))).T.flatten()
+    # theta = 45 * DEG2RAD * (5 - 1 / np.random.uniform(low=0.2, high=1.2, size=(joints // 2,))) / (5 - (1 / 1.2)) * np.random.choice([-1, 1], size=(joints // 2, ))
+    # theta = np.vstack((np.zeros((joints // 2,)),
+    #                    theta)).T.flatten()
 
     # 平面关节正态分布采样45 * DEG2RAD
     # theta = np.vstack((np.zeros((joints // 2,)),

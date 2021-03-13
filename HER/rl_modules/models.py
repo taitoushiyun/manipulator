@@ -9,7 +9,7 @@ the input x in both networks should be [o, g], where o is the observation and g 
 
 
 class Actor(nn.Module):
-    def __init__(self, env_params):
+    def __init__(self, args, env_params):
         super(Actor, self).__init__()
         self.max_action = env_params['action_max']
         self.fc1 = nn.Linear(env_params['obs'] + env_params['goal'], 256)
@@ -44,8 +44,9 @@ class Critic(nn.Module):
 
 
 class ActorDenseSimple(nn.Module):
-    def __init__(self, env_params):
+    def __init__(self, args, env_params):
         super(ActorDenseSimple, self).__init__()
+        self.agent = agent
         self.max_action = env_params['action_max']
         self.fc1 = nn.Linear(env_params['obs'] + env_params['goal'], 256)
         self.fc2 = nn.Linear(env_params['obs'] + env_params['goal'] + 256, 256)
@@ -98,7 +99,7 @@ class CriticDenseSimple(nn.Module):
 
 
 class ActorDense(nn.Module):
-    def __init__(self, env_params):
+    def __init__(self, args, env_params):
         super(ActorDense, self).__init__()
         self.max_action = env_params['action_max']
         self.k0 = env_params['obs'] + env_params['goal']
@@ -117,8 +118,13 @@ class ActorDense(nn.Module):
 
 
 class ActorDenseASF(nn.Module):
-    def __init__(self, env_params):
+    def __init__(self, args, env_params):
         super(ActorDenseASF, self).__init__()
+        self.args = args
+        if self.args.cuda:
+            self.local_device = 'cuda'
+        else:
+            self.local_device = 'cpu'
         self.action_size = env_params['action']
         self.max_action = env_params['action_max']
         self.k0 = env_params['obs'] + env_params['goal']
@@ -136,7 +142,7 @@ class ActorDenseASF(nn.Module):
     def forward(self, state):
         state = state.unsqueeze(-2).expand(*state.shape[:-1], self.action_size, state.shape[-1])
         h = torch.cat([state, torch.eye(self.action_size).unsqueeze(0).expand(
-            (*state.shape[:-2], self.action_size, self.action_size)).to('cuda')], dim=-1)
+            (*state.shape[:-2], self.action_size, self.action_size)).to(self.local_device)], dim=-1)
         h = self.attention(h).softmax(dim=-1)
         h = state * h
         bypass = h
@@ -145,7 +151,7 @@ class ActorDenseASF(nn.Module):
             bypass = torch.cat([bypass, x], -1)
         h = self.action_out(x)
         h = h * torch.eye(self.action_size).unsqueeze(0).expand((*h.shape[:-2], self.action_size, self.action_size)).to(
-            'cuda')
+            self.local_device)
         h = h.sum(dim=-1)
         # h = h.squeeze(-1)
         return self.max_action * torch.tanh(h)
