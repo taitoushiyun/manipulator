@@ -95,6 +95,7 @@ def launch(args):
         'add_ta': False,
         'add_peb': False,
         'is_her': True,
+        'reset_period': args.reset_period,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args.seed)

@@ -30,7 +30,7 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
                         'hard': [0, 20, 0, 15, 0,  20, 0,  20, 0, 20, 0, -10],
                         'super hard': [0, -50, 0, -50, 0, -20, 0, 40, 0, 30, 0, 0]},
         (False, False): {'easy': [20, 20, 20, 20, -10, -10, -15, -15, 20, 20, 0, 0],
-                         'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10, 20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
+                         'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                          'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
 
 
@@ -52,6 +52,7 @@ class ManipulatorEnv(gym.Env):
         self.add_ta = env_config['add_ta']
         self.add_peb = env_config['add_peb']
         self.is_her = env_config['is_her']
+        self.zero_reset_period = env_config['reset_period']
 
         model_xml_path = os.path.join(os.path.dirname(__file__), 'mani', env_config['scene_file'])
         if not os.path.exists(model_xml_path):
@@ -102,6 +103,7 @@ class ManipulatorEnv(gym.Env):
         _, self.goal, _ = self._sample_goal(self.goal_set)
         self.goal_index = -1
         self.has_reset = False
+        self.reset_cnt = -1
         self._elapsed_steps = 0
         obs = self._get_obs()
         self.observation_space = spaces.Dict(dict(
@@ -275,7 +277,10 @@ class ManipulatorEnv(gym.Env):
     def _reset_sim(self):
         if self.random_initial_state:
             if self.has_reset:
-                return
+                # return
+                self.reset_cnt += 1
+                if self.reset_cnt % self.zero_reset_period != 0:
+                    return
             else:
                 self.has_reset = True
         #     # if self.goal is not None:
@@ -376,7 +381,7 @@ if __name__ == '__main__':
         'goal_set': 'random',
         'max_episode_steps': 100,
         'collision_cnt': 15,
-        'scene_file': 'mani_env.xml',
+        'scene_file': 'mani_env_6.xml',
         'headless_mode': False,
         'n_substeps': 100,
         'random_initial_state': False,

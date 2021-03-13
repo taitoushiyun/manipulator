@@ -1,5 +1,5 @@
 import torch
-from rl_modules.models import actor
+from rl_modules.models import Actor, ActorDense, ActorDenseSimple, ActorDenseASF
 from arguments import get_args
 import gym
 import numpy as np
@@ -60,8 +60,8 @@ def set_axes_equal(ax):
 
 if __name__ == '__main__':
     args = get_args()
-    # model_path = 'saved_models/her_9/1488.pt'
-    model_path = '/media/cq/000CF0AE00072D66/saved_models/her_6/9800.pt'
+    model_path = 'saved_models/her_57/model.pt'
+    # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_46/model.pt'
     o_mean, o_std, g_mean, g_std, model = torch.load(model_path, map_location=lambda storage, loc: storage)
     env_config = {
         'distance_threshold': args.distance_threshold,
@@ -78,6 +78,10 @@ if __name__ == '__main__':
         'scene_file': args.scene_file,
         'n_substeps': 100,
         'random_initial_state': args.random_initial_state,
+        'add_ta': False,
+        'add_peb': False,
+        'is_her': True,
+        'reset_period': args.reset_period,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args.seed)
@@ -92,6 +96,16 @@ if __name__ == '__main__':
                   'action_max': env.action_space.high[0],
                   }
     # create the actor network
+    if args.actor_type == 'normal':
+        actor = Actor
+    elif args.actor_type == 'dense':
+        actor = ActorDense
+    elif args.actor_type == 'dense_simple':
+        actor = ActorDenseSimple
+    elif args.actor_type == 'dense_asf':
+        actor = ActorDenseASF
+    else:
+        raise ValueError
     actor_network = actor(env_params)
     actor_network.load_state_dict(model)
     actor_network.eval()
@@ -135,7 +149,7 @@ if __name__ == '__main__':
                 env.render()
             inputs = process_inputs(obs, g, o_mean, o_std, g_mean, g_std, args)
             with torch.no_grad():
-                pi = actor_network(inputs)
+                pi = actor_network(inputs.unsqueeze(0))
             action = pi.detach().numpy().squeeze()
             noise = np.random.normal(0, 0.05, size=action.shape)
             # Add noise to the action for exploration

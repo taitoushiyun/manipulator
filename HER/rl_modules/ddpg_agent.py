@@ -6,13 +6,17 @@ import numpy as np
 # from mpi4py import MPI
 # from mpi_utils.mpi_utils import sync_networks, sync_grads
 from rl_modules.replay_buffer import replay_buffer
-from rl_modules.models import actor, critic
+from rl_modules.models import Actor, Critic, ActorDense, CriticDense, ActorDenseSimple, CriticDenseSimple, ActorDenseASF
 from mpi_utils.normalizer import normalizer
 from her_modules.her import her_sampler
 import visdom
 from _collections import deque
 import logging
 logger = logging.getLogger('mani')
+
+
+DEG2RAD = np.pi / 180.
+RAD2DEG = 180. / np.pi
 
 
 class HeatBuffer:
@@ -55,6 +59,24 @@ class HeatBuffer:
 class ddpg_agent:
     def __init__(self, args, env, env_params):
         self.args = args
+        if self.args.actor_type == 'normal':
+            actor = Actor
+        elif self.args.actor_type == 'dense':
+            actor = ActorDense
+        elif self.args.actor_type == 'dense_simple':
+            actor = ActorDenseSimple
+        elif self.args.actor_type == 'dense_asf':
+            actor = ActorDenseASF
+        else:
+            raise ValueError
+        if self.args.critic_type == 'normal':
+            critic = Critic
+        elif self.args.critic_type == 'dense':
+            critic = CriticDense
+        elif self.args.critic_type == 'dense_simple':
+            critic = CriticDenseSimple
+        else:
+            raise ValueError
         self.env = env
         self.env_params = env_params
         # create the network
@@ -69,15 +91,24 @@ class ddpg_agent:
         # load the weights into the target networks
         self.actor_target_network.load_state_dict(self.actor_network.state_dict())
         self.critic_target_network.load_state_dict(self.critic_network.state_dict())
+
+        self.critic2_network = critic(env_params)
+        self.critic2_target_network = critic(env_params)
+        self.critic2_target_network.load_state_dict(self.critic2_network.state_dict())
         # if use gpu
         if self.args.cuda:
             self.actor_network.cuda()
             self.critic_network.cuda()
             self.actor_target_network.cuda()
             self.critic_target_network.cuda()
+
+            self.critic2_network.cuda()
+            self.critic2_target_network.cuda()
         # create the optimizer
         self.actor_optim = torch.optim.Adam(self.actor_network.parameters(), lr=self.args.lr_actor)
         self.critic_optim = torch.optim.Adam(self.critic_network.parameters(), lr=self.args.lr_critic)
+
+        self.critic2_optim = torch.optim.Adam(self.critic2_network.parameters(), lr=self.args.lr_critic)
         # her sampler
         self.her_module = her_sampler(self.args.replay_strategy, self.args.replay_k, self.env.compute_reward)
         # create the replay buffer
@@ -206,7 +237,10 @@ class ddpg_agent:
             # start to do the evaluation
             if epoch > 0.9 * self.args.n_epochs:
                 torch.save([self.o_norm.mean, self.o_norm.std, self.g_norm.mean, self.g_norm.std,
-                            self.actor_network.state_dict()], self.model_path + f'/{i_episode}.pt')
+                            self.actor_network.state_dict()], self.model_path + f'/{epoch}.pt')
+            else:
+                torch.save([self.o_norm.mean, self.o_norm.std, self.g_norm.mean, self.g_norm.std,
+                            self.actor_network.state_dict()], self.model_path + f'/model.pt')
             self._eval_agent(epoch)
             # if epoch % 2 == 0:
             #     self.vis.heatmap(
@@ -291,6 +325,13 @@ class ddpg_agent:
         o, o_next, g = transitions['obs'], transitions['obs_next'], transitions['g']
         transitions['obs'], transitions['g'] = self._preproc_og(o, g)
         transitions['obs_next'], transitions['g_next'] = self._preproc_og(o_next, g)
+
+        next_joint_state = transitions['obs'][::, self.env.j_ang_idx] \
+                           + DEG2RAD * 0.2 * self.args.max_angles_vel * transitions['actions']
+        action_q_target = torch.from_numpy(np.absolute(next_joint_state[::, :-1] -
+                                                       next_joint_state[::, 1:]).sum(
+            axis=-1, keepdims=True)).detach()
+
         # start to do the update
         obs_norm = self.o_norm.normalize(transitions['obs'])
         g_norm = self.g_norm.normalize(transitions['g'])
@@ -308,6 +349,7 @@ class ddpg_agent:
             inputs_next_norm_tensor = inputs_next_norm_tensor.cuda()
             actions_tensor = actions_tensor.cuda()
             r_tensor = r_tensor.cuda()
+            action_q_target = action_q_target.cuda()
         # calculate the target Q value function
         with torch.no_grad():
             # do the normalization
@@ -323,9 +365,16 @@ class ddpg_agent:
         # the q loss
         real_q_value = self.critic_network(inputs_norm_tensor, actions_tensor)
         critic_loss = (target_q_value - real_q_value).pow(2).mean()
+
+        action_q_value = self.critic2_network(inputs_norm_tensor, actions_tensor)
+
+        action_critic_loss = (action_q_target - action_q_value).pow(2).mean()
+
         # the actor loss
         actions_real = self.actor_network(inputs_norm_tensor)
         actor_loss = -self.critic_network(inputs_norm_tensor, actions_real).mean()
+
+        actor_loss += -self.args.critic2_ratio * self.critic2_network(inputs_norm_tensor, actions_real).mean()
         actor_loss += self.args.action_l2 * (actions_real / self.env_params['action_max']).pow(2).mean()
         # start to update the network
         self.actor_optim.zero_grad()
@@ -336,6 +385,10 @@ class ddpg_agent:
         self.critic_optim.zero_grad()
         critic_loss.backward()
         # sync_grads(self.critic_network)
+        self.critic_optim.step()
+
+        self.critic2_optim.zero_grad()
+        action_critic_loss.backward()
         self.critic_optim.step()
 
     # do the evaluation
