@@ -49,7 +49,6 @@ class ManipulatorEnv(gym.Env):
         self.collision_cnt = env_config['collision_cnt']
         self.headless_mode = env_config['headless_mode']
         self.random_initial_state = env_config.get('random_initial_state', False)
-        self.add_ta = env_config['add_ta']
         self.add_peb = env_config['add_peb']
         self.is_her = env_config['is_her']
         self.zero_reset_period = env_config['reset_period']
@@ -100,7 +99,8 @@ class ManipulatorEnv(gym.Env):
         self.action_dim = self.joint_state_dim // 2
 
         self.dh_model = DHModel(self.num_joints)
-        _, self.goal, _ = self._sample_goal(self.goal_set)
+        self.sample_cnt = 0
+        _, self.goal, _ = self._sample_goal(self.goal_set, 0)
         self.goal_index = -1
         self.has_reset = False
         self.reset_cnt = -1
@@ -178,9 +178,9 @@ class ManipulatorEnv(gym.Env):
         else:
             return self.normalize(obs), reward, done, info
 
-    def reset(self, goal_set=None):
+    def reset(self, goal_set=None, i_epoch=0):
         self._elapsed_steps = 0
-        self.goal_theta, self.goal, self.max_rewards = self._sample_goal(goal_set)
+        self.goal_theta, self.goal, self.max_rewards = self._sample_goal(goal_set, i_epoch)
         self._reset_sim()
         obs = self._get_obs()
         self.last_obs = obs
@@ -249,12 +249,8 @@ class ManipulatorEnv(gym.Env):
         end_pos = self.sim.data.get_site_xpos('robot0:tip')
         end_vel = self.sim.data.get_site_xvelp('robot0:tip')
         achieved_goal = end_pos
-        time_aware = self._elapsed_steps / ((self._max_episode_steps - 1) / 2.) - 1.
-        # ftg = self.goal - achieved_goal
-        if self.add_ta:
-            obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel, np.array([time_aware])])
-        else:
-            obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel])
+        ftg = self.goal - achieved_goal
+        obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel])
         return {
             'observation': obs.copy(),
             'achieved_goal': achieved_goal.copy(),
@@ -293,24 +289,26 @@ class ManipulatorEnv(gym.Env):
         self.sim.set_state(self.initial_state)
         self.sim.forward()
 
-    def _sample_goal(self, goal_set):
+    def _sample_goal(self, goal_set, i_epoch):
+        # sample_range = 0.3 + 0.7 * min(.7, i_epoch / 60)
+        sample_range = 1
         if goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][goal_set]) * DEG2RAD
         elif goal_set == 'random':
             if self.plane_model and not self.cc_model:
                 theta = np.vstack((np.zeros((self.action_dim,)),
-                                   45 * DEG2RAD * np.random.uniform(low=-1, high=1,
+                                   sample_range * 45 * DEG2RAD * np.random.uniform(low=-1, high=1,
                                                                     size=(self.action_dim,)))).T.flatten()
             elif not self.plane_model and not self.cc_model:
-                theta = 45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.action_dim, ))
+                theta = sample_range * 45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.action_dim, ))
             elif self.plane_model and self.cc_model:
-                theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
+                theta = sample_range * 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
                         * np.ones((self.action_dim, self.num_joints // (2 * self.action_dim)))
                 theta = theta.flatten()
                 theta = np.vstack((np.zeros((self.num_joints // 2,)),
                                    theta)).T.flatten()
             elif not self.plane_model and self.cc_model:
-                theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
+                theta = sample_range * 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
                         * np.ones((self.action_dim, self.num_joints // self.action_dim))
                 theta = theta.flatten()
             else:

@@ -157,7 +157,7 @@ class ddpg_agent:
                     # reset the rollouts
                     ep_obs, ep_ag, ep_g, ep_actions = [], [], [], []
                     # reset the environment
-                    observation = self.env.reset(self.args.goal_set)
+                    observation = self.env.reset(self.args.goal_set, epoch)
                     obs = observation['observation']
                     ag = observation['achieved_goal']
                     g = observation['desired_goal']
@@ -326,11 +326,12 @@ class ddpg_agent:
         transitions['obs'], transitions['g'] = self._preproc_og(o, g)
         transitions['obs_next'], transitions['g_next'] = self._preproc_og(o_next, g)
 
-        next_joint_state = transitions['obs'][::, self.env.j_ang_idx] \
-                           + DEG2RAD * 0.2 * self.args.max_angles_vel * transitions['actions']
-        action_q_target = torch.from_numpy(np.absolute(next_joint_state[::, :-1] -
-                                                       next_joint_state[::, 1:]).sum(
-            axis=-1, keepdims=True)).detach()
+        if self.args.double_q:
+            next_joint_state = transitions['obs'][::, self.env.j_ang_idx] \
+                               + DEG2RAD * 0.2 * self.args.max_angles_vel * transitions['actions']
+            action_q_target = torch.from_numpy(np.absolute(next_joint_state[::, :-1] -
+                                                           next_joint_state[::, 1:]).sum(
+                axis=-1, keepdims=True)).detach()
 
         # start to do the update
         obs_norm = self.o_norm.normalize(transitions['obs'])
@@ -349,7 +350,8 @@ class ddpg_agent:
             inputs_next_norm_tensor = inputs_next_norm_tensor.cuda()
             actions_tensor = actions_tensor.cuda()
             r_tensor = r_tensor.cuda()
-            action_q_target = action_q_target.cuda()
+            if self.args.double_q:
+                action_q_target = action_q_target.cuda()
         # calculate the target Q value function
         with torch.no_grad():
             # do the normalization
@@ -366,15 +368,15 @@ class ddpg_agent:
         real_q_value = self.critic_network(inputs_norm_tensor, actions_tensor)
         critic_loss = (target_q_value - real_q_value).pow(2).mean()
 
-        action_q_value = self.critic2_network(inputs_norm_tensor, actions_tensor)
-
-        action_critic_loss = (action_q_target - action_q_value).pow(2).mean()
+        if self.args.double_q:
+            action_q_value = self.critic2_network(inputs_norm_tensor, actions_tensor)
+            action_critic_loss = (action_q_target - action_q_value).pow(2).mean()
 
         # the actor loss
         actions_real = self.actor_network(inputs_norm_tensor)
         actor_loss = -self.critic_network(inputs_norm_tensor, actions_real).mean()
-
-        actor_loss += -self.args.critic2_ratio * self.critic2_network(inputs_norm_tensor, actions_real).mean()
+        if self.args.double_q:
+            actor_loss += -self.args.critic2_ratio * self.critic2_network(inputs_norm_tensor, actions_real).mean()
         actor_loss += self.args.action_l2 * (actions_real / self.env_params['action_max']).pow(2).mean()
         # start to update the network
         self.actor_optim.zero_grad()
@@ -386,17 +388,17 @@ class ddpg_agent:
         critic_loss.backward()
         # sync_grads(self.critic_network)
         self.critic_optim.step()
-
-        self.critic2_optim.zero_grad()
-        action_critic_loss.backward()
-        self.critic_optim.step()
+        if self.args.double_q:
+            self.critic2_optim.zero_grad()
+            action_critic_loss.backward()
+            self.critic_optim.step()
 
     # do the evaluation
     def _eval_agent(self, n_epoch):
         total_success_rate = []
         for i in range(self.args.n_test_rollouts):
             per_success_rate = []
-            observation = self.env.reset(self.args.eval_goal_set)
+            observation = self.env.reset(self.args.eval_goal_set, n_epoch)
             obs = observation['observation']
             g = observation['desired_goal']
             for _ in range(self.env_params['max_timesteps']):

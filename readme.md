@@ -271,24 +271,28 @@ her_51 her on mujoco env num_joints 20 random goal distance-threshold 0.02 epoch
 her_52 her on mujoco env num_joints 20 random goal distance-threshold 0.02 epoch 500 DenseNet plane model random initial reset period 10 ASF+Densenet  
 her_53 her on mujoco env num_joints 20 random goal distance-threshold 0.02 epoch 500 DenseNet plane model random initial reset period 10 ASF+Densenet 两层attention  
 her_54 joints 20 random goal dt 0.02 denseASF hidden [16] random init_10 plane  
-her_55 joints 20 random goal dt 0.02 denseASF hidden [1] random init_10 plane  
-her_56 joints 20 random goal dt 0.02 denseASF hidden [1] random init_10 plane  修改denseASF结构
+her_55 joints 20 random goal dt 0.02 denseASF hidden [1] random init_10 plane   
+her_56 joints 20 random goal dt 0.02 denseASF hidden [1] random init_10 plane  修改denseASF结构  
 
-her_57 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.01
-her_58 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.1
-her_59 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.5
-her_60 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 1
-her_61 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 10
-her_62 joints 4 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_63 joints 6 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_64 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_65 joints 10 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_66 joints 12 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_67 joints 14 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_68 joints 16 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_69 joints 18 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_70 joints 20 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
+her_57 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.01  
+her_58 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.1  
+her_59 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.5  
+her_60 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 1  
+her_61 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 10  
+her_62 joints 4 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_63 joints 6 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_64 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_65 joints 10 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_66 joints 12 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_67 joints 14 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_68 joints 16 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_69 joints 18 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_70 joints 20 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
 
+her_71 joints 10 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt distance to target  
+her_72 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt max_joint_speed 20  
+her_73 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt 1500 episode sample cnt decay
+her_74 retry her_66
  
 
 

@@ -247,7 +247,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--load-model', type=str, default=None)
-    parser.add_argument('--episodes', type=int, default=1000)
+    parser.add_argument('--episodes', type=int, default=500)
 
     args = parser.parse_args()
     # write the selected car to configuration file
