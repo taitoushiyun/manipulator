@@ -26,7 +26,7 @@ def get_args():
     parser.add_argument('--clip-obs', type=float, default=200, help='the clip ratio') #TODO
     parser.add_argument('--batch-size', type=int, default=256, help='the sample batch size')
     parser.add_argument('--gamma', type=float, default=0.98, help='the discount factor')
-    parser.add_argument('--action-l2', type=float, default=0.1, help='l2 reg')  # TODO
+    parser.add_argument('--action-l2', type=float, default=1, help='l2 reg')  # TODO
     parser.add_argument('--lr-actor', type=float, default=0.001, help='the learning rate of the actor')
     parser.add_argument('--lr-critic', type=float, default=0.001, help='the learning rate of the critic')
     parser.add_argument('--polyak', type=float, default=0.95, help='the average coefficient')  # TODO
@@ -47,7 +47,7 @@ def get_args():
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='sparse')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
-    parser.add_argument('--num-joints', type=int, default=12)
+    parser.add_argument('--num-joints', type=int, default=24)
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
@@ -57,10 +57,12 @@ def get_args():
                         default='random')
     parser.add_argument('--eval-goal-set', type=str, default='random')
     parser.add_argument('--collision-cnt', type=int, default=27)
-    parser.add_argument('--scene-file', type=str, default='mani_env_6.xml')
+    parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')
     parser.add_argument('--headless-mode', action='store_true')
     parser.add_argument('--random-initial-state', action='store_true')
-    parser.add_argument('--reset-period', type=int, default=10)
+    parser.add_argument('--max-reset-period', type=int, default=10)
+    parser.add_argument('--reset-change-point', type=int, default=0)
+    parser.add_argument('--reset-change-period', type=int, default=30)
 
     parser.add_argument('--train', action='store_true')
     args = parser.parse_args()

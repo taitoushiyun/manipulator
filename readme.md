@@ -242,12 +242,12 @@ her_24 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch
 her_25 her_6 9800 eval
 her_26 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet简化版本  seed 1  
 her_27 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet seed 1  
-her_28 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNet seed  
-her_29 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000 DenseNet seed  
+her_28 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNet seed  1  
+her_29 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000 DenseNet seed  1  
  
-her_30 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 1000 DenseNet  random-initial-state  
-her_31 her on mujoco env num_joints 12 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  跑错了实验    
-her_32 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  
+her_30 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 1000 DenseNet  random-initial-state  seed  1  
+her_31 her on mujoco env num_joints 12 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  跑错了实验  seed  1     
+her_32 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  seed  1   
 
 her_33 her on mujoco env num_joints 4 random goal distance-threshold 0.02 epoch 500 DenseNet plane model   
 her_34 her on mujoco env num_joints 4 random goal distance-threshold 0.02 epoch 500 DenseNet plane model random initial action_l2 0  
@@ -293,7 +293,8 @@ her_71 joints 10 random goal dt .02 denseASF hidden [16] random init_10 3D  crit
 her_72 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt max_joint_speed 20  
 her_73 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt 1500 episode sample cnt decay
 her_74 retry her_66
-her_75 joints 12 random goal dr .02 denseASF hidden [16] random init_1-->10(30) 3D add_dtt 
+her_75 joints 12 random goal dt .02 denseASF hidden [16] random init_1-->10(30) 3D add_dtt 
+her_76 joints 24 random goal dt .02 denseASF hidden [16] action_l2 1 3D add_dtt
  
 
 

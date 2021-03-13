@@ -95,7 +95,9 @@ def launch(args):
         'add_ta': False,
         'add_peb': False,
         'is_her': True,
-        'reset_period': args.reset_period,
+        'max_reset_period': args.max_reset_period,
+        'reset_change_point': args.reset_change_point,
+        'reset_change_period': args.reset_change_period,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args.seed)

@@ -81,7 +81,9 @@ if __name__ == '__main__':
         'add_ta': False,
         'add_peb': False,
         'is_her': True,
-        'reset_period': args.reset_period,
+        'max_reset_period': args.max_reset_period,
+        'reset_change_point': args.reset_change_point,
+        'reset_change_period': args.reset_change_period,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args.seed)
@@ -134,7 +136,7 @@ if __name__ == '__main__':
     result_list = []
 
     for i in range(args.demo_length):
-        observation = env.reset(args.eval_goal_set, 300)
+        observation = env.reset(args.eval_goal_set, 10000)
         achieved_path.append(observation['achieved_goal'])
         # env.render()
         goal_list.append(observation['desired_goal'])

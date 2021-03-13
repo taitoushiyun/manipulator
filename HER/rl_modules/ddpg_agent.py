@@ -91,25 +91,24 @@ class ddpg_agent:
         # load the weights into the target networks
         self.actor_target_network.load_state_dict(self.actor_network.state_dict())
         self.critic_target_network.load_state_dict(self.critic_network.state_dict())
-
-        self.critic2_network = critic(env_params)
-        self.critic2_target_network = critic(env_params)
-
-        self.critic2_target_network.load_state_dict(self.critic2_network.state_dict())
+        if self.args.double_q:
+            self.critic2_network = critic(env_params)
+            self.critic2_target_network = critic(env_params)
+            self.critic2_target_network.load_state_dict(self.critic2_network.state_dict())
         # if use gpu
         if self.args.cuda:
             self.actor_network.cuda()
             self.critic_network.cuda()
             self.actor_target_network.cuda()
             self.critic_target_network.cuda()
-
-            self.critic2_network.cuda()
-            self.critic2_target_network.cuda()
+            if self.args.double_q:
+                self.critic2_network.cuda()
+                self.critic2_target_network.cuda()
         # create the optimizer
         self.actor_optim = torch.optim.Adam(self.actor_network.parameters(), lr=self.args.lr_actor)
         self.critic_optim = torch.optim.Adam(self.critic_network.parameters(), lr=self.args.lr_critic)
-
-        self.critic2_optim = torch.optim.Adam(self.critic2_network.parameters(), lr=self.args.lr_critic)
+        if self.args.double_q:
+            self.critic2_optim = torch.optim.Adam(self.critic2_network.parameters(), lr=self.args.lr_critic)
         # her sampler
         self.her_module = her_sampler(self.args.replay_strategy, self.args.replay_k, self.env.compute_reward)
         # create the replay buffer

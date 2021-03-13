@@ -51,8 +51,10 @@ class ManipulatorEnv(gym.Env):
         self.random_initial_state = env_config.get('random_initial_state', False)
         self.add_peb = env_config['add_peb']
         self.is_her = env_config['is_her']
-        # self.zero_reset_period = env_config['reset_period']
-        self.zero_reset_period = 1
+        self.max_reset_period = env_config['max_reset_period']
+        self.reset_change_period = env_config['reset_change_period']
+        self.reset_change_point = env_config['reset_change_point']
+        self.reset_period = 1
 
         model_xml_path = os.path.join(os.path.dirname(__file__), 'mani', env_config['scene_file'])
         if not os.path.exists(model_xml_path):
@@ -181,7 +183,7 @@ class ManipulatorEnv(gym.Env):
 
     def reset(self, goal_set=None, i_epoch=0):
         self._elapsed_steps = 0
-        self.zero_reset_period = 1 + min(9, i_epoch // 40)
+        self.reset_period = 1 + min(self.max_reset_period - 1, max(0, i_epoch - self.reset_change_point) // self.reset_change_period)
         self.goal_theta, self.goal, self.max_rewards = self._sample_goal(goal_set, i_epoch)
         self._reset_sim()
         obs = self._get_obs()
@@ -277,7 +279,7 @@ class ManipulatorEnv(gym.Env):
             if self.has_reset:
                 # return
                 self.reset_cnt += 1
-                if self.reset_cnt % self.zero_reset_period != 0:
+                if self.reset_cnt % self.reset_period != 0:
                     return
             else:
                 self.has_reset = True
