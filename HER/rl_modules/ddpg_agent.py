@@ -329,9 +329,16 @@ class ddpg_agent:
         if self.args.double_q:
             next_joint_state = transitions['obs'][::, self.env.j_ang_idx] \
                                + DEG2RAD * 0.2 * self.args.max_angles_vel * transitions['actions']
-            action_q_target = torch.from_numpy(np.absolute(next_joint_state[::, :-1] -
-                                                           next_joint_state[::, 1:]).sum(
-                axis=-1, keepdims=True)).detach()
+            if self.args.plane_model:
+                action_q_target = torch.from_numpy(np.absolute(next_joint_state[::, :-1] -
+                                                               next_joint_state[::, 1:]).sum(
+                    axis=-1, keepdims=True)).detach()
+            else:
+                action_q_target = torch.from_numpy(np.absolute(np.concatenate([
+                    next_joint_state[::, range(0, self.env.action_dim - 2, 2)] - next_joint_state[::, range(2, self.env.action_dim, 2)],
+                    next_joint_state[::, range(1, self.env.action_dim - 2, 2)] - next_joint_state[::, range(3, self.env.action_dim, 2)]
+                ], axis=-1)).sum(
+                    axis=-1, keepdims=True)).detach()
 
         # start to do the update
         obs_norm = self.o_norm.normalize(transitions['obs'])

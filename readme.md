@@ -295,6 +295,12 @@ her_73 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  criti
 her_74 retry her_66
 her_75 joints 12 random goal dt .02 denseASF hidden [16] random init_1-->10(30) 3D add_dtt 
 her_76 joints 24 random goal dt .02 denseASF hidden [16] action_l2 1 3D add_dtt
+her_77 joints 24 random goal dt .02 denseASF hidden [16] action_l2 0.1 3D add_dtt
  
-
+her_78 joints 24 random goal dt .02 dense action_l2 1 reset(100-30-->10)  种子和her_32一致
+python train.py --code-version her_78 --train --headless-mode --cuda \
+  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 100 --action-l2 1 --actor-type dense
+python train.py --code-version her_79 --train --headless-mode --cuda \
+  --random-intial-state --max-reset-period 10 --reset-change-period 30 reset-change-point 100 --action-l2 0.1 --actor-type dense \
+  --double-q  --critic2-ratio 0.1
 

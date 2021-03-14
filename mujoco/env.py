@@ -103,8 +103,8 @@ class ManipulatorEnv(gym.Env):
 
         self.dh_model = DHModel(self.num_joints)
         self.sample_cnt = 0
-        _, self.goal, _ = self._sample_goal(self.goal_set, 0)
         self.goal_index = -1
+        _, self.goal, _ = self._sample_goal(self.goal_set, 0)
         self.has_reset = False
         self.reset_cnt = -1
         self._elapsed_steps = 0
@@ -342,6 +342,8 @@ class ManipulatorEnv(gym.Env):
 
         goal_theta = np.clip(theta, -3, 3)
         goal = self.dh_model.forward_kinematics(goal_theta)
+        if -0.1 <= goal[0] <= 0.1 and -0.05 <= goal[1] <= 0.05 and 0.95 <= goal[2] <= 1.05:
+            return self._sample_goal(goal_set, i_epoch)
         reset_state = self.dh_model.forward_kinematics(np.zeros((self.num_joints, )))
         max_rewards = np.linalg.norm(goal - reset_state, axis=-1)
         return goal_theta, goal, max_rewards
