@@ -158,6 +158,7 @@ class ddpg_agent:
                     ep_obs, ep_ag, ep_g, ep_actions = [], [], [], []
                     # reset the environment
                     observation = self.env.reset(self.args.goal_set, epoch)
+                    # last_achieved_goal = observation['achieved_goal']
                     obs = observation['observation']
                     ag = observation['achieved_goal']
                     g = observation['desired_goal']
@@ -174,7 +175,9 @@ class ddpg_agent:
                         if not self.args.headless_mode:
                             self.env.render()
                         observation_new, reward, done, info = self.env.step(action)
-                        self.heat_buffer.add_sample(observation_new['achieved_goal'])
+                        # if np.linalg.norm(observation_new['achieved_goal'] - last_achieved_goal) > 0.005:
+                        #     self.heat_buffer.add_sample(observation_new['achieved_goal'])
+                        # last_achieved_goal = observation_new['achieved_goal'].copy()
                         episode_length += 1
                         score += reward
                         if episode_length >= self.args.max_episode_steps:
@@ -255,7 +258,7 @@ class ddpg_agent:
             #             'colormap': 'Viridis',  # 'Electric'
             #         }
             #     )
-            # print('[{}] epoch is: {}, eval success rate is: {:.3f}'.format(datetime.now(), epoch, success_rate))
+            print('[{}] epoch is: {}, eval success rate is: {:.3f}'.format(datetime.now(), epoch, success_rate))
 
     # pre_process the inputs
     def _preproc_inputs(self, obs, g):

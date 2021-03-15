@@ -34,7 +34,10 @@
 #  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 20 --action-l2 1 --actor-type dense \
 #  --double-q  --critic2-ratio 0.1 --n-epochs 2000
 
-python train.py --code-version her_85 --train --headless-mode --cuda \
-  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 20 --action-l2 0.1 --actor-type dense  \
-  --n-epochs 2000
+python train.py --code-version her_84 --train --headless-mode --cuda \
+  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 50 --action-l2 0.1 --actor-type dense  \
+  --n-epochs 2000 --env-name mani
 
+python train.py --code-version her_85 --train --headless-mode --cuda \
+  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 50 --action-l2 1 --actor-type dense  \
+  --n-epochs 2000 --env-name mani --double-q  --critic2-ratio 1

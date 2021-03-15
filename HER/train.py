@@ -100,7 +100,11 @@ def launch(args):
         'reset_change_point': args.reset_change_point,
         'reset_change_period': args.reset_change_period,
     }
-    env = EnvTest(env_config)
+    if args.env_name == 'mani':
+        env_name = ManipulatorEnv
+    elif args.env_name == 'test':
+        env_name = EnvTest
+    env = env_name(env_config)
     env.action_space.seed(args.seed)
     # env.seed()
 

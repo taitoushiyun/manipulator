@@ -11,6 +11,7 @@ sys.path.append(main_dir)
 # sys.path.append(os.path.join(main_dir, 'vrep_pyrep'))
 sys.path.append(os.path.join(main_dir, 'mujoco'))
 from mujoco.env import ManipulatorEnv
+from mujoco.env_test import EnvTest
 import visdom
 import matplotlib as mpl
 from matplotlib import cm
@@ -60,7 +61,7 @@ def set_axes_equal(ax):
 
 if __name__ == '__main__':
     args = get_args()
-    model_path = 'saved_models/her_80/999.pt'
+    model_path = 'saved_models/a_test_1/model.pt'
     # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_46/model.pt'
     o_mean, o_std, g_mean, g_std, model = torch.load(model_path, map_location=lambda storage, loc: storage)
     env_config = {
@@ -85,7 +86,11 @@ if __name__ == '__main__':
         'reset_change_point': args.reset_change_point,
         'reset_change_period': args.reset_change_period,
     }
-    env = ManipulatorEnv(env_config)
+    if args.env_name == 'mani':
+        env_name = ManipulatorEnv
+    elif args.env_name == 'test':
+        env_name = EnvTest
+    env = env_name(env_config)
     env.action_space.seed(args.seed)
     env.seed()
     random.seed(args.seed)
