@@ -11,7 +11,7 @@ def get_args():
     parser.add_argument('--code-version', type=str, default='her_74')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--env-name', type=str, default='FetchReach-v1', help='the environment name')
-    parser.add_argument('--n-epochs', type=int, default=1000, help='the number of epochs to train the agent')
+    parser.add_argument('--n-epochs', type=int, default=500, help='the number of epochs to train the agent')
     parser.add_argument('--n-cycles', type=int, default=10, help='the times to collect samples per epoch')
     parser.add_argument('--n-batches', type=int, default=40, help='the times to update the network')
     parser.add_argument('--save-interval', type=int, default=5, help='the interval that save the trajectory')
@@ -32,7 +32,7 @@ def get_args():
     parser.add_argument('--polyak', type=float, default=0.95, help='the average coefficient')  # TODO
     parser.add_argument('--n-test-rollouts', type=int, default=10, help='the number of tests')
     parser.add_argument('--clip-range', type=float, default=5, help='the clip range')  # TODO
-    parser.add_argument('--demo-length', type=int, default=18, help='the demo length')
+    parser.add_argument('--demo-length', type=int, default=45, help='the demo length')
     parser.add_argument('--demo-dense', type=int, default=18)
     parser.add_argument('--cuda', action='store_true', help='if use gpu do the acceleration')
     parser.add_argument('--num-rollouts-per-mpi', type=int, default=2, help='the rollouts per mpi')
@@ -54,8 +54,8 @@ def get_args():
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random',
                                                          'block0', 'block1', 'block2', 'block3', 'block4',
                                                          'draw0', 'draw1', 'special'],
-                        default='draw1')
-    parser.add_argument('--eval-goal-set', type=str, default='draw1')
+                        default='random')
+    parser.add_argument('--eval-goal-set', type=str, default='random')
     parser.add_argument('--collision-cnt', type=int, default=27)
     parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')
     parser.add_argument('--headless-mode', action='store_true')

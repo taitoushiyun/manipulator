@@ -12,6 +12,7 @@ sys.path.append(os.path.join(main_dir, 'mujoco'))
 
 # from vrep_pyrep.env import ManipulatorEnv
 from mujoco.env import ManipulatorEnv
+from mujoco.env_test import EnvTest
 
 
 
@@ -99,7 +100,7 @@ def launch(args):
         'reset_change_point': args.reset_change_point,
         'reset_change_period': args.reset_change_period,
     }
-    env = ManipulatorEnv(env_config)
+    env = EnvTest(env_config)
     env.action_space.seed(args.seed)
     # env.seed()
 

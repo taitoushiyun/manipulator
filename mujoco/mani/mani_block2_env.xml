@@ -14,7 +14,7 @@
 			<site name="target0" pos="0.4 0.2 0.8" size="0.005 0.005 0.005" rgba="1 0 0 1" type="sphere"></site>
 		</body>
 
-		<include file="mani.xml"></include>
+		<include file="mani_6.xml"></include>
         <body name="block0" pos="0.65 0 1.2">
 			<geom name="block0" size="0.01 0.15 0.15" type="box" material="block_mat" mass="1"></geom>
 		</body>

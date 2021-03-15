@@ -22,15 +22,19 @@
 #python train.py --train --headless-mode --cuda --code-version her_70 --random-initial-state --critic2-ratio 0 --num-joints 20 --scene-file mani_env_10.xml
 #python train.py --code-version her_78 --train --headless-mode --cuda \
 #  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 100 --action-l2 1 --actor-type dense
-python train.py --code-version her_79 --train --headless-mode --cuda \
-  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 50 --action-l2 1 --actor-type dense
-python train.py --code-version her_80 --train --headless-mode --cuda \
-  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 0 --action-l2 1 --actor-type dense
-python train.py --code-version her_81 --train --headless-mode --cuda \
-  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 20 --action-l2 1 --actor-type dense
-python train.py --code-version her_82 --train --headless-mode --cuda \
-  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 50 --action-l2 1 --actor-type dense \
-  --double-q  --critic2-ratio 0.1
-python train.py --code-version her_83 --train --headless-mode --cuda \
-  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 50 --action-l2 1 --actor-type dense \
-  --double-q  --critic2-ratio 1
+#python train.py --code-version her_79 --train --headless-mode --cuda \
+#  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 50 --action-l2 1 --actor-type dense
+#python train.py --code-version her_80 --train --headless-mode --cuda \
+#  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 0 --action-l2 1 --actor-type dense
+#python train.py --code-version her_81 --train --headless-mode --cuda \
+#  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 20 --action-l2 1 --actor-type dense
+#python train.py --code-version her_82 --train --headless-mode --cuda \
+#  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 50 --action-l2 0.1 --actor-type dense
+#python train.py --code-version her_83 --train --headless-mode --cuda \
+#  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 20 --action-l2 1 --actor-type dense \
+#  --double-q  --critic2-ratio 0.1 --n-epochs 2000
+
+python train.py --code-version her_85 --train --headless-mode --cuda \
+  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 20 --action-l2 0.1 --actor-type dense  \
+  --n-epochs 2000
+

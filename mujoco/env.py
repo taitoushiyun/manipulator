@@ -105,6 +105,7 @@ class ManipulatorEnv(gym.Env):
         self.sample_cnt = 0
         self.goal_index = -1
         _, self.goal, _ = self._sample_goal(self.goal_set, 0)
+        self.goal_index = -1
         self.has_reset = False
         self.reset_cnt = -1
         self._elapsed_steps = 0
@@ -331,6 +332,7 @@ class ManipulatorEnv(gym.Env):
         elif isinstance(goal_set, str) and goal_set.startswith('draw'):
             path_index = int(goal_set.strip('draw'))
             self.goal_index += 1
+            print(self.goal_index)
             return None, PATH_LIST[path_index][self.goal_index], 0
         elif goal_set == 'special':
             theta = 0.5 * 45 * DEG2RAD * np.random.randn(self.action_dim).clip(-2, 2).T.flatten()

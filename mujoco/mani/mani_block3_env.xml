@@ -14,7 +14,7 @@
 			<site name="target0" pos="0.4 0.2 0.8" size="0.005 0.005 0.005" rgba="1 0 0 1" type="sphere"></site>
 		</body>
 
-		<include file="mani.xml"></include>
+		<include file="mani_6.xml"></include>
         <body name="block0" pos="0.5 0 0.75">
 			<geom name="robot0:hole0" mesh="robot0:hole0" material="block_mat" class="robot0:blue"></geom>
 		</body>
