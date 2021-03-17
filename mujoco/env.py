@@ -245,6 +245,8 @@ class ManipulatorEnv(gym.Env):
         if self.viewer is None:
             if mode == 'human':
                 self.viewer = mujoco_py.MjViewer(self.sim)
+                # self.viewer._record_video = True
+                # self._time_per_render = 1 / 5
             elif mode == 'rgb_array':
                 self.viewer = mujoco_py.MjRenderContextOffscreen(self.sim, device_id=-1)
             self._viewer_setup()

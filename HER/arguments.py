@@ -32,7 +32,7 @@ def get_args():
     parser.add_argument('--polyak', type=float, default=0.95, help='the average coefficient')  # TODO
     parser.add_argument('--n-test-rollouts', type=int, default=10, help='the number of tests')
     parser.add_argument('--clip-range', type=float, default=5, help='the clip range')  # TODO
-    parser.add_argument('--demo-length', type=int, default=1000, help='the demo length')
+    parser.add_argument('--demo-length', type=int, default=100, help='the demo length')
     parser.add_argument('--demo-dense', type=int, default=18)
     parser.add_argument('--cuda', action='store_true', help='if use gpu do the acceleration')
     parser.add_argument('--num-rollouts-per-mpi', type=int, default=2, help='the rollouts per mpi')
@@ -54,10 +54,10 @@ def get_args():
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random',
                                                          'block0', 'block1', 'block2', 'block3', 'block4',
                                                          'draw0', 'draw1', 'special'],
-                        default='block4')
-    parser.add_argument('--eval-goal-set', type=str, default='block4')
+                        default='random')
+    parser.add_argument('--eval-goal-set', type=str, default='draw1')
     parser.add_argument('--collision-cnt', type=int, default=27)
-    parser.add_argument('--scene-file', type=str, default='mani_block4_env_12.xml')
+    parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')
     parser.add_argument('--headless-mode', action='store_true')
     parser.add_argument('--random-initial-state', action='store_true')
     parser.add_argument('--max-reset-period', type=int, default=10)

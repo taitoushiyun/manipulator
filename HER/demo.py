@@ -17,7 +17,9 @@ import matplotlib as mpl
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-
+import time
+from multiprocessing import Process, Queue
+from mujoco_py.mjviewer import save_video
 
 # process the inputs
 def process_inputs(o, g, o_mean, o_std, g_mean, g_std, args):
@@ -61,7 +63,7 @@ def set_axes_equal(ax):
 
 if __name__ == '__main__':
     args = get_args()
-    model_path = 'saved_models/her_86/model.pt'
+    model_path = 'saved_models/her_80/999.pt'
     # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_46/model.pt'
     o_mean, o_std, g_mean, g_std, model = torch.load(model_path, map_location=lambda storage, loc: storage)
     env_config = {
@@ -169,8 +171,8 @@ if __name__ == '__main__':
             achieved_path.append(observation_new['achieved_goal'])
             obs = observation_new['observation']
             if done:
-                if not args.headless_mode:
-                    env.render()
+                # if not args.headless_mode:
+                #     env.render()
                 # if done and path_length < args.max_episode_steps and not any(info['collision_state']):
                 if done and length < args.max_episode_steps:
                     result = 1
@@ -182,6 +184,18 @@ if __name__ == '__main__':
         vis.line(X=[i], Y=[length], win='path len', update='append')
         vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
         print('the episode is: {}, length is {}, is success: {}'.format(i, length, info['is_success']))
+
+
+    # fps = (1 / env.viewer._time_per_render)
+    # env.viewer._video_process = Process(target=save_video,
+    #                               args=(env.viewer._video_queue, env.viewer._video_path % env.viewer._video_idx, fps))
+    # env.viewer._video_process.start()
+    #
+    # time.sleep(4)
+    # env.viewer._video_queue.put(None)
+    # env.viewer._video_process.join()
+
+    env.close()
 
     # 目标达成情况
     result_list = np.array(result_list)
