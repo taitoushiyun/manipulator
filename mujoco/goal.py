@@ -56,7 +56,7 @@ def create_path_0():
 def create_path_1():
     path_list = []
     path_list.append([1.4, 0, 1])
-    for i in range(100):
+    for i in range(1000):
         path_list.append([1.2, 0.2 * np.sin(i * 2 * np.pi / 18), 1 + 0.2 * np.cos(i * 2 * np.pi / 18)])
     return np.array(path_list)
 

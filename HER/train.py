@@ -52,7 +52,7 @@ def get_logger(code_version):
 
 
 def get_env_params(env, goal_set):
-    obs = env.reset(goal_set)
+    obs = env.reset()
     # close the environment
     params = {'obs': obs['observation'].shape[0],
             'goal': obs['desired_goal'].shape[0],
@@ -87,6 +87,7 @@ def launch(args):
         'cc_model': args.cc_model,
         'plane_model': args.plane_model,
         'goal_set': args.goal_set,
+        'eval_goal_set': args.eval_goal_set,
         'max_episode_steps': args.max_episode_steps,
         'collision_cnt': args.collision_cnt,
         'headless_mode': args.headless_mode,

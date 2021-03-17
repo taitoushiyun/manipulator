@@ -41,7 +41,7 @@ class EnvTest(gym.Env):
             'video.frames_per_second': int(np.round(1.0 / self.dt))
         }
 
-    def reset(self, goal_set=None, i_epoch=0):
+    def reset(self, eval=False, i_epoch=0):
         self._elapsed_steps = 0
         self.goal = np.array([0.8, 0, 0.73])
         self.pos = np.array([1.4, 0, 1])

@@ -293,14 +293,19 @@ her_71 joints 10 random goal dt .02 denseASF hidden [16] random init_10 3D  crit
 her_72 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt max_joint_speed 20  
 her_73 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt 1500 episode sample cnt decay
 her_74 retry her_66
-her_75 joints 12 random goal dt .02 denseASF hidden [16] random init_1-->10(30) 3D add_dtt 
-her_76 joints 24 random goal dt .02 denseASF hidden [16] action_l2 1 3D add_dtt
-her_77 joints 24 random goal dt .02 denseASF hidden [16] action_l2 0.1 3D add_dtt
+her_75 joints 12 3D random goal dt .02 denseASF hidden [16] random init_1-->10(30)  add_dtt 
+her_76 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 1   add_dtt  
+her_77 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 0.1 add_dtt  
  
-her_78 joints 24 random goal dt .02 dense action_l2 1 reset(100-30-->10)  种子和her_32一致
-python train.py --code-version her_78 --train --headless-mode --cuda \
-  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 100 --action-l2 1 --actor-type dense
-python train.py --code-version her_79 --train --headless-mode --cuda \
-  --random-intial-state --max-reset-period 10 --reset-change-period 30 reset-change-point 100 --action-l2 0.1 --actor-type dense \
-  --double-q  --critic2-ratio 0.1
+her_78 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(100--30-->10)  种子和her_32一致
+her_79 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30-->10)  
+her_81 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(20--30-->10)  
+her_80 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(0--30-->10)  999.pth二校门  
+her_82 joints 24 3D random goal dt .02 dense action_l2 0.1 random_initial(50--30-->10)  
+her_84 joints 24 3D random goal dt .02 dense action_l2 0.1 random_initial(50--30-->10)  her_82数据丢了重跑了一遍  
+her_83 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(20--30-->10)  double_q critic_ratio 0.1  
+her_85 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30-->10)  double_q critic_ratio 1
 
+her_86 joints 24 3D block4 goal dt .02 dense action_l2 1 block4_env
+her_87 joints 24 3D block4 goal dt .02 dense action_l2 1 
+ 

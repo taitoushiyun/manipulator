@@ -146,7 +146,6 @@ class ddpg_agent:
 
         """
         # start to collect samples
-
         i_episode = 0
         for epoch in range(self.args.n_epochs):
             for n_cycle in range(self.args.n_cycles):
@@ -157,7 +156,7 @@ class ddpg_agent:
                     # reset the rollouts
                     ep_obs, ep_ag, ep_g, ep_actions = [], [], [], []
                     # reset the environment
-                    observation = self.env.reset(self.args.goal_set, epoch)
+                    observation = self.env.reset(i_epoch=epoch)
                     # last_achieved_goal = observation['achieved_goal']
                     obs = observation['observation']
                     ag = observation['achieved_goal']
@@ -408,7 +407,7 @@ class ddpg_agent:
         total_success_rate = []
         for i in range(self.args.n_test_rollouts):
             per_success_rate = []
-            observation = self.env.reset(self.args.eval_goal_set, n_epoch)
+            observation = self.env.reset(eval=True, i_epoch=n_epoch)
             obs = observation['observation']
             g = observation['desired_goal']
             for _ in range(self.env_params['max_timesteps']):

@@ -45,6 +45,7 @@ class ManipulatorEnv(gym.Env):
         self.cc_model = env_config['cc_model']
         self.plane_model = env_config['plane_model']
         self.goal_set = env_config['goal_set']
+        self.eval_goal_set = env_config['eval_goal_set']
         self._max_episode_steps = env_config['max_episode_steps']
         self.collision_cnt = env_config['collision_cnt']
         self.headless_mode = env_config['headless_mode']
@@ -182,9 +183,11 @@ class ManipulatorEnv(gym.Env):
         else:
             return self.normalize(obs), reward, done, info
 
-    def reset(self, goal_set=None, i_epoch=0):
+    def reset(self, eval=False, i_epoch=0):
         self._elapsed_steps = 0
-        self.reset_period = 1 + min(self.max_reset_period - 1, max(0, i_epoch - self.reset_change_point) // self.reset_change_period)
+        self.reset_period = 1 + min(self.max_reset_period - 1, max(0, i_epoch - self.reset_change_point) // self.reset_change_period) \
+            if not eval else 10000
+        goal_set = self.goal_set if not eval else self.eval_goal_set
         self.goal_theta, self.goal, self.max_rewards = self._sample_goal(goal_set, i_epoch)
         self._reset_sim()
         obs = self._get_obs()
@@ -332,7 +335,6 @@ class ManipulatorEnv(gym.Env):
         elif isinstance(goal_set, str) and goal_set.startswith('draw'):
             path_index = int(goal_set.strip('draw'))
             self.goal_index += 1
-            print(self.goal_index)
             return None, PATH_LIST[path_index][self.goal_index], 0
         elif goal_set == 'special':
             theta = 0.5 * 45 * DEG2RAD * np.random.randn(self.action_dim).clip(-2, 2).T.flatten()

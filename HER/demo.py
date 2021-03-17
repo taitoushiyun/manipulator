@@ -61,7 +61,7 @@ def set_axes_equal(ax):
 
 if __name__ == '__main__':
     args = get_args()
-    model_path = 'saved_models/a_test_1/model.pt'
+    model_path = 'saved_models/her_86/model.pt'
     # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_46/model.pt'
     o_mean, o_std, g_mean, g_std, model = torch.load(model_path, map_location=lambda storage, loc: storage)
     env_config = {
@@ -73,6 +73,7 @@ if __name__ == '__main__':
         'cc_model': args.cc_model,
         'plane_model': args.plane_model,
         'goal_set': args.goal_set,
+        'eval_goal_set': args.eval_goal_set,
         'max_episode_steps': args.max_episode_steps,
         'collision_cnt': args.collision_cnt,
         'headless_mode': args.headless_mode,
@@ -96,7 +97,7 @@ if __name__ == '__main__':
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-    observation = env.reset('random', 300)
+    observation = env.reset()
     env_params = {'obs': observation['observation'].shape[0], 
                   'goal': observation['desired_goal'].shape[0], 
                   'action': env.action_space.shape[0], 
@@ -141,7 +142,7 @@ if __name__ == '__main__':
     result_list = []
 
     for i in range(args.demo_length):
-        observation = env.reset(args.eval_goal_set, 10000)
+        observation = env.reset(eval=True)
         achieved_path.append(observation['achieved_goal'])
         # env.render()
         goal_list.append(observation['desired_goal'])
