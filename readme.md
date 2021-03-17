@@ -43,6 +43,26 @@ mani_35 reward dense distance hard goal gamma 0.95 plane model run whole episode
 mani_36 reward dense distance hard goal gamma 0.95 3D model  
 mani_37 reward dense distance hard goal gamma 0.6 3D model 
 
+mani_40 reward dense potential gamma 0.99 plane
+main_41 reward dense potential gamma 0.9 plane 
+mani_42 reward dense potential gamma 0.8 plane
+mani_43 reward dense potential gamma 0.6 plane
+mani_44 reward dense potential gamma 0.8  3D easy
+mani_45 reward dense potential gamma 0.8  3D hard
+mani_46 reward dense potential gamma 0.8 3D super hard
+mani_47 reward dense potential gamma 0.8 3D hard max-episode-steps 20 
+mani_48 reward dense potential gamma 0.8 3D hard max-episode-steps 30 
+mani_49 reward dense potential gamma 0.8 3D hard max-episode-steps 50 
+mani_50 reward dense potential gamma 0.8 3D hard batch_size 16
+mani_51 reward dense potential gamma 0.8 3D hard batch_size 64
+mani_52 reward dense potential gamma 0.8 3D hard batch_size 128
+mani_53 reward dense potential gamma 0.99 3D hard max-episode-steps 20 
+mani_54 reward dense potential gamma 0.9 3D hard max-episode-steps 20 
+mani_55 reward dense potential gamma 0.8 3D hard max-episode-steps 20 
+mani_56 reward dense potential gamma 0.6 3D hard max-episode-steps 20 
+mani_57 reward dense potential gamma 0.0 3D hard max-episode-steps 20 
+mani_58 reward dense potential gamma 0.8 3D random goal max-episode-steps 30
+mani_59 reward dense distance gamma 0.95 3D hard goal max-episode-steps 100
 
 -------------------------------------------------remote-----------------------------------------------------------  
 td3_2   lunarlander  td3_agent  
