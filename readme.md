@@ -5,27 +5,34 @@ mani_3   ppo_single  distance_threshold': 0.01,    log_std  nn.parameter  with m
 mani_4   ppo_single  distance_threshold': 0.02,    log_std  nn.parameter   without max episode steps done  
 mani_5   ppo_single  distance_threshold:  0.01,    log_std  nn.parameter   with max  espisode steps done  
 
-mani_6   ppo_single  distance_threshold:  0.01    repair mu bug    with max episode steps done  
-mani_7   ppo_single  distance_threshold:  0.02    repair  mu  bug      with max episode steps done 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  
-mani_16   ppo_single  distance_threshold:  0.02    repair  mu  bug    wiht max episode steps done 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  
-mani_8  ppo_single  distance_threshold:  0.02    repair  mu  bug    wiht max episode steps done goal  0, 20, 0, 15, 0, 20, 0, 20, 0, 20  
-mani_9  ppo_single   distance_threshold: 0.02  goal 0, 20, 0, 10, 0, 20  
-mani_10  ppo_single   distance_threshold: 0.01  goal 0, 20, 0, 10, 0, 20  
+# 平面2自由度
 mani_11  ppo_single   distance_threshold: 0.02  goal 0, 20, 0, 10  
 mani_12  ppo_single   distance_threshold: 0.01  goal 0, 20, 0, 10  
-mani_13  ppo_single   distance_threshold: 0.02 0, 20, 0, 20, 0, -10, 0, -15, 0, 20, 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  
-mani_14  ppo_single   distance_threshold: 0.02 0, 20, 0, 20, 0, -10, 0, -15, 0, 20, 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  
-mani_15  ppo_single   distance_threshold: 0.02 0, 20, 0, 20, 0, -10, 0, -15, 0, 20, 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  
-mani_17 ppo_single  distance_threshold: 0.02   goal  0, -50, 0, -50, 0, -50, 0, 0, -20, -10   10000 episodes  5平面自由度  
-mani_18 ppo_single reward 势函数 goal 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  
-mani_19  ppo_single  reward -d 势函数   goal 0, 20, 0, 15, 0, 20, 0, 20, 0, 20  
-mani_20  ppo_single  reward -d 势函数  0, 20, 0, 20, 0, -10, 0, -15, 0, 20  gamma 0.99  
-mani_21  ppo_single  reward -d 势函数  0, 20, 0, 20, 0, -10, 0, -15, 0, 20  gamma  0.8  
-mani_22  ppo_single  reward -d 势函数  0, 20, 0, 15, 0, 20, 0, 20, 0, 20  gamma  0.8  
+# 平面3自由度
+mani_9   ppo_single   distance_threshold: 0.02  goal 0, 20, 0, 10, 0, 20  
+mani_10  ppo_single   distance_threshold: 0.01  goal 0, 20, 0, 10, 0, 20  
+# 平面10自由度
+mani_13  ppo_single  distance_threshold: 0.02 goal 0, 20, 0, 20, 0, -10, 0, -15, 0, 20, 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  
+mani_14  ppo_single  distance_threshold: 0.02 goal 0, 20, 0, 20, 0, -10, 0, -15, 0, 20, 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  
+mani_15  ppo_single  distance_threshold: 0.02 goal 0, 20, 0, 20, 0, -10, 0, -15, 0, 20, 0, 20, 0, 20, 0, -10, 0, -15, 0, 20 
+# 平面5自由度
+~~mani_7   ppo_single  distance_threshold:  0.02  easy goal 0, 20, 0, 20, 0, -10, 0, -15, 0, 20~~  
+mani_16  ppo_single  distance_threshold:  0.02  easy goal 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  
+mani_6   ppo_single  distance_threshold:  0.01  easy goal 0, 20, 0, 20, 0, -10, 0, -15, 0, 20 
+~~mani_18  ppo_single  distance_threshold:  0.02  easy goal 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  reward 势函数  gamma 0.99~~ [reward零点没矫正]
+~~mani_20  ppo_single  distance_threshold:  0.02  easy goal 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  reward 势函数  gamma 0.99~~ [矫正失败]
+~~mani_21  ppo_single  distance_threshold:  0.02  easy goal 0, 20, 0, 20, 0, -10, 0, -15, 0, 20  reward 势函数  gamma  0.8~~ [矫正失败]  
 
-mani_23 ppo_single reward -d 势函数  easy  gamma 0.8  
-mani_24 ppo_single reward -d 势函数  hard  gamma 0.8  
-mani_25 ppo_single reward -d 势函数  super hard  gamma 0.8  (bug)  
+mani_8   ppo_single  distance_threshold:  0.02  hard goal 0, 20, 0, 15, 0, 20, 0, 20, 0, 20  gamma 0.99  
+mani_19  ppo_single  distance_threshold:  0.02  hard goal 0, 20, 0, 15, 0, 20, 0, 20, 0, 20  gamma 0.99  reward 势函数  
+mani_22  ppo_single  distance_threshold:  0.02  hard goal 0, 20, 0, 15, 0, 20, 0, 20, 0, 20  gamma  0.8  reward 势函数   
+~~mani_17  ppo_single  distance_threshold:  0.02  super hard goal 0, -50, 0, -50, 0, -50, 0, 0, -20, -10   10000 episodes~~ [目标错误]  
+
+
+
+~~mani_23 ppo_single reward -d 势函数  easy  gamma 0.8~~ [矫正失败]  
+~~mani_24 ppo_single reward -d 势函数  hard  gamma 0.8~~ [矫正失败]  
+~~mani_25 ppo_single reward -d 势函数  super hard  gamma 0.8  (bug)~~  [矫正失败]  
 
 mani_26 ppo_single reward -d 势函数  super hard  gamma 0.8  修正goal 标错bug  
 mani_27 ppo_single reward -d 势函数  super hard  gamma 0.95  修正goal 标错bug  

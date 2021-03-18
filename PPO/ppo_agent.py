@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 sys.path.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'PPO'))
-sys.path.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'vrep_pyrep'))
+sys.path.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'mujoco'))
 import torch
 import torch.optim as optim
 import numpy as np
@@ -76,11 +76,13 @@ class PPO_agent(object):
 
         for i_episode in range(self.num_episodes):
             cur_obs = self.env.reset()
+            cur_obs = np.concatenate([cur_obs['observation'], cur_obs['desired_goal']], axis=-1)
             path_length, path_rewards = 0, 0.
             while True:
                 path_length += 1
                 action, old_log_prob, value = self.actor_critic.select_action(torch.FloatTensor(cur_obs[None]))
                 next_obs, reward, done, info = self.env.step(action)
+                next_obs = np.concatenate([next_obs['observation'], next_obs['desired_goal']], axis=-1)
                 self.pooling.store_data(cur_obs, action, reward, done, old_log_prob, value)
                 cur_obs = next_obs
 
@@ -99,7 +101,7 @@ class PPO_agent(object):
                 path_rewards += reward
                 if done or self.max_steps_per_episodes == path_length:
                     result = 0.
-                    if done and path_length < self.args.max_episode_steps and not any(info['collision_state']):
+                    if done and path_length < self.args.max_episode_steps:
                         result = 1.
                     break
                 # if self.max_steps_per_episodes == path_length:
@@ -176,9 +178,11 @@ class PPO_agent(object):
         result = 0
         for i in range(num_episodes):
             cur_obs = self.env.reset()
+            cur_obs = np.concatenate([cur_obs['observation'], cur_obs['desired_goal']], axis=-1)
             for i in range(self.args.max_episode_steps):
                 action = self.actor_critic.eval_action(torch.FloatTensor(cur_obs[None]))
                 next_obs, reward, done, info = self.env.step(action)
+                next_obs = np.concatenate([next_obs['observation'], next_obs['desired_goal']], axis=-1)
                 if test:
                     time.sleep(0.1)
                 rewards += reward
@@ -186,7 +190,7 @@ class PPO_agent(object):
                 cur_obs = next_obs
                 if done:
                     eval_result = 0.
-                    if done and path_len < self.args.max_episode_steps and not any(info['collision_state']):
+                    if done and path_len < self.args.max_episode_steps:
                         eval_result = 1.
                     result += eval_result
                     break

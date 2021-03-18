@@ -2,13 +2,14 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 sys.path.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'PPO'))
-sys.path.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'vrep_pyrep'))
+sys.path.append(os.path.join(os.path.abspath(os.path.join(os.getcwd(), os.pardir)), 'mujoco'))
 from ppo_agent import PPO_agent, ReplayBuffer
 from actor_critic import Actor_critic
 import argparse
 import torch
 import matplotlib.pyplot as plt
-from vrep_pyrep.env import ManipulatorEnv
+# from vrep_pyrep.env import ManipulatorEnv
+from mujoco.env import ManipulatorEnv
 import random
 import numpy as np
 import time
@@ -66,15 +67,24 @@ def main(args_):
         'cc_model': args_.cc_model,
         'plane_model': args_.plane_model,
         'goal_set': args_.goal_set,
+        'eval_goal_set': args_.eval_goal_set,
         'max_episode_steps': args_.max_episode_steps,
         'collision_cnt': args_.collision_cnt,
         'headless_mode': args_.headless_mode,
         'scene_file': args_.scene_file,
+        'n_substeps': 100,
+        'random_initial_state': args.random_initial_state,
+        'add_peb': args_.add_peb,
+        'is_her': args_.is_her,
+        'max_reset_period': args.max_reset_period,
+        'reset_change_point': args.reset_change_point,
+        'reset_change_period': args.reset_change_period,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args_.seed)
-
-    obs_dims = env.observation_space.shape[0]
+    obs = env.reset()
+    obs_dims = obs['observation'].shape[0] + obs['desired_goal'].shape[0]
+    # obs_dims = env.observation_space.shape[0]
     act_dims = env.action_space.shape[0]
     print(f'obs_dims is {obs_dims}')
     print(f'act_dims is {act_dims}')
@@ -102,7 +112,8 @@ def main(args_):
                     weight_epsilon=args_.ent_coef)
     if args_.train:
         ppo.train()
-        env.end_simulation()
+        # env.end_simulation()
+        env.close()
         time.sleep(2)
     else:
         # ppo.eval_model(f'/home/cq/code/manipulator/PPO/checkpoints/mani_34/994.pth', 10)
@@ -114,7 +125,7 @@ def main(args_):
         for i in range(10):
             # model = torch.load(f'/home/cq/code/manipulator/PPO/checkpoints/mani_34/.pth')
             # actor_critic.load_state_dict(model)
-            cur_obs = env.reset()
+            cur_obs = env.reset(eval=True)
             for i in range(args_.max_episode_steps):
                 action = actor_critic.eval_action(torch.FloatTensor(cur_obs[None]))
                 next_obs, reward, done, info = env.step(action)
@@ -131,7 +142,7 @@ def main(args_):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--code-version', type=str, default='mani_36')
+    parser.add_argument('--code-version', type=str, default='mani_60')
     parser.add_argument('--visdom-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     # ppo config
@@ -153,16 +164,24 @@ if __name__ == '__main__':
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='dense distance')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
-    parser.add_argument('--num-joints', type=int, default=12)
+    parser.add_argument('--num-joints', type=int, default=10)
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
     parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random'],
                         default='hard')
+    parser.add_argument('--eval-goal-set', type=str, default='hard')
     parser.add_argument('--collision-cnt', type=int, default=15)
-    parser.add_argument('--scene-file', type=str, default='simple_12_1.ttt')
+    parser.add_argument('--scene-file', type=str, default='mani_env_5.xml')
     parser.add_argument('--headless-mode', action='store_true')
+    parser.add_argument('--add-peb', action='store_true')
+    parser.add_argument('--is-her', type=bool, default=True)
+    parser.add_argument('--max-reset-period', type=int, default=10)
+    parser.add_argument('--reset-change-point', type=int, default=0)
+    parser.add_argument('--reset-change-period', type=int, default=30)
+    parser.add_argument('--random-initial-state', action='store_true')
     parser.add_argument('--train', action='store_true')
+
     args = parser.parse_args()
     logger = get_logger(args.code_version)
     main(args)

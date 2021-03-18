@@ -43,6 +43,26 @@ mani_35 reward dense distance hard goal gamma 0.95 plane model run whole episode
 mani_36 reward dense distance hard goal gamma 0.95 3D model  
 mani_37 reward dense distance hard goal gamma 0.6 3D model 
 
+mani_40 reward dense potential gamma 0.99 plane
+main_41 reward dense potential gamma 0.9 plane 
+mani_42 reward dense potential gamma 0.8 plane
+mani_43 reward dense potential gamma 0.6 plane
+mani_44 reward dense potential gamma 0.8  3D easy
+mani_45 reward dense potential gamma 0.8  3D hard
+mani_46 reward dense potential gamma 0.8 3D super hard
+mani_47 reward dense potential gamma 0.8 3D hard max-episode-steps 20 
+mani_48 reward dense potential gamma 0.8 3D hard max-episode-steps 30 
+mani_49 reward dense potential gamma 0.8 3D hard max-episode-steps 50 
+mani_50 reward dense potential gamma 0.8 3D hard batch_size 16
+mani_51 reward dense potential gamma 0.8 3D hard batch_size 64
+mani_52 reward dense potential gamma 0.8 3D hard batch_size 128
+mani_53 reward dense potential gamma 0.99 3D hard max-episode-steps 20 
+mani_54 reward dense potential gamma 0.9 3D hard max-episode-steps 20 
+mani_55 reward dense potential gamma 0.8 3D hard max-episode-steps 20 
+mani_56 reward dense potential gamma 0.6 3D hard max-episode-steps 20 
+mani_57 reward dense potential gamma 0.0 3D hard max-episode-steps 20 
+mani_58 reward dense potential gamma 0.8 3D random goal max-episode-steps 30
+mani_59 reward dense distance gamma 0.95 3D hard goal max-episode-steps 100
 
 -------------------------------------------------remote-----------------------------------------------------------  
 td3_2   lunarlander  td3_agent  
@@ -242,12 +262,12 @@ her_24 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch
 her_25 her_6 9800 eval
 her_26 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet简化版本  seed 1  
 her_27 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet seed 1  
-her_28 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNet seed  
-her_29 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000 DenseNet seed  
+her_28 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNet seed  1  
+her_29 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000 DenseNet seed  1  
  
-her_30 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 1000 DenseNet  random-initial-state  
-her_31 her on mujoco env num_joints 12 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  跑错了实验    
-her_32 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  
+her_30 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 1000 DenseNet  random-initial-state  seed  1  
+her_31 her on mujoco env num_joints 12 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  跑错了实验  seed  1     
+her_32 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  seed  1   
 
 her_33 her on mujoco env num_joints 4 random goal distance-threshold 0.02 epoch 500 DenseNet plane model   
 her_34 her on mujoco env num_joints 4 random goal distance-threshold 0.02 epoch 500 DenseNet plane model random initial action_l2 0  
@@ -271,24 +291,41 @@ her_51 her on mujoco env num_joints 20 random goal distance-threshold 0.02 epoch
 her_52 her on mujoco env num_joints 20 random goal distance-threshold 0.02 epoch 500 DenseNet plane model random initial reset period 10 ASF+Densenet  
 her_53 her on mujoco env num_joints 20 random goal distance-threshold 0.02 epoch 500 DenseNet plane model random initial reset period 10 ASF+Densenet 两层attention  
 her_54 joints 20 random goal dt 0.02 denseASF hidden [16] random init_10 plane  
-her_55 joints 20 random goal dt 0.02 denseASF hidden [1] random init_10 plane  
-her_56 joints 20 random goal dt 0.02 denseASF hidden [1] random init_10 plane  修改denseASF结构
+her_55 joints 20 random goal dt 0.02 denseASF hidden [1] random init_10 plane   
+her_56 joints 20 random goal dt 0.02 denseASF hidden [1] random init_10 plane  修改denseASF结构  
 
-her_57 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.01
-her_58 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.1
-her_59 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.5
-her_60 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 1
-her_61 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 10
-her_62 joints 4 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_63 joints 6 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_64 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_65 joints 10 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_66 joints 12 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_67 joints 14 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_68 joints 16 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_69 joints 18 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
-her_70 joints 20 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0
+her_57 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.01  
+her_58 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.1  
+her_59 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 0.5  
+her_60 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 1  
+her_61 joints 20 random goal dt .02 denseASF hidden [16] random init_10 plane  critic2-ratio 10  
+her_62 joints 4 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_63 joints 6 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_64 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_65 joints 10 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_66 joints 12 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_67 joints 14 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_68 joints 16 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_69 joints 18 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
+her_70 joints 20 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
 
+her_71 joints 10 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt distance to target  
+her_72 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt max_joint_speed 20  
+her_73 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt 1500 episode sample cnt decay
+her_74 retry her_66
+her_75 joints 12 3D random goal dt .02 denseASF hidden [16] random init_1-->10(30)  add_dtt 
+her_76 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 1   add_dtt  
+her_77 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 0.1 add_dtt  
  
+her_78 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(100--30-->10)  种子和her_32一致
+her_79 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30-->10)  
+her_81 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(20--30-->10)  
+her_80 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(0--30-->10)  999.pth二校门  
+her_82 joints 24 3D random goal dt .02 dense action_l2 0.1 random_initial(50--30-->10)  
+her_84 joints 24 3D random goal dt .02 dense action_l2 0.1 random_initial(50--30-->10)  her_82数据丢了重跑了一遍  
+her_83 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(20--30-->10)  double_q critic_ratio 0.1  
+her_85 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30-->10)  double_q critic_ratio 1
 
-
+her_86 joints 24 3D block4 goal dt .02 dense action_l2 1 block4_env
+her_87 joints 24 3D block4 goal dt .02 dense action_l2 1 
+ 
