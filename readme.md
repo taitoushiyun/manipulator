@@ -27,21 +27,17 @@ mani_8   ppo_single  distance_threshold:  0.02  hard goal 0, 20, 0, 15, 0, 20, 0
 mani_19  ppo_single  distance_threshold:  0.02  hard goal 0, 20, 0, 15, 0, 20, 0, 20, 0, 20  gamma 0.99  reward 势函数  
 mani_22  ppo_single  distance_threshold:  0.02  hard goal 0, 20, 0, 15, 0, 20, 0, 20, 0, 20  gamma  0.8  reward 势函数   
 ~~mani_17  ppo_single  distance_threshold:  0.02  super hard goal 0, -50, 0, -50, 0, -50, 0, 0, -20, -10   10000 episodes~~ [目标错误]  
-
-
-
 ~~mani_23 ppo_single reward -d 势函数  easy  gamma 0.8~~ [矫正失败]  
 ~~mani_24 ppo_single reward -d 势函数  hard  gamma 0.8~~ [矫正失败]  
 ~~mani_25 ppo_single reward -d 势函数  super hard  gamma 0.8  (bug)~~  [矫正失败]  
+mani_27 ppo_single reward 势函数  super hard  gamma 0.95  
+mani_26 ppo_single reward 势函数  super hard  gamma 0.8 
+mani_28 ppo_single reward 势函数  super hard  gamma 0.6  
 
-mani_26 ppo_single reward -d 势函数  super hard  gamma 0.8  修正goal 标错bug  
-mani_27 ppo_single reward -d 势函数  super hard  gamma 0.95  修正goal 标错bug  
-mani_28 ppo_single reward -d 势函数  super hard  gamma 0.6  修正goal 标错bug  
-
-mani_29 ppo_single reward -d 非势函数  super hard  gamma 0.9  
-mani_31 ppo_single reward -d 非势函数  super hard  gamma 0.9  
-mani_30 ppo_single reward -d 非势函数  super hard  gamma 0.6  
-mani_32 ppo_single reward -d 势函数    super hard  gamma 0.99   without max steps done true  
+mani_29 ppo_single reward 非势函数  super hard  gamma 0.9  
+mani_31 ppo_single reward 非势函数  super hard  gamma 0.9  
+mani_30 ppo_single reward 非势函数  super hard  gamma 0.6  
+mani_32 ppo_single reward 势函数    super hard  gamma 0.99   without max steps done true  
 
 ----------------------------------ppo pyrep --------------------------------------------  
 mani_33 reward dense potential hard goal gamma 0.95 plane model  
