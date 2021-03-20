@@ -341,7 +341,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         start_episode = 0
     for i_episode in range(start_episode, n_episodes):
         time_a = time.time()
-        state = env.reset(args_.goal_set)
+        state = env.reset()
         state = np.concatenate([state['observation'], state['desired_goal']])
         score = 0
         episode_length = 0
@@ -438,7 +438,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         #             vis.line(X=[i_episode // args_.test_interval], Y=[eval_reward], win='eval reward', update='append')
 
         if i_episode % 5 == 0:
-            state = env.reset(args_.eval_goal_set)
+            state = env.reset(eval=True)
             state = np.concatenate([state['observation'], state['desired_goal']])
             eval_score = 0
             total_len = 0

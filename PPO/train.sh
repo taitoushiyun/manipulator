@@ -15,7 +15,32 @@
 #python train.py --headless-mode --train --code-version mani_53 --gamma 0.99 --max-episode-steps 20
 #python train.py --train --code-version mani_54 --gamma 0.9 --max-episode-steps 20
 #python train.py --train --code-version mani_55 --gamma 0.8 --max-episode-steps 20
-python train.py --train --code-version mani_56 --gamma 0.6 --max-episode-steps 20 --headless-mode &
-python train.py --train --code-version mani_57 --gamma 0.0 --max-episode-steps 20 --headless-mode &
-python train.py --train --code-version mani_58 --gamma 0.8 --max-episode-steps 30 --headless-mode --goal-set random --num-episodes 20000
-python train.py --train --code-version mani_59 --gamma 0.95 --max-episode-steps 100 --headless-mode --goal-set hard --num-episodes 2000
+#python train.py --train --code-version mani_56 --gamma 0.6 --max-episode-steps 20 --headless-mode &
+#python train.py --train --code-version mani_57 --gamma 0.0 --max-episode-steps 20 --headless-mode &
+#python train.py --train --code-version mani_58 --gamma 0.8 --max-episode-steps 30 --headless-mode --goal-set random --num-episodes 20000
+#python train.py --train --code-version mani_59 --gamma 0.95 --max-episode-steps 100 --headless-mode --goal-set hard --num-episodes 2000
+#python train.py --train --headless-mode --goal-set "super hard" --eval-goal-set "super hard" --plane-model --code-version mani_66 --gamma 0.95 --reward-type "dense potential"
+#python train.py --train --headless-mode --goal-set "super hard" --eval-goal-set "super hard" --plane-model --code-version mani_67 --gamma 0.8 --reward-type "dense potential"
+#python train.py --train --headless-mode --goal-set "super hard" --eval-goal-set "super hard" --plane-model --code-version mani_68 --gamma 0.6 --reward-type "dense potential"
+#python train.py --train --headless-mode --goal-set "super hard" --eval-goal-set "super hard" --plane-model --code-version mani_69 --gamma 0.95 --reward-type "dense potential"
+#python train.py --train --headless-mode --goal-set "super hard" --eval-goal-set "super hard" --plane-model --code-version mani_70 --gamma 0.8 --reward-type "dense potential"
+#python train.py --train --headless-mode --goal-set "super hard" --eval-goal-set "super hard" --plane-model --code-version mani_71 --gamma 0.6 --reward-type "dense potential"
+#python train.py --train --headless-mode --goal-set "super hard" --eval-goal-set "super hard" --plane-model --code-version mani_72 --gamma 0.95 --reward-type "dense distance"
+#python train.py --train --headless-mode --goal-set "super hard" --eval-goal-set "super hard" --plane-model --code-version mani_73 --gamma 0.8 --reward-type "dense distance"
+#python train.py --train --headless-mode --goal-set "super hard" --eval-goal-set "super hard" --plane-model --code-version mani_74 --gamma 0.6 --reward-type "dense distance"
+#python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --plane-model --code-version mani_75 --gamma 0.95 --reward-type "dense distance"
+#python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --plane-model --code-version mani_76 --gamma 0.95 --reward-type "dense distance"
+
+#python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --plane-model --code-version mani_77 --gamma 0.95 --reward-type "dense distance"
+#python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --plane-model --code-version mani_78 --gamma 0.8 --reward-type "dense distance"
+#python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --plane-model --code-version mani_79 --gamma 0.6 --reward-type "dense distance"
+#python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --code-version mani_80 --gamma 0.95 --reward-type "dense distance"
+#python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --code-version mani_81 --gamma 0.8 --reward-type "dense distance"
+#python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --code-version mani_82 --gamma 0.6 --reward-type "dense distance"
+
+#python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --plane-model --code-version mani_83 --gamma 0.95 --reward-type "dense potential"
+#python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --plane-model --code-version mani_84 --gamma 0.8 --reward-type "dense potential"
+#python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --plane-model --code-version mani_85 --gamma 0.6 --reward-type "dense potential"
+python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --code-version mani_86 --gamma 0.86 --reward-type "dense potential"
+python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --code-version mani_87 --gamma 0.87 --reward-type "dense potential"
+python train.py --train --headless-mode --goal-set "hard" --eval-goal-set "hard" --code-version mani_88 --gamma 0.88 --reward-type "dense potential"

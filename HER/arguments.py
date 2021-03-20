@@ -8,10 +8,10 @@ Here are the param for the training
 def get_args():
     parser = argparse.ArgumentParser()
     # the environment setting
-    parser.add_argument('--code-version', type=str, default='her_86')
+    parser.add_argument('--code-version', type=str, default='her_88')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--env-name', type=str, default='mani', help='the environment name')
-    parser.add_argument('--n-epochs', type=int, default=500, help='the number of epochs to train the agent')
+    parser.add_argument('--n-epochs', type=int, default=1000, help='the number of epochs to train the agent')
     parser.add_argument('--n-cycles', type=int, default=10, help='the times to collect samples per epoch')
     parser.add_argument('--n-batches', type=int, default=40, help='the times to update the network')
     parser.add_argument('--save-interval', type=int, default=5, help='the interval that save the trajectory')
@@ -38,6 +38,9 @@ def get_args():
     parser.add_argument('--num-rollouts-per-mpi', type=int, default=2, help='the rollouts per mpi')
     parser.add_argument('--critic2-ratio', type=float, default=0.1)
     parser.add_argument('--double-q', action='store_true')
+
+    parser.add_argument('--noise', type=float, default=0.1)
+    parser.add_argument('--noise-clip', type=float, default=0.5)
     # net config
     parser.add_argument('--actor-type', type=str, default='dense')
     parser.add_argument('--critic-type', type=str, default='dense')
@@ -55,7 +58,7 @@ def get_args():
                                                          'block0', 'block1', 'block2', 'block3', 'block4',
                                                          'draw0', 'draw1', 'special'],
                         default='random')
-    parser.add_argument('--eval-goal-set', type=str, default='draw1')
+    parser.add_argument('--eval-goal-set', type=str, default='random')
     parser.add_argument('--collision-cnt', type=int, default=27)
     parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')
     parser.add_argument('--headless-mode', action='store_true')
@@ -65,6 +68,7 @@ def get_args():
     parser.add_argument('--reset-change-period', type=int, default=30)
 
     parser.add_argument('--train', action='store_true')
+    parser.add_argument('--use-td3', action='store_true')
     args = parser.parse_args()
 
     return args

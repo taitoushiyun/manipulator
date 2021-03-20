@@ -3,6 +3,7 @@ import gym
 import os, sys
 from arguments import get_args
 from rl_modules.ddpg_agent import ddpg_agent
+from rl_modules.td3_agent import TD3Agent
 import random
 import torch
 main_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
@@ -111,12 +112,15 @@ def launch(args):
 
     # get the environment parameters
     env_params = get_env_params(env, args.goal_set)
-    # create the ddpg agent to interact with the environment 
-    ddpg_trainer = ddpg_agent(args, env, env_params)
-    if args.train:
-        ddpg_trainer.learn()
+    # create the ddpg agent to interact with the environment
+    if args.use_td3:
+        trainer = TD3Agent(args, env, env_params)
     else:
-        ddpg_trainer.eval()
+        trainer = ddpg_agent(args, env, env_params)
+    if args.train:
+        trainer.learn()
+    else:
+        trainer.eval()
 
 
 if __name__ == '__main__':

@@ -75,6 +75,7 @@ class PPO_agent(object):
         eval_result_queue = deque(maxlen=10)
 
         for i_episode in range(self.num_episodes):
+            time_a = time.time()
             cur_obs = self.env.reset()
             cur_obs = np.concatenate([cur_obs['observation'], cur_obs['desired_goal']], axis=-1)
             path_length, path_rewards = 0, 0.
@@ -100,6 +101,8 @@ class PPO_agent(object):
                     self.iter_steps += 1
                 path_rewards += reward
                 if done or self.max_steps_per_episodes == path_length:
+                    time_b = time.time()
+                    print(time_b - time_a)
                     result = 0.
                     if done and path_length < self.args.max_episode_steps:
                         result = 1.
@@ -177,7 +180,7 @@ class PPO_agent(object):
         rewards = 0
         result = 0
         for i in range(num_episodes):
-            cur_obs = self.env.reset()
+            cur_obs = self.env.reset(eval=True)
             cur_obs = np.concatenate([cur_obs['observation'], cur_obs['desired_goal']], axis=-1)
             for i in range(self.args.max_episode_steps):
                 action = self.actor_critic.eval_action(torch.FloatTensor(cur_obs[None]))

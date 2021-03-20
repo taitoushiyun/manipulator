@@ -67,6 +67,7 @@ def playGame(args_, train=True, episode_count=2000):
         'cc_model': args_.cc_model,
         'plane_model': args_.plane_model,
         'goal_set': args_.goal_set,
+        'eval_goal_set': args_.eval_goal_set,
         'max_episode_steps': args_.max_episode_steps,
         'collision_cnt': args_.collision_cnt,
         'headless_mode': args_.headless_mode,
@@ -76,12 +77,14 @@ def playGame(args_, train=True, episode_count=2000):
         'add_ta': args_.add_ta,
         'add_peb': args_.add_peb,
         'is_her': args_.is_her,
-        'reset_period': args.reset_period,
+        'max_reset_period': args_.max_reset_period,
+        'reset_change_point': args_.reset_change_point,
+        'reset_change_period': args_.reset_change_period,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args_.seed)
     # env = gym.make('LunarLanderContinuous-v2')
-    obs = env.reset(args_.goal_set)
+    obs = env.reset()
     agent = TD3Agent(args=args_,
                      state_size=obs['observation'].shape[0] + obs['desired_goal'].shape[0],
                      action_size=env.action_space.shape[0],
@@ -138,7 +141,7 @@ def playGame(args_, train=True, episode_count=2000):
             agent.actor_local.load_state_dict(model)
 
             for i in range(2000):
-                state = env.reset(args_.eval_goal_set)
+                state = env.reset()
                 goal_list.append(state['desired_goal'])
                 state = np.concatenate([state['observation'], state['desired_goal']])
                 total_reward = 0
@@ -204,7 +207,7 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code-version', type=str, default='td3_133')
+    parser.add_argument('--code-version', type=str, default='td3_140')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
     #  TD3 config
@@ -226,7 +229,7 @@ if __name__ == "__main__":
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='dense potential')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
-    parser.add_argument('--num-joints', type=int, default=12)
+    parser.add_argument('--num-joints', type=int, default=24)
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
@@ -235,19 +238,21 @@ if __name__ == "__main__":
                         default='hard')
     parser.add_argument('--eval-goal-set', type=str, default='hard')
     parser.add_argument('--collision-cnt', type=int, default=15)
-    parser.add_argument('--scene-file', type=str, default='mani_env_6.xml')
+    parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')
     parser.add_argument('--headless-mode', action='store_true')
     parser.add_argument('--n-substeps', type=int, default=100)
     parser.add_argument('--random-initial-state', action='store_true')
     parser.add_argument('--add-ta', action='store_true')
     parser.add_argument('--add-peb', action='store_true')
-    parser.add_argument('--is-her', type=bool, default=True)
-    parser.add_argument('--reset-period', type=int, default=10)
+    parser.add_argument('--is-her', type=bool, default=False)
+    parser.add_argument('--max-reset-period', type=int, default=10)
+    parser.add_argument('--reset-change-point', type=int, default=0)
+    parser.add_argument('--reset-change-period', type=int, default=30)
 
 
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--load-model', type=str, default=None)
-    parser.add_argument('--episodes', type=int, default=500)
+    parser.add_argument('--episodes', type=int, default=1000)
 
     args = parser.parse_args()
     # write the selected car to configuration file

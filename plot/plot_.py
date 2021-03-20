@@ -50,44 +50,57 @@ def plot_curve(index, dfs, label=None, shaded_err=False, shaded_std=True):
 
 
 if __name__ == '__main__':
-    with open('/home/cq/code/manipulator/plot/goal_compare.txt', 'r') as f:
-        data_2 = [[] for _ in range(2)]
-        for i in range(500):
-            data_temp = list(map(float, f.readline().split()))
-            for j in range(2):
-                data_2[j].append(data_temp[2 * j + 1])
-
     os.makedirs('saved_fig', exist_ok=True)
-    df = pd.DataFrame(columns=('method', 'seed', 'Episodes', 'Return'))
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'DOF', 'with normalization',
+                               'space_type', 'gamma', 'joints', 'reward_type', 'alg', 'accuracy', 'Net', 'reset period',
+                               'start_point'))
     sns.set()
     fig, ax = plt.subplots(1, 1, figsize=(6, 4), dpi=500)
     ax.xaxis.get_major_formatter().set_powerlimits((0, 1))
 
-    dof = [16]
-    dof_name = ['r <= 0.02', 'r <= 0.01']
-    for i in range(1):
+    version = [50, 51]
+    space_type = (['plane'] * 3 + ['3D'] * 3) * 4
+    gamma = ['0.95', '0.8', '0.6'] * 8
+    reward_type = ['distance', 'potential', 'mix']
+    joints = [f'{i *2} DOF' for i in range(2, 11)]
+    alg = ['ppo', 'ppo', 'td3', 'td3']
+    accuracy = ['0.02', '0.015', '0.01'] * 2
+    # net = ['MLP'] * 3 + ['DenseNet'] * 3
+    net = ['MLP'] * 3 + ['DenseNet'] * 3
+    reset_period = ['reset every episode', 'reset every 10 episode']
+    start_point = ['100 epoch', '50 epoch', '20 epoch', '0 epoch']
 
-        with open(f'/home/cq/.visdom/mani_{dof[i]}.json', 'r') as f:
+
+
+    for i in range(2):
+        file_name = f'her_{version[i]}'
+        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
             t = json.load(f)
-        d = t['jsons']['mean rewards']['content']['data'][0]
-        x = d['x'][1:501]
-        y = d['y'][1:501]
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x']
+        y = d['y']
         # x = smoother(x, a=0.9, w=10, mode="window")
         # y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
         for x_, y_ in zip(x, y):
-            df = df.append([{'method': dof_name[i], 'seed': 1, 'Episodes': float(x_), 'Return': float(y_)}], ignore_index=False)
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                                 'reset_period': reset_period[i]})
+        df = df.append(a, ignore_index=False)
 
-    data = data_2[1]
-    data = smoother(data, a=0.9, w=10, mode="window")
-    for i in range(500):
-        df = df.append([{'method': 'r <= 0.01', 'seed': 1, 'Episodes': float(i), 'Return': float(data[i])}],
-                       ignore_index=False)
 
-    palette = sns.color_palette("deep", 2)
-    g = sns.lineplot(x='Episodes', y="Return", data=df, hue="method", style="method", dashes=False, palette=palette,
-                     hue_order=dof_name)
+        # for j in range(10):
+        #     for k in range(1000):
+        #         df = df.append(
+        #             [{'version': str(version[i]), 'seed': 1, 'Episodes': float(k), 'Success Rate(%)': float(y[int(10 * k + j)]),
+        #               'space_type': space_type[i], 'reward_type': reward_type[i], 'gamma': gamma[i],
+        #               'joints': joints[i], 'alg': alg[i]}], ignore_index=False)
+
+
+    # palette = sns.color_palette("deep", 9)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="reset_period" #palette=palette,
+                   )
 
     plt.tight_layout()
     plt.legend(fontsize=10, loc='lower right')
-    plt.savefig('saved_fig/goal_effect.png', bbox_inches='tight')
+    plt.savefig('saved_fig/her_random_init_3', bbox_inches='tight')
     plt.show()
