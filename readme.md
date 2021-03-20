@@ -333,16 +333,22 @@ her_22 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoc
 her_20 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000  
 her_19 her on mujoco env num_joints 24 random goal distance-threshold 0.005 epoch 1000  
 
+her_27 her on mujoco env num_joints 24 random goal distance-threshold 0.02  epoch  500 DenseNet seed  1  
+her_28 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNet seed  1  
+her_29 her on mujoco env num_joints 24 random goal distance-threshold 0.01  epoch 1000 DenseNet seed  1  
+
+her_90 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNetSimple seed 1
+her_93 her on mujoco env num_joints 24 random goal distance-threshold 0.01  epoch 1000 DenseNetSimple seed 1
+
 her_23 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 均匀 sample method   
 her_24 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 尖峰 sample method  
+her_91 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 尖峰学，均匀评估 sample method  
 her_25 her_6 9800 eval
 her_26 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet简化版本  seed 1  
 
-her_27 her on mujoco env num_joints 24 random goal distance-threshold 0.02  epoch 500 DenseNet seed 1  
-her_28 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNet seed  1  
-her_29 her on mujoco env num_joints 24 random goal distance-threshold 0.01  epoch 1000 DenseNet seed  1  
+
  
-her_30 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 1000 DenseNet  random-initial-state  seed  1  
+
 her_31 her on mujoco env num_joints 12 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  跑错了实验  seed  1     
 her_32 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  seed  1   
 
@@ -394,6 +400,7 @@ her_75 joints 12 3D random goal dt .02 denseASF hidden [16] random init_1-->10(3
 her_76 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 1   add_dtt  
 her_77 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 0.1 add_dtt  
  
+her_30 joints 24 3D random goal dt .02 dense action_l2 1 random-initial-state 永不复位 
 her_78 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(100--30-->10)  种子和her_32一致
 her_79 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30-->10)  
 her_81 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(20--30-->10)  

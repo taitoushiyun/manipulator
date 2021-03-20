@@ -66,6 +66,7 @@ def get_args():
     parser.add_argument('--max-reset-period', type=int, default=10)
     parser.add_argument('--reset-change-point', type=int, default=0)
     parser.add_argument('--reset-change-period', type=int, default=30)
+    parser.add_argument('--fixed-reset', action='store_true')
 
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--use-td3', action='store_true')

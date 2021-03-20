@@ -101,6 +101,7 @@ def launch(args):
         'max_reset_period': args.max_reset_period,
         'reset_change_point': args.reset_change_point,
         'reset_change_period': args.reset_change_period,
+        'fixed_reset': args.fixed_reset,
     }
     if args.env_name == 'mani':
         env_name = ManipulatorEnv

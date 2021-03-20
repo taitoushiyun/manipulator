@@ -59,6 +59,7 @@ class ManipulatorEnv(gym.Env):
         self.max_reset_period = env_config['max_reset_period']
         self.reset_change_period = env_config['reset_change_period']
         self.reset_change_point = env_config['reset_change_point']
+        self.fixed_reset = env_config['fixed_reset']
         self.reset_period = 1
 
         model_xml_path = os.path.join(os.path.dirname(__file__), 'mani', env_config['scene_file'])
@@ -190,7 +191,7 @@ class ManipulatorEnv(gym.Env):
     def reset(self, eval=False, i_epoch=0):
         self._elapsed_steps = 0
         self.reset_period = 1 + min(self.max_reset_period - 1, max(0, i_epoch - self.reset_change_point) // self.reset_change_period) \
-            if not eval else 10000
+            if not self.fixed_reset else self.max_reset_period
         goal_set = self.goal_set if not eval else self.eval_goal_set
         self.goal_theta, self.goal, self.max_rewards = self._sample_goal(goal_set, i_epoch)
         self._reset_sim()
@@ -347,6 +348,8 @@ class ManipulatorEnv(gym.Env):
         elif goal_set == 'special1':
             theta = 45 * DEG2RAD * (5 - 1 / np.random.uniform(low=0.2, high=1.2, size=(self.action_dim,))) / (
                         5 - (1 / 1.2)) * np.random.choice([-1, 1], size=(self.action_dim,))
+        elif goal_set == 'special2':
+            theta = 0.5 * 45 * DEG2RAD * np.random.normal(0, 0.3, size=self.action_dim).clip(-2, 2).T.flatten()
         else:
             raise ValueError(f'goal_set is {goal_set}')
 

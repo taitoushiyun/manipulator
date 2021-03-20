@@ -46,7 +46,6 @@ class Critic(nn.Module):
 class ActorDenseSimple(nn.Module):
     def __init__(self, args, env_params):
         super(ActorDenseSimple, self).__init__()
-        self.agent = agent
         self.max_action = env_params['action_max']
         self.fc1 = nn.Linear(env_params['obs'] + env_params['goal'], 256)
         self.fc2 = nn.Linear(env_params['obs'] + env_params['goal'] + 256, 256)

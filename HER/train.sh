@@ -42,7 +42,17 @@
 #  --random-initial-state --max-reset-period 10 --reset-change-period 30 --reset-change-point 50 --action-l2 1 --actor-type dense  \
 #  --n-epochs 2000 --env-name mani --double-q  --critic2-ratio 1
 
-python train.py --code-version her_90 --train --headless-mode --cuda --actor-type dense_simple --critic-type dense_simple --distance-threshold 0.015 --n-epochs 1000
-python train.py --code-version her_91 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special --eval-goal-set random --n-epochs 500
-python train.py --code-version her_92 --train --headless-mode --cuda --actor-type normal --critic-type normal --random-initial-state --n-epochs 500
+#python train.py --code-version her_90 --train --headless-mode --cuda --actor-type dense_simple --critic-type dense_simple --distance-threshold 0.015 --n-epochs 1000
+#python train.py --code-version her_91 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special --eval-goal-set random --n-epochs 500
+#python train.py --code-version her_92 --train --headless-mode --cuda --actor-type normal --critic-type normal --random-initial-state --n-epochs 500
+python train.py --code-version her_93 --train --headless-mode --cuda --actor-type dense_simple --critic-type dense_simple --distance-threshold 0.01 --n-epochs 1000
+python train.py --code-version her_94 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special1 --eval-goal-set special1 --n-epochs 500
+python train.py --code-version her_95 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set random   --eval-goal-set special1 --n-epochs 500
+python train.py --code-version her_96 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special  --eval-goal-set special1 --n-epochs 500
+python train.py --code-version her_97 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special2 --eval-goal-set special1 --n-epochs 500
+python train.py --code-version her_98 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --fixed-reset --n-epochs 1000
+python train.py --code-version her_99 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000
+python train.py --code-version her_100 --train --headless-mode --cuda --actor-type normal --critic-type normal --random-initial-state --n-epochs 1000
+
+
 
