@@ -49,20 +49,12 @@ def plot_curve(index, dfs, label=None, shaded_err=False, shaded_std=True):
     return lin
 
 
-if __name__ == '__main__':
-    os.makedirs('saved_fig', exist_ok=True)
-    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'DOF', 'with normalization',
-                               'space_type', 'gamma', 'joints', 'reward_type', 'alg', 'accuracy', 'Net', 'reset period',
-                               'start_point'))
-    sns.set()
-    fig, ax = plt.subplots(1, 1, figsize=(6, 4), dpi=500)
-    ax.xaxis.get_major_formatter().set_powerlimits((0, 1))
-
-    version = [50, 51]
+def plot():
+    # version = [36, 38, 40, 42, 44, 46, 49, 50, 48]
     space_type = (['plane'] * 3 + ['3D'] * 3) * 4
     gamma = ['0.95', '0.8', '0.6'] * 8
     reward_type = ['distance', 'potential', 'mix']
-    joints = [f'{i *2} DOF' for i in range(2, 11)]
+    joints = [f'{i} DOF' for i in range(2, 7)] + ['8 DOF', '9 DOF', '10 DOF', '12 DOF']
     alg = ['ppo', 'ppo', 'td3', 'td3']
     accuracy = ['0.02', '0.015', '0.01'] * 2
     # net = ['MLP'] * 3 + ['DenseNet'] * 3
@@ -70,37 +62,148 @@ if __name__ == '__main__':
     reset_period = ['reset every episode', 'reset every 10 episode']
     start_point = ['100 epoch', '50 epoch', '20 epoch', '0 epoch']
 
-
-
-    for i in range(2):
+    for i in range(9):
         file_name = f'her_{version[i]}'
         with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
             t = json.load(f)
         d = t['jsons']['eval success rate']['content']['data'][0]
         x = d['x']
         y = d['y']
-        # x = smoother(x, a=0.9, w=10, mode="window")
-        # y = smoother(y, a=0.9, w=10, mode="window")
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
         a = []
         for x_, y_ in zip(x, y):
             a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
-                                 'reset_period': reset_period[i]})
+                      'joints': joints[i]})
         df = df.append(a, ignore_index=False)
-
-
-        # for j in range(10):
-        #     for k in range(1000):
-        #         df = df.append(
-        #             [{'version': str(version[i]), 'seed': 1, 'Episodes': float(k), 'Success Rate(%)': float(y[int(10 * k + j)]),
-        #               'space_type': space_type[i], 'reward_type': reward_type[i], 'gamma': gamma[i],
-        #               'joints': joints[i], 'alg': alg[i]}], ignore_index=False)
-
-
-    # palette = sns.color_palette("deep", 9)
-    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="reset_period" #palette=palette,
-                   )
-
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="joints")
     plt.tight_layout()
     plt.legend(fontsize=10, loc='lower right')
-    plt.savefig('saved_fig/her_random_init_3', bbox_inches='tight')
+    plt.savefig('saved_fig/her_random_init_5', bbox_inches='tight')
     plt.show()
+
+
+def plot_random_init_10():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'DOF', 'with normalization',
+                               'space_type', 'gamma', 'joints', 'reward_type', 'alg', 'accuracy', 'Net', 'reset period',
+                               'start_point'))
+    version = [36, 38, 40, 42, 44, 46, 49, 50, 48]
+    space_type = (['plane'] * 3 + ['3D'] * 3) * 4
+    gamma = ['0.95', '0.8', '0.6'] * 8
+    reward_type = ['distance', 'potential', 'mix']
+    joints = [f'{i} DOF' for i in range(2, 7)] + ['8 DOF', '9 DOF', '10 DOF', '12 DOF']
+    alg = ['ppo', 'ppo', 'td3', 'td3']
+    accuracy = ['0.02', '0.015', '0.01'] * 2
+    # net = ['MLP'] * 3 + ['DenseNet'] * 3
+    net = ['MLP'] * 3 + ['DenseNet'] * 3
+    reset_period = ['reset every episode', 'reset every 10 episode']
+    start_point = ['100 epoch', '50 epoch', '20 epoch', '0 epoch']
+
+    for i in range(9):
+        file_name = f'her_{version[i]}'
+        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x']
+        y = d['y']
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'joints': joints[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="joints")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/her_random_init_5', bbox_inches='tight')
+    plt.show()
+
+
+def plot_sample_effect():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'sample method'))
+    version = [94, 95, 96, 97]
+    sample_method = ['1/x', 'uniform', 'normal(0, 1)', 'normal(0, 0.3)']
+
+    for i in range(4):
+        file_name = f'her_{version[i]}'
+        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x']
+        y = d['y']
+        x = smoother(x, a=0.9, w=20, mode="window")
+        y = smoother(y, a=0.9, w=20, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'sample method': sample_method[i]})
+        df = df.append(a, ignore_index=False)
+    sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="sample method")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/her_sample_effect', bbox_inches='tight')
+    plt.show()
+
+
+def plot_dense_effect():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'net', 'accuracy'))
+    version = [27, 28, 29, 90, 93, 21, 22, 20]
+    net = ['DenseNet', 'DenseNet', 'DenseNet', 'SimpleDenseNet', 'SimpleDenseNet', 'MLP', 'MLP', 'MLP']
+    accuracy = ['0.02', '0.015', '0.01', '0.015', '0.01', '0.02', '0.015', '0.01']
+
+    for i in range(8):
+        file_name = f'her_{version[i]}'
+        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x']
+        y = d['y']
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'net': net[i], 'accuracy': accuracy[i]})
+        df = df.append(a, ignore_index=False)
+    sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="accuracy", style='net')
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/her_dense_precise_effect', bbox_inches='tight')
+    plt.show()
+
+
+def plot_dense_effect2():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'net'))
+    version = [ 100, 80]
+    net = ['MLP', 'DenseNet']
+
+    for i in range(len(version)):
+        file_name = f'her_{version[i]}'
+        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x']
+        y = d['y']
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'net': net[i]})
+        df = df.append(a, ignore_index=False)
+    sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="net")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/her_dense_precise_effect_2', bbox_inches='tight')
+    plt.show()
+
+if __name__ == '__main__':
+    os.makedirs('saved_fig', exist_ok=True)
+    sns.set()
+    fig, ax = plt.subplots(1, 1, figsize=(6, 4), dpi=500)
+    ax.xaxis.get_major_formatter().set_powerlimits((0, 1))
+    sns.set_palette(sns.color_palette('deep', 3))
+    plot_dense_effect()
+
+

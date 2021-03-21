@@ -54,10 +54,7 @@ def get_args():
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random',
-                                                         'block0', 'block1', 'block2', 'block3', 'block4',
-                                                         'draw0', 'draw1', 'special'],
-                        default='random')
+    parser.add_argument('--goal-set', type=str, default='random')
     parser.add_argument('--eval-goal-set', type=str, default='random')
     parser.add_argument('--collision-cnt', type=int, default=27)
     parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')

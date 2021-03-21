@@ -80,12 +80,14 @@ def playGame(args_, train=True, episode_count=2000):
         'max_reset_period': args_.max_reset_period,
         'reset_change_point': args_.reset_change_point,
         'reset_change_period': args_.reset_change_period,
+        'fixed_reset': args_.fixed_reset,
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args_.seed)
     # env = gym.make('LunarLanderContinuous-v2')
     obs = env.reset()
     agent = TD3Agent(args=args_,
+                     env=env,
                      state_size=obs['observation'].shape[0] + obs['desired_goal'].shape[0],
                      action_size=env.action_space.shape[0],
                      max_action=env.action_space.high,
@@ -207,9 +209,11 @@ def playGame(args_, train=True, episode_count=2000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TD3 for manipulator.')
-    parser.add_argument('--code-version', type=str, default='td3_140')
+    parser.add_argument('--code-version', type=str, default='td3_164')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--seed', type=int, default=1)
+    # unused
+    parser.add_argument('--fixed-reset', action='store_true')
     #  TD3 config
     parser.add_argument('--actor-hidden', type=list, default=[128, 128])
     parser.add_argument('--critic-hidden', type=list, default=[64, 64])
@@ -224,6 +228,9 @@ if __name__ == "__main__":
     parser.add_argument('--noise-decay-period', type=float, default=500.)
     parser.add_argument('--n-test-rollouts', type=int, default=10)
     parser.add_argument('--test-interval', type=int, default=20)
+
+    parser.add_argument('--action-q-ratio', type=float, default=0.1)
+    parser.add_argument('--action-q', action='store_true')
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=100)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
@@ -233,9 +240,7 @@ if __name__ == "__main__":
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
-    parser.add_argument('--goal-set', type=str, choices=['easy', 'hard', 'super hard', 'random',
-                                                         'draw0'],
-                        default='hard')
+    parser.add_argument('--goal-set', type=str, default='hard')
     parser.add_argument('--eval-goal-set', type=str, default='hard')
     parser.add_argument('--collision-cnt', type=int, default=15)
     parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')

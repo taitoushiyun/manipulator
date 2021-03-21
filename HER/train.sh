@@ -45,14 +45,18 @@
 #python train.py --code-version her_90 --train --headless-mode --cuda --actor-type dense_simple --critic-type dense_simple --distance-threshold 0.015 --n-epochs 1000
 #python train.py --code-version her_91 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special --eval-goal-set random --n-epochs 500
 #python train.py --code-version her_92 --train --headless-mode --cuda --actor-type normal --critic-type normal --random-initial-state --n-epochs 500
-python train.py --code-version her_93 --train --headless-mode --cuda --actor-type dense_simple --critic-type dense_simple --distance-threshold 0.01 --n-epochs 1000
-python train.py --code-version her_94 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special1 --eval-goal-set special1 --n-epochs 500
-python train.py --code-version her_95 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set random   --eval-goal-set special1 --n-epochs 500
-python train.py --code-version her_96 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special  --eval-goal-set special1 --n-epochs 500
-python train.py --code-version her_97 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special2 --eval-goal-set special1 --n-epochs 500
-python train.py --code-version her_98 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --fixed-reset --n-epochs 1000
-python train.py --code-version her_99 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000
-python train.py --code-version her_100 --train --headless-mode --cuda --actor-type normal --critic-type normal --random-initial-state --n-epochs 1000
+
+#python train.py --code-version her_93 --train --headless-mode --cuda --actor-type dense_simple --critic-type dense_simple --distance-threshold 0.01 --n-epochs 1000
+#python train.py --code-version her_94 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special1 --eval-goal-set special1 --n-epochs 500
+#python train.py --code-version her_95 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set random   --eval-goal-set special1 --n-epochs 500
+#python train.py --code-version her_96 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special  --eval-goal-set special1 --n-epochs 500
+#python train.py --code-version her_97 --train --headless-mode --cuda --actor-type normal --critic-type normal --goal-set special2 --eval-goal-set special1 --n-epochs 500
+#python train.py --code-version her_100 --train --headless-mode --cuda --actor-type normal --critic-type normal --random-initial-state --n-epochs 1000
+#python train.py --code-version her_98 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --fixed-reset --n-epochs 1000
+#python train.py --code-version her_99 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000
+python train.py --code-version her_101 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --action-l2 0.1
+python train.py --code-version her_102 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --action-l2 10.
+python train.py --code-version her_103 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --action-l2 5.
 
 
 

@@ -291,6 +291,7 @@ td3_117,td3_118,td3_115表明R>R+r>r,其中R表示势函数
 td3_117,td3_116,td3_114表明高次势函数效果差，可以补充低次势函数实验  
 
 
+#-----------------------------一下验证peb和ta作用-----------------------------------------------------------------------------------
 td3_119 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_ta add_peb  验证time aware和peb,没有归一化  
 td3_120 hard goal num_joints 24 gamma 0.6 dense potential 3D model 存在种子没对齐的bug
 td3_121 hard goal num_joints 24 gamma 0.6 dense potential 3D model 种子与td3_111对齐，加入简单归一化，功能与td3_84对齐，效果和td3_111差不多  
@@ -299,8 +300,8 @@ td3_122 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_ta
 td3_123 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_peb  
 td3_124 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_ta add_peb  
 td3_121,td3_122,td3_123,td3_124消融实验，验证time-awareness和PEB效果,如果效果不明显可以考虑gamma=0.99的情况效果怎么样   
-
 td3_126 hard goal num_joints 24 gamma 0.99 dense potential 3D model add_ta add_peb  
+#--------------------------------------------------------------------------------------------------------------------------------
 td3_126 和 td3_124对照实验证明空间0.99gamma不可取  
 ~~td3_125 eval td3_122/1990.pth on 1000 epsilon decay rate  1 -> 0.05
 td3_127 eval td3_122/1830.pth on 1000 epsilon decay rate  1 -> 0.05  
@@ -308,6 +309,8 @@ td3_128 eval td3_122/1830.pth on 1000 epsilon decay rate  1 -> 0
 td3_129 eval td3_122/1990.pth on 1000 epsilon decay rate  1 -> 0~~  
 
 td3_131  td3_130加入ASF
+
+td3_115 hard goal num_joints 24 gamma 0.6 dense distance add peb 3D model
 
 
 -------------------------------------her -------------------------------------------------  
@@ -397,14 +400,16 @@ her_72 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  criti
 her_73 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt 1500 episode sample cnt decay
 her_74 retry her_66
 her_75 joints 12 3D random goal dt .02 denseASF hidden [16] random init_1-->10(30)  add_dtt 
-her_76 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 1   add_dtt  
-her_77 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 0.1 add_dtt  
+~~her_76 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 1   add_dtt~~  
+~~her_77 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 0.1 add_dtt~~  
  
-her_30 joints 24 3D random goal dt .02 dense action_l2 1 random-initial-state 永不复位 
+her_30 joints 12 3D random goal dt .02 dense action_l2 1 random-initial-state 永不复位 
+her_98 joints 12 3D random goal dt .02 dense action_l2 1 random-initial-state-10 fixed reset
 her_78 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(100--30-->10)  种子和her_32一致
 her_79 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30-->10)  
 her_81 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(20--30-->10)  
-her_80 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(0--30-->10)  999.pth二校门  
+her_80 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(0--30-->10)  999.pth二校门 
+her_100 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(0--30-->10) 
 
 her_82 joints 24 3D random goal dt .02 dense action_l2 0.1 random_initial(50--30-->10)  
 her_84 joints 24 3D random goal dt .02 dense action_l2 0.1 random_initial(50--30-->10)  her_82数据丢了重跑了一遍  
@@ -413,4 +418,15 @@ her_85 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30--
 
 her_86 joints 24 3D block4 goal dt .02 dense action_l2 1 block4_env
 her_87 joints 24 3D block4 goal dt .02 dense action_l2 1 
+
+her_94 joints 24 3D special1 goal eval special1 goal 
+her_95 joints 24 3D random   goal eval special1 goal
+her_96 joints 24 3D random   goal eval special1 goal
+her_97 joints 24 3D random   goal eval special1 goal
+
+
+her_101 jonins 24 3D dt .02 dense random goal action_l2 0.1
+her_103 jonins 24 3D dt .02 dense random goal action_l2 5
+her_102 jonins 24 3D dt .02 dense random goal action_l2 10
+
  

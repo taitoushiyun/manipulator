@@ -22,6 +22,9 @@ if torch.cuda.is_available():
     torch.cuda.current_device()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+DEG2RAD = np.pi / 180.
+RAD2DEG = 180. / np.pi
+
 
 class ReplayBuffer:
     """Fixed-size buffer to store experience tuples."""
@@ -172,7 +175,7 @@ class Critic(nn.Module):
 class TD3Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, args, state_size, action_size, max_action, min_action, actor_hidden, critic_hidden, random_seed,
+    def __init__(self, args, env, state_size, action_size, max_action, min_action, actor_hidden, critic_hidden, random_seed,
                  gamma=0.99, tau=5e-3, lr_actor=1e-3, lr_critic=1e-3, update_every_step=2, random_start=2000,
                  noise=0.2, noise_std=0.1, noise_clip=0.5, noise_drop_rate=500.,
                  buffer_size=int(1e7), batch_size=64):
@@ -190,6 +193,7 @@ class TD3Agent():
             noise_clip (float): to clip random noise into this range
         """
         self.args = args
+        self.env = env
         self.state_size = state_size
         self.action_size = action_size
         self.max_action = max_action
@@ -219,6 +223,12 @@ class TD3Agent():
         self.critic_target2 = Critic(state_size, action_size, critic_hidden).to(device)
         self.critic_target2.load_state_dict(self.critic_local2.state_dict())
         self.critic_optimizer2 = optim.Adam(self.critic_local2.parameters(), lr=lr_critic)
+
+        if self.args.action_q:
+            self.critic_action = Critic(state_size, action_size, critic_hidden).to(device)
+            self.critic_action_target = Critic(state_size, action_size, critic_hidden).to(device)
+            self.critic_action_target.load_state_dict(self.critic_action.state_dict())
+            self.critic_action_optimizer = optim.Adam(self.critic_action.parameters(), lr=lr_critic)
         # Replay memory
         self.memory = ReplayBuffer(action_size, buffer_size, batch_size, random_seed)
 
@@ -269,6 +279,9 @@ class TD3Agent():
 
                 Q1_targets_next = self.critic_target1(next_state, actions_next)
                 Q2_targets_next = self.critic_target2(next_state, actions_next)
+                if self.args.action_q:
+                    next_joint_state = state[::, self.env.j_ang_idx] + DEG2RAD * 0.2 * self.args.max_angles_vel * action
+                    action_q_target = torch.pow(next_joint_state / 1.57, 2).mean().detach()
 
                 Q_targets_next = torch.min(Q1_targets_next, Q2_targets_next)
                 # Compute Q targets for current states (y_i)
@@ -278,6 +291,9 @@ class TD3Agent():
                 Q2_expected = self.critic_local2(state, action)
                 critic_loss1 = F.mse_loss(Q1_expected, Q_targets)
                 critic_loss2 = F.mse_loss(Q2_expected, Q_targets)
+                if self.args.action_q:
+                    Q_action_expected = self.critic_action(state, action)
+                    critic_action_loss = F.mse_loss(Q_action_expected, action_q_target)
                 # Minimize the loss
                 self.critic_optimizer1.zero_grad()
                 critic_loss1.backward()
@@ -287,11 +303,18 @@ class TD3Agent():
                 critic_loss2.backward()
                 self.critic_optimizer2.step()
 
+                if self.args.action_q:
+                    self.critic_action_optimizer.zero_grad()
+                    critic_action_loss.backward()
+                    self.critic_action_optimizer.step()
+
                 if i % self.update_every_step == 0:
                     # ---------------------------- update actor ---------------------------- #
                     # Compute actor loss
                     actions_pred = self.actor_local(state)
                     actor_loss = -self.critic_local1(state, actions_pred).mean()
+                    if self.args.action_q:
+                        actor_loss += -self.args.action_q_ratio * self.critic_action(state, actions_pred).mean()
                     # Minimize the loss
                     self.actor_optimizer.zero_grad()
                     actor_loss.backward()
@@ -300,6 +323,8 @@ class TD3Agent():
                     # ----------------------- update target networks ----------------------- #
                     self.soft_update(self.critic_local1, self.critic_target1, self.tau)
                     self.soft_update(self.critic_local2, self.critic_target2, self.tau)
+                    if self.args.action_q:
+                        self.soft_update(self.critic_action, self.critic_action_target, self.tau)
                     self.soft_update(self.actor_local, self.actor_target, self.tau)
 
     def soft_update(self, local_model, target_model, tau):
