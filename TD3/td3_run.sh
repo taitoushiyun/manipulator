@@ -24,6 +24,39 @@
 #python td3_run.py --train --headless-mode --add-peb --code-version td3_162 --gamma 0.8 --reward-type "dense potential"
 #python td3_run.py --train --headless-mode --add-peb --code-version td3_163 --gamma 0.6 --reward-type "dense potential"
 
+
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_166 --gamma 0.6 --reward-type "dense distance" --goal "super hard" --eval-goal "super hard"
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_165 --gamma 0.6 --reward-type "dense distance"
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_167 --gamma 0.6 --reward-type "dense potential"
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_168 --gamma 0.6 --reward-type "dense mix"
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_169 --gamma 0.6 --reward-type "dense 2x"
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_170 --gamma 0.6 --reward-type "dense 4x"
+
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_165 --gamma 0.6 --reward-type "dense distance"
 #python td3_run.py --train --headless-mode --add-peb --code-version td3_164 --gamma 0.6 --reward-type "dense distance" --action-q --action-q-ratio 0.1
-python td3_run.py --train --headless-mode --add-peb --code-version td3_165 --gamma 0.6 --reward-type "dense distance"
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_171 --gamma 0.6 --reward-type "dense distance" --action-q --action-q-ratio 0.5
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_172 --gamma 0.6 --reward-type "dense distance" --action-q --action-q-ratio 1
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_173 --gamma 0.6 --reward-type "dense distance" --action-q --action-q-ratio 10
+
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_167 --gamma 0.6 --reward-type "dense potential"
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_1174 --gamma 0.6 --reward-type "dense potential" --action-q --action-q-ratio 0.1
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_175 --gamma 0.6 --reward-type "dense potential" --action-q --action-q-ratio 1
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_176 --gamma 0.6 --reward-type "dense potential" --action-q --action-q-ratio 10
+
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_177 --gamma 0.6 --reward-type "dense potential" --goal random --eval-goal random
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_178 --gamma 0.6 --reward-type "dense potential" --action-q --action-q-ratio 1. --goal random --eval-goal random
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_179 --gamma 0.6 --reward-type "dense potential" --action-q --action-q-ratio 0.1 --goal random --eval-goal random
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_180 --gamma 0.6 --reward-type "dense potential" --action-q --action-q-ratio 10. --goal random --eval-goal random
+
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_182 --gamma 0.6 --reward-type "dense potential" --action-q --action-q-ratio 0.05
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_183 --gamma 0.6 --reward-type "dense potential" --action-q --action-q-ratio 10
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_184 --gamma 0.6 --reward-type "dense potential" --action-q --action-q-ratio 0.1
+
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_186 --gamma 0.0 --reward-type "dense distance"  --plane-model
+
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_187 --gamma 0.0 --reward-type "dense distance" --max-episode-steps 1
+
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_200 --gamma 0.6 --reward-type 'dense distance' --episodes 20000
+python td3_run.py --train --headless-mode --add-peb --code-version td3_201 --gamma 0.6 --reward-type 'dense potential' --episodes 40000
+
 

@@ -280,7 +280,8 @@ class TD3Agent():
                 Q1_targets_next = self.critic_target1(next_state, actions_next)
                 Q2_targets_next = self.critic_target2(next_state, actions_next)
                 if self.args.action_q:
-                    next_joint_state = state[::, self.env.j_ang_idx] + DEG2RAD * 0.2 * self.args.max_angles_vel * action
+                    # next_joint_state = state[::, self.env.j_ang_idx] + DEG2RAD * 0.2 * self.args.max_angles_vel * action
+                    next_joint_state = next_state[::, self.env.j_ang_idx]
                     action_q_target = torch.pow(next_joint_state / 1.57, 2).mean().detach()
 
                 Q_targets_next = torch.min(Q1_targets_next, Q2_targets_next)
@@ -314,7 +315,7 @@ class TD3Agent():
                     actions_pred = self.actor_local(state)
                     actor_loss = -self.critic_local1(state, actions_pred).mean()
                     if self.args.action_q:
-                        actor_loss += -self.args.action_q_ratio * self.critic_action(state, actions_pred).mean()
+                        actor_loss += self.args.action_q_ratio * self.critic_action(state, actions_pred).mean()
                     # Minimize the loss
                     self.actor_optimizer.zero_grad()
                     actor_loss.backward()
@@ -403,18 +404,22 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         logger.info(
             "Episode: %d,          Path length: %d       result: %f       reward: %f"
             % (i_episode, episode_length, result, score))
-        if args_.goal_set != 'random':
-            if args_.reward_type == 'dense potential':
-                vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
-                vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
+        if i_episode % 10 == 0:
+            if args_.goal_set != 'random':
+                if args_.reward_type == 'dense potential':
+                    vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
+                    vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
+                else:
+                    vis.line(X=[i_episode], Y=[score], win='reward', update='append')
+                    vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
+            vis.line(X=[i_episode], Y=[result], win='result', update='append')
+            vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
+            vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
+        if i_episode % 10 == 0:
+            if i_episode > 0.9 * n_episodes:
+                torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'{i_episode}.pth'))
             else:
-                vis.line(X=[i_episode], Y=[score], win='reward', update='append')
-                vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
-        vis.line(X=[i_episode], Y=[result], win='result', update='append')
-        vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
-        vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
-        if i_episode % 10 == 0 and i_episode > 0.9 * n_episodes:
-            torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'{i_episode}.pth'))
+                torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, 'model.pth'))
         time_b = time.time()
         print(time_b - time_a)
         # if i_episode % args_.test_interval == 0:
@@ -468,7 +473,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
             eval_score = 0
             total_len = 0
             for i in range(max_episode_length):
-                action = agent.act(state, args_.noise_decay_period + 1)
+                action = agent.act(state, add_noise=False)
                 next_state, reward, done, info = env.step(action)
                 next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
                 eval_score += reward

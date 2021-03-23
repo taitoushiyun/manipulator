@@ -87,6 +87,24 @@ mani_53 reward dense potential gamma 0.99 3D hard max-episode-steps 20  [对比�
 mani_54 reward dense potential gamma 0.9 3D hard max-episode-steps 20 
 mani_55 reward dense potential gamma 0.8 3D hard max-episode-steps 20 
 mani_56 reward dense potential gamma 0.6 3D hard max-episode-steps 20 
+
+# 新补充实验
+# 6节臂
+mani_89 reward dense distance gamma 0.95 hard plane
+mani_90 reward dense distance gamma 0.8  hard plane 
+mani_91 reward dense distance gamma 0.6  hard plane
+mani_92 reward dense distance gamma 0.95 hard 3D
+mani_93 reward dense distance gamma 0.8  hard 3D
+mani_94 reward dense distance gamma 0.6  hard 3D
+
+mani_95 reward dense potential gamma 0.95 hard plane
+mani_96 reward dense potential gamma 0.8  hard plane 
+mani_97 reward dense potential gamma 0.6  hard plane
+mani_98 reward dense potential gamma 0.95 hard 3D
+mani_99 reward dense potential gamma 0.8  hard 3D
+mani_100 reward dense potential gamma 0.6  hard 3D
+
+
 ~~mani_57 reward dense potential gamma 0.0 3D hard max-episode-steps 20~~ 
 # 12节臂
 mani_77 plane reward dense distance hard goal gamma 0.95  [对比表明平面内gamma也是越小越好,reward和rate表现一致]
@@ -270,28 +288,37 @@ td3_86 hard goal num_joints 24 gamma 0.5  dense potential not cc model 3D model
 ~~td3_102 td3_100 eval~~  
 ~~td3_103 td3_101 eval~~  
 ~~td3_104 random goal num_joints 12 gamma 0.6 dense potential 3D model max_episode_steps 100 eval按照her来~~  
-# 这里测试最大精度,6节臂最大可以到0.5cm精度
-td3_101 random goal num_joints 12 gamma 0.6 dense potential 3D model max_episode_steps 100  
+#----------------------------测试最大精度,6节臂最大可以到0.5cm精度------------------------------------------------------------------------------
+#这部分没有用归一化
+td3_101 random goal num_joints 12 gamma 0.6 dense potential 3D model max_episode_steps 100    
 td3_105 random goal num_joints 12 gamma 0.6 dense potential 3D model max_episode_steps 100 distance-threshold 0.01 episodes 20000
 td3_106 random goal num_joints 12 gamma 0.6 dense potential 3D model max_episode_steps 100 distance-threshold 0.005 episodes 20000
 td3_107 random goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance-threshold 0.02 episode 20000  
-~~td3_108 random goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance-threshold 0.01 episode 20000~~ [数据太短]    
+~~td3_108 random goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance-threshold 0.01 episode 20000~~ [数据太短]  
+#-----------------------------------------------------------------------------------------------------------------------------------------  
 
-# 在这里测列了不同reward的效果
-~~td3_111 hard goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance threshold 0.02 episode 2000~~  
+
+#----------------------------验证不同reward的效果-------------------------------------------------------------------------------------------
+#以下是不带归一化
+td3_115 hard goal num_joints 24 gamma 0.6 dense distance 3D model max_episode_steps 100 distance threshold 0.02 episode 2000  
 td3_117 hard goal num_joints 24 gamma 0.6 dense potential 3D model max_episode_steps 100 distance threshold 0.02 episode 4000   
-~~td3_112 hard goal num_joints 24 gamma 0.6 dense mix 3D model max_episode_steps 100 distance threshold 0.02 episode 2000~~  
 td3_118 hard goal num_joints 24 gamma 0.6 dense mix 3D model max_episode_steps 100 distance threshold 0.02 episode 4000  
-~~td3_113 hard goal num_joints 24 gamma 0.6 dense 2x 3D model max_episode_steps 100 distance threshold 0.02 episode 2000~~  
 td3_116 hard goal num_joints 24 gamma 0.6 dense 2x 3D model max_episode_steps 100 distance threshold 0.02 episode 4000
 td3_114 hard goal num_joints 24 gamma 0.6 dense 4x 3D model max_episode_steps 100 distance threshold 0.02 episode 2000
-td3_115 hard goal num_joints 24 gamma 0.6 dense distance 3D model max_episode_steps 100 distance threshold 0.02 episode 2000  
 <font color=#FF0000> **td3_111与td3_115对比表明势函数比-d好** </font>  
 td3_117,td3_118,td3_115表明R>R+r>r,其中R表示势函数  
 td3_117,td3_116,td3_114表明高次势函数效果差，可以补充低次势函数实验  
+#以下是在归一化条件和PEB条件下新补充的实验
+td3_165 hard goal num_joints 24 gamma 0.6 add peb 3D model dense distance 
+td3_167 hard goal num_joints 24 gamma 0.6 add peb 3D model dense potential 
+td3_168 hard goal num_joints 24 gamma 0.6 add peb 3D model dense mix 
+td3_169 hard goal num_joints 24 gamma 0.6 add peb 3D model dense 2x 
+td3_170 hard goal num_joints 24 gamma 0.6 add peb 3D model dense 4x 
+#这里实验表明mix效果会更好一点
+#----------------------------------------------------------------------------------------------------------------------------------------
 
 
-#-----------------------------一下验证peb和ta作用-----------------------------------------------------------------------------------
+#-----------------------------下验证peb和ta作用--------------------------------------------------------------------------------------------
 td3_119 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_ta add_peb  验证time aware和peb,没有归一化  
 td3_120 hard goal num_joints 24 gamma 0.6 dense potential 3D model 存在种子没对齐的bug
 td3_121 hard goal num_joints 24 gamma 0.6 dense potential 3D model 种子与td3_111对齐，加入简单归一化，功能与td3_84对齐，效果和td3_111差不多  
@@ -301,16 +328,67 @@ td3_123 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_peb
 td3_124 hard goal num_joints 24 gamma 0.6 dense potential 3D model add_ta add_peb  
 td3_121,td3_122,td3_123,td3_124消融实验，验证time-awareness和PEB效果,如果效果不明显可以考虑gamma=0.99的情况效果怎么样   
 td3_126 hard goal num_joints 24 gamma 0.99 dense potential 3D model add_ta add_peb  
-#--------------------------------------------------------------------------------------------------------------------------------
-td3_126 和 td3_124对照实验证明空间0.99gamma不可取  
+#td3_126 和 td3_124对照实验证明空间0.99gamma不可取  
+#---------------------------------------------------------------------------------------------------------------------------------------
+
 ~~td3_125 eval td3_122/1990.pth on 1000 epsilon decay rate  1 -> 0.05
 td3_127 eval td3_122/1830.pth on 1000 epsilon decay rate  1 -> 0.05  
 td3_128 eval td3_122/1830.pth on 1000 epsilon decay rate  1 -> 0  
 td3_129 eval td3_122/1990.pth on 1000 epsilon decay rate  1 -> 0~~  
+~~td3_131  td3_130加入ASF~~
 
-td3_131  td3_130加入ASF
+#--------------------------------------测试action-q的作用---------------------------------------------------------------------------------
+td3_165 hard goal num_joints 24 gamma 0.6 add peb 3D model dense distance action_q 0
+td3_164 hard goal num_joints 24 gamma 0.6 add peb 3D model dense distance action_q 0.1
+td3_171 hard goal num_joints 24 gamma 0.6 add peb 3D model dense distance action_q 0.5
+td3_172 hard goal num_joints 24 gamma 0.6 add peb 3D model dense distance action_q 1
+td3_173 hard goal num_joints 24 gamma 0.6 add peb 3D model dense distance action_q 10
+#---------------------------------------------------------------------------------------------------------------------------------------
 
-td3_115 hard goal num_joints 24 gamma 0.6 dense distance add peb 3D model
+
+#---------------------------------------测试gamma space type的影响-----------------------------------------------------------------
+td3_140 hard goal num_joints 12 gamma 0.95 add peb plane dense distance 
+td3_141 hard goal num_joints 12 gamma 0.8  add peb plane dense distance
+td3_142 hard goal num_joints 12 gamma 0.6  add peb plane dense distance
+td3_143 hard goal num_joints 12 gamma 0.95 add peb 3D dense distance 
+td3_144 hard goal num_joints 12 gamma 0.8  add peb 3D dense distance
+td3_145 hard goal num_joints 12 gamma 0.6  add peb 3D dense distance
+
+td3_146 hard goal num_joints 12 gamma 0.95 add peb plane dense potential 
+td3_147 hard goal num_joints 12 gamma 0.8  add peb plane dense potential
+td3_148 hard goal num_joints 12 gamma 0.6  add peb plane dense potential
+td3_149 hard goal num_joints 12 gamma 0.95 add peb 3D dense potential 
+td3_150 hard goal num_joints 12 gamma 0.8  add peb 3D dense potential
+td3_151 hard goal num_joints 12 gamma 0.6  add peb 3D dense potential
+
+td3_152 hard goal num_joints 24 gamma 0.95 add peb plane dense distance 
+td3_153 hard goal num_joints 24 gamma 0.8  add peb plane dense distance
+td3_154 hard goal num_joints 24 gamma 0.6  add peb plane dense distance
+td3_155 hard goal num_joints 24 gamma 0.95 add peb 3D dense distance 
+td3_156 hard goal num_joints 24 gamma 0.8  add peb 3D dense distance
+td3_157 hard goal num_joints 24 gamma 0.6  add peb 3D dense distance
+
+td3_158 hard goal num_joints 24 gamma 0.95 add peb plane dense potential 
+td3_159 hard goal num_joints 24 gamma 0.8  add peb plane dense potential
+td3_160 hard goal num_joints 24 gamma 0.6  add peb plane dense potential
+td3_161 hard goal num_joints 24 gamma 0.95 add peb 3D dense potential 
+td3_162 hard goal num_joints 24 gamma 0.8  add peb 3D dense potential
+td3_163 hard goal num_joints 24 gamma 0.6  add peb 3D dense potential
+
+td3_185 hard goal num_joints 24 gamma 0.0  add peb 3D dense distance
+td3_186 hard goal num_joints 24 gamma 0.0  add peb plane dense distance
+#--------------------------------------------------------------------------------------------------------------------
+
+td3_187 one step max_angle_vel 50
+td3_188 one step max_angle_vel 40
+td3_189 one step max_angle_vel 30
+td3_190 one step max_angle_vel 20
+td3_191 one step max_angle_vel 10
+td3_192 one step max_angle_vel 60
+td3_193 one step max_angle_vel 70
+~~td3_194 one step max_angle_vel 70~~
+td3_195 one step max_angle_vel 70  reward * 10
+#----------------------------------------------------------------------------------------------------------------------
 
 
 -------------------------------------her -------------------------------------------------  
@@ -330,30 +408,33 @@ her_14 her on mujoco env num_joints 24 block3 goal
 her_15 her on mujoco env num_joints 24 block3 goal block env
 her_16 her on mujoco env num_joints 24 block0 goal block env plane model
 her_17 her on mujoco env num_joints 24 block0 goal block env plane model with heatmap
-# 测试精度
+
+#---------------------------------------------------测试不同网络下不同精度的效果--------------------------------------------------------------
 her_21 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500
 her_22 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000
 her_20 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch 1000  
 her_19 her on mujoco env num_joints 24 random goal distance-threshold 0.005 epoch 1000  
 
+her_32 her on mujoco env num_joints 24 random goal distance-threshold 0.02  epoch  500 DenseNet seed  1 添加末端距离矢量特征  
 her_27 her on mujoco env num_joints 24 random goal distance-threshold 0.02  epoch  500 DenseNet seed  1  
 her_28 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNet seed  1  
 her_29 her on mujoco env num_joints 24 random goal distance-threshold 0.01  epoch 1000 DenseNet seed  1  
 
-her_90 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNetSimple seed 1
-her_93 her on mujoco env num_joints 24 random goal distance-threshold 0.01  epoch 1000 DenseNetSimple seed 1
+her_26 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch  500  DenseNetSimple seed 1  
+her_90 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNetSimple seed 1 添加末端距离矢量特征
+her_93 her on mujoco env num_joints 24 random goal distance-threshold 0.01  epoch 1000 DenseNetSimple seed 1 添加末端距离矢量特征
+#----------------------------------------------------------------------------------------------------------------------------------------
+
 
 her_23 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 均匀 sample method   
 her_24 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 尖峰 sample method  
 her_91 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 尖峰学，均匀评估 sample method  
 her_25 her_6 9800 eval
-her_26 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet简化版本  seed 1  
 
 
- 
 
 her_31 her on mujoco env num_joints 12 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  跑错了实验  seed  1     
-her_32 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 DenseNet 添加末端距离矢量特征  seed  1   
+  
 
 her_33 her on mujoco env num_joints 4 random goal distance-threshold 0.02 epoch 500 DenseNet plane model   
 her_35 her on mujoco env num_joints 4 random goal distance-threshold 0.02 epoch 500 DenseNet plane model random initial action_l2 1  
@@ -409,7 +490,7 @@ her_78 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(100--30-
 her_79 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30-->10)  
 her_81 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(20--30-->10)  
 her_80 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(0--30-->10)  999.pth二校门 
-her_100 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(0--30-->10) 
+her_100 joints 24 3D random goal dt .02 mlp action_l2 1 random_initial(0--30-->10) 
 
 her_82 joints 24 3D random goal dt .02 dense action_l2 0.1 random_initial(50--30-->10)  
 her_84 joints 24 3D random goal dt .02 dense action_l2 0.1 random_initial(50--30-->10)  her_82数据丢了重跑了一遍  

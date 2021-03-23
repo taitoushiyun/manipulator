@@ -35,7 +35,7 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
         (False, False): {'easy': [20, 20, 20, 20, -10, -10, -15, -15, 20, 20, 0, 0],
                          # 'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                          'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10, 20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
-                         'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
+                         'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0, -50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
 
 
 class ManipulatorEnv(gym.Env):
@@ -309,6 +309,10 @@ class ManipulatorEnv(gym.Env):
         sample_range = 1
         if goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][goal_set]) * DEG2RAD
+            if self.num_joints == 12:
+                theta = theta[:12]
+        elif goal_set == 'point0':
+            return None, np.array([0.4, 0, 1]), 0
         elif goal_set == 'random':
             if self.plane_model and not self.cc_model:
                 theta = np.vstack((np.zeros((self.action_dim,)),

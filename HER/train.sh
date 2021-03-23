@@ -54,9 +54,19 @@
 #python train.py --code-version her_100 --train --headless-mode --cuda --actor-type normal --critic-type normal --random-initial-state --n-epochs 1000
 #python train.py --code-version her_98 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --fixed-reset --n-epochs 1000
 #python train.py --code-version her_99 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000
-python train.py --code-version her_101 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --action-l2 0.1
-python train.py --code-version her_102 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --action-l2 10.
-python train.py --code-version her_103 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --action-l2 5.
+#python train.py --code-version her_101 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --action-l2 0.1
+#python train.py --code-version her_102 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --action-l2 10.
+#python train.py --code-version her_103 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --action-l2 5.
+
+#python train.py --code-version her_104 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --double-q --critic2-ratio 0.1
+#python train.py --code-version her_105 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --double-q --critic2-ratio 1
+#python train.py --code-version her_106 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --double-q --critic2-ratio 5
+
+python train.py --code-version her_107 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --double-q --critic2-ratio 0.1
+python train.py --code-version her_108 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --double-q --critic2-ratio 1
+python train.py --code-version her_109 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --goal special1 --eval-goal special1
+
+
 
 
 

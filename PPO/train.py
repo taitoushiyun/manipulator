@@ -79,6 +79,7 @@ def main(args_):
         'max_reset_period': args.max_reset_period,
         'reset_change_point': args.reset_change_point,
         'reset_change_period': args.reset_change_period,
+        'fixed_reset': False
     }
     env = ManipulatorEnv(env_config)
     env.action_space.seed(args_.seed)
@@ -164,7 +165,7 @@ if __name__ == '__main__':
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='dense distance')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
-    parser.add_argument('--num-joints', type=int, default=24)
+    parser.add_argument('--num-joints', type=int, default=12)
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
@@ -172,7 +173,7 @@ if __name__ == '__main__':
                         default='hard')
     parser.add_argument('--eval-goal-set', type=str, default='hard')
     parser.add_argument('--collision-cnt', type=int, default=15)
-    parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')
+    parser.add_argument('--scene-file', type=str, default='mani_env_6.xml')
     parser.add_argument('--headless-mode', action='store_true')
     parser.add_argument('--add-peb', action='store_true')
     parser.add_argument('--is-her', type=bool, default=False)

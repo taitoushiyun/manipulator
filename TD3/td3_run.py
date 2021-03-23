@@ -15,6 +15,35 @@ from itertools import count
 import gym
 
 
+def set_axes_equal(ax):
+    '''Make axes of 3D plot have equal scale so that spheres appear as spheres,
+    cubes as cubes, etc..  This is one possible solution to Matplotlib's
+    ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
+
+    Input
+      ax: a matplotlib axis, e.g., as output from plt.gca().
+    '''
+
+    x_limits = ax.get_xlim3d()
+    y_limits = ax.get_ylim3d()
+    z_limits = ax.get_zlim3d()
+
+    x_range = abs(x_limits[1] - x_limits[0])
+    x_middle = np.mean(x_limits)
+    y_range = abs(y_limits[1] - y_limits[0])
+    y_middle = np.mean(y_limits)
+    z_range = abs(z_limits[1] - z_limits[0])
+    z_middle = np.mean(z_limits)
+
+    # The plot bounding box is a sphere in the sense of the infinity
+    # norm, hence I call half the max range the plot radius.
+    plot_radius = 0.5*max([x_range, y_range, z_range])
+
+    ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+    ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+    ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
+
 def get_logger(code_version):
     import time
     import logging
@@ -128,7 +157,7 @@ def playGame(args_, train=True, episode_count=2000):
                 Y=[2],
                 win='cnt',
                 opts={
-                    'title': 'if success',
+
                     'legend': ['fail', 'success'],
                     'markersize': 5
                 }
@@ -137,69 +166,93 @@ def playGame(args_, train=True, episode_count=2000):
             result_queue = deque(maxlen=20)
             goal_list = []
             result_list = []
-            model = torch.load(
-                f'/home/cq/code/manipulator/TD3/checkpoints/td3_122/1830.pth')  # 'PPO/checkpoints/40.pth'
-            # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
-            agent.actor_local.load_state_dict(model)
+            # file_list = [f'/home/cq/code/manipulator/TD3/checkpoints/td3_155/950.pth',
+            #              f'/home/cq/code/manipulator/TD3/checkpoints/td3_156/990.pth',
+            #              f'/home/cq/code/manipulator/TD3/checkpoints/td3_157/990.pth',
+            #              f'/home/cq/code/manipulator/TD3/checkpoints/td3_185/950.pth']
+            file_list = [f'/home/cq/code/manipulator/TD3/checkpoints/td3_200/19990.pth']
+            achieved_path = [[] for _ in range(len(file_list))]
+            for k in range(len(file_list)):
+                model = torch.load(file_list[k])  # 'PPO/checkpoints/40.pth'
+                # f'/media/cq/系统/Users/Administrator/Desktop/实验记录/td3_14/checkpoints/actor/1000.pth')
+                agent.actor_local.load_state_dict(model)
 
-            for i in range(2000):
-                state = env.reset()
-                goal_list.append(state['desired_goal'])
-                state = np.concatenate([state['observation'], state['desired_goal']])
-                total_reward = 0
-                path_length = 0
-                for _ in range(args_.max_episode_steps):
-                    if not args_.headless_mode:
-                        env.render()
-                    action = agent.act(state, episode_step=i)
-                    next_state, reward, done, info = env.step(action)
-                    next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
-                    total_reward += reward
-                    path_length += 1
-                    state = next_state
-                    if args_.add_peb:
-                        if done or i == args_.max_episode_steps - 1:
-                            result = 0.
+                for i in range(1000):
+
+                    state = env.reset(eval=True)
+                    achieved_path[k].append(state['achieved_goal'].copy())
+                    goal_list.append(state['desired_goal'])
+                    state = np.concatenate([state['observation'], state['desired_goal']])
+                    total_reward = 0
+                    path_length = 0
+                    joints_total = 0
+                    for step in range(args_.max_episode_steps):
+                        if not args_.headless_mode:
+                            env.render()
+                        action = agent.act(state, episode_step=args_.noise_decay_period + 1, add_noise=False)
+                        next_state, reward, done, info = env.step(action)
+                        achieved_path[k].append(next_state['achieved_goal'].copy())
+                        next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
+                        joints_total += np.absolute(next_state[env.j_ang_idx]).sum()
+                        total_reward += reward
+                        path_length += 1
+                        state = next_state
+                        if args_.add_peb:
+                            if done or path_length == args_.max_episode_steps:
+                                if not args_.headless_mode:
+                                    env.render()
+                                result = 0.
+                                if done:
+                                    result = 1.
+                                break
+                        else:
                             if done:
-                                result = 1.
-                            break
-                    else:
-                        if done:
-                            # env.render()
-                            result = 0.
-                            if done and path_length < args_.max_episode_steps:
-                                # if done and total_len < max_episode_length and not any(info['collision_state']):
-                                result = 1.
-                            break
-                result_list.append(result+1)
-                result_queue.append(result)
-                eval_success_rate = sum(result_queue) / len(result_queue)
-                print(f'episode {i} result {result} path len {path_length}')
-                vis.line(X=[i], Y=[result], win='result', update='append')
-                vis.line(X=[i], Y=[path_length], win='path len', update='append')
-                vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
-                # vis.scatter(
-                #     X=goal_list,
-                #     Y=result_list,
-                #     win='cnt',
-                #     opts={
-                #         'title': 'if success',
-                #         'legend': ['fail', 'success'],
-                #         'markersize': 5
-                #     }
-                # )
+                                if not args_.headless_mode:
+                                    env.render()
+                                result = 0.
+                                if done and path_length < args_.max_episode_steps:
+                                    # if done and total_len < max_episode_length and not any(info['collision_state']):
+                                    result = 1.
+                                break
+                    # if i % 10 == 0:
+                    #     print(joints_total)
+                    #     joints_total = 0
+
+
+                    result_list.append(result+1)
+                    result_queue.append(result)
+                    eval_success_rate = sum(result_queue) / len(result_queue)
+                    print(f'episode {i} result {result} path len {path_length}')
+                    vis.line(X=[i], Y=[result], win='result', update='append')
+                    vis.line(X=[i], Y=[path_length], win='path len', update='append')
+                    vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
+                achieved_path[k] = np.array(achieved_path[k])
             result_list = np.array(result_list)
             goal_list = np.array(goal_list)
+            print(result_list.sum())
             from matplotlib import pyplot as plt
+            import matplotlib as mpl
             vis.scatter(
                 X=goal_list,
                 Y=result_list,
                 opts={
-                    'title': 'if success',
+
                     'legend': ['fail', 'success'],
                     'markersize': 5
                 }
             )
+            mpl.rcParams['legend.fontsize'] = 10
+            fig = plt.figure()
+            ax = fig.gca(projection='3d')
+            for i in range(len(file_list)):
+                ax.scatter(achieved_path[i][:, 0], achieved_path[i][:, 1], achieved_path[i][:, 2], label='achieved path')
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+            set_axes_equal(ax)
+            ax.legend()
+            plt.show()
+
 
 
     finally:
@@ -225,7 +278,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr-critic', type=float, default=1e-3)
     parser.add_argument('--update-every-step', type=int, default=2)
     parser.add_argument('--random-start', type=int, default=2000)
-    parser.add_argument('--noise-decay-period', type=float, default=500.)
+    parser.add_argument('--noise-decay-period', type=float, default=2000.)
     parser.add_argument('--n-test-rollouts', type=int, default=10)
     parser.add_argument('--test-interval', type=int, default=20)
 
@@ -240,8 +293,8 @@ if __name__ == "__main__":
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
-    parser.add_argument('--goal-set', type=str, default='hard')
-    parser.add_argument('--eval-goal-set', type=str, default='hard')
+    parser.add_argument('--goal-set', type=str, default='special1')
+    parser.add_argument('--eval-goal-set', type=str, default='special1')
     parser.add_argument('--collision-cnt', type=int, default=15)
     parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')
     parser.add_argument('--headless-mode', action='store_true')
