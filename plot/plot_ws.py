@@ -45,10 +45,10 @@ def set_axes_equal(ax):
 45度均匀采样的平面样本分布
 '''
 time_a = time.time()
-joints = 12
+joints = 24
 dh = DHModel(0, joints)
 sample_list = []
-num_sample = 1000
+num_sample = 10000
 for i in range(num_sample):
     # 平面关节均匀分布采样
     # theta = np.vstack((np.zeros((joints//2,)),

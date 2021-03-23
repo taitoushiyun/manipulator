@@ -181,7 +181,7 @@ def playGame(args_, train=True, episode_count=2000):
 
                     state = env.reset(eval=True)
                     achieved_path[k].append(state['achieved_goal'].copy())
-                    goal_list.append(state['desired_goal'])
+                    goal_list.append(env.goal.copy())
                     state = np.concatenate([state['observation'], state['desired_goal']])
                     total_reward = 0
                     path_length = 0
@@ -241,17 +241,17 @@ def playGame(args_, train=True, episode_count=2000):
                     'markersize': 5
                 }
             )
-            mpl.rcParams['legend.fontsize'] = 10
-            fig = plt.figure()
-            ax = fig.gca(projection='3d')
-            for i in range(len(file_list)):
-                ax.scatter(achieved_path[i][:, 0], achieved_path[i][:, 1], achieved_path[i][:, 2], label='achieved path')
-            ax.set_xlabel('X')
-            ax.set_ylabel('Y')
-            ax.set_zlabel('Z')
-            set_axes_equal(ax)
-            ax.legend()
-            plt.show()
+            # mpl.rcParams['legend.fontsize'] = 10
+            # fig = plt.figure()
+            # ax = fig.gca(projection='3d')
+            # for i in range(len(file_list)):
+            #     ax.scatter(achieved_path[i][:, 0], achieved_path[i][:, 1], achieved_path[i][:, 2], label='achieved path')
+            # ax.set_xlabel('X')
+            # ax.set_ylabel('Y')
+            # ax.set_zlabel('Z')
+            # set_axes_equal(ax)
+            # ax.legend()
+            # plt.show()
 
 
 
@@ -293,8 +293,8 @@ if __name__ == "__main__":
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
-    parser.add_argument('--goal-set', type=str, default='special1')
-    parser.add_argument('--eval-goal-set', type=str, default='special1')
+    parser.add_argument('--goal-set', type=str, default='special')
+    parser.add_argument('--eval-goal-set', type=str, default='random')
     parser.add_argument('--collision-cnt', type=int, default=15)
     parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')
     parser.add_argument('--headless-mode', action='store_true')

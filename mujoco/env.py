@@ -151,16 +151,16 @@ class ManipulatorEnv(gym.Env):
         state = obs['observation'].copy()
         state[self.j_ang_idx] /= 3.14
         state[self.j_vel_idx] /= 10.
-        state[self.e_pos_idx[0]] = (state[self.e_pos_idx[0]] - 0.4) / .4
-        state[self.e_pos_idx[2]] = (state[self.e_pos_idx[2]] - 1.) / 1.
+        state[self.e_pos_idx[0]] = state[self.e_pos_idx[0]] - 0.4
+        state[self.e_pos_idx[2]] = state[self.e_pos_idx[2]] - 1.
         state[self.e_vel_idx] /= 0.5
         desired_goal = obs['desired_goal'].copy()
-        desired_goal[0] = (desired_goal[0] - 0.4) / .4
-        desired_goal[2] = (desired_goal[2] - 1.) / 1.
+        desired_goal[0] = desired_goal[0] - 0.4
+        desired_goal[2] = desired_goal[2] - 1.
         achieved_goal = obs['achieved_goal'].copy()
         if achieved_goal is not None:
-            achieved_goal[0] = (achieved_goal[0] - 0.4) / .4
-            achieved_goal[2] = (achieved_goal[2] - 1.) / 1.
+            achieved_goal[0] = achieved_goal[0] - 0.4
+            achieved_goal[2] = achieved_goal[2] - 1.
         return {
             'observation': state,
             'achieved_goal': achieved_goal,

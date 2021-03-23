@@ -409,7 +409,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
                 if args_.reward_type == 'dense potential':
                     vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
                     vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
-                else:
+                if args_.reward_type == 'dense distance':
                     vis.line(X=[i_episode], Y=[score], win='reward', update='append')
                     vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
             vis.line(X=[i_episode], Y=[result], win='result', update='append')
@@ -503,6 +503,6 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
             if args_.goal_set != 'random':
                 if args_.reward_type == 'dense potential':
                     vis.line(X=[i_episode], Y=[100 * (eval_score - env.max_rewards)], win='eval reward', update='append')
-                else:
+                if args_.reward_type == 'dense distance':
                     vis.line(X=[i_episode], Y=[eval_score], win='eval reward', update='append')
 
