@@ -404,17 +404,16 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         logger.info(
             "Episode: %d,          Path length: %d       result: %f       reward: %f"
             % (i_episode, episode_length, result, score))
-        if i_episode % 10 == 0:
-            if args_.goal_set != 'random':
-                if args_.reward_type == 'dense potential':
-                    vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
-                    vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
-                if args_.reward_type == 'dense distance':
-                    vis.line(X=[i_episode], Y=[score], win='reward', update='append')
-                    vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
-            vis.line(X=[i_episode], Y=[result], win='result', update='append')
-            vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
-            vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
+        if args_.goal_set != 'random':
+            if args_.reward_type == 'dense potential':
+                vis.line(X=[i_episode], Y=[(score - env.max_rewards) * 100], win='reward', update='append')
+                vis.line(X=[i_episode], Y=[(mean_score - env.max_rewards) * 100], win='mean reward', update='append')
+            if args_.reward_type == 'dense distance':
+                vis.line(X=[i_episode], Y=[score], win='reward', update='append')
+                vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
+        vis.line(X=[i_episode], Y=[result], win='result', update='append')
+        vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
+        vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
         if i_episode % 10 == 0:
             if i_episode > 0.9 * n_episodes:
                 torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'{i_episode}.pth'))

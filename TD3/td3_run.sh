@@ -57,8 +57,9 @@
 #python td3_run.py --train --headless-mode --add-peb --code-version td3_187 --gamma 0.0 --reward-type "dense distance" --max-episode-steps 1
 
 #python td3_run.py --train --headless-mode --add-peb --code-version td3_200 --gamma 0.6 --reward-type 'dense distance' --episodes 20000
-python td3_run.py --train --headless-mode --add-peb --code-version td3_201 --gamma 0.6 --reward-type 'dense potential' --episodes 20000
-python td3_run.py --train --headless-mode --add-peb --code-version td3_202 --gamma 0.0 --reward-type 'dense potential' --episodes 20000
+#python td3_run.py --train --headless-mode --add-peb --code-version td3_201 --gamma 0.6 --reward-type 'dense potential' --episodes 20000
+python td3_run.py --train --headless-mode --add-peb --code-version td3_202 --gamma 0.6 --reward-type 'dense potential' --episodes 20000
+python td3_run.py --train --headless-mode --add-peb --code-version td3_203 --gamma 0.0 --reward-type 'dense potential' --episodes 20000
 
 
 

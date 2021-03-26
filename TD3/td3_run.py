@@ -170,7 +170,8 @@ def playGame(args_, train=True, episode_count=2000):
             #              f'/home/cq/code/manipulator/TD3/checkpoints/td3_156/990.pth',
             #              f'/home/cq/code/manipulator/TD3/checkpoints/td3_157/990.pth',
             #              f'/home/cq/code/manipulator/TD3/checkpoints/td3_185/950.pth']
-            file_list = [f'/home/cq/code/manipulator/TD3/checkpoints/td3_200/19990.pth']
+            # file_list = [f'/home/cq/code/manipulator/TD3/checkpoints/td3_203/19990.pth']
+            file_list = [f'/media/cq/新加卷/checkpoints/td3_checkpoints/td3_101/9999.pth']
             achieved_path = [[] for _ in range(len(file_list))]
             for k in range(len(file_list)):
                 model = torch.load(file_list[k])  # 'PPO/checkpoints/40.pth'
@@ -293,8 +294,8 @@ if __name__ == "__main__":
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
-    parser.add_argument('--goal-set', type=str, default='special')
-    parser.add_argument('--eval-goal-set', type=str, default='random')
+    parser.add_argument('--goal-set', type=str, default='special1')
+    parser.add_argument('--eval-goal-set', type=str, default='special1')
     parser.add_argument('--collision-cnt', type=int, default=15)
     parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')
     parser.add_argument('--headless-mode', action='store_true')

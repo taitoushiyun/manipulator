@@ -55,6 +55,7 @@ class ManipulatorEnv(gym.Env):
         self.headless_mode = env_config['headless_mode']
         self.random_initial_state = env_config.get('random_initial_state', False)
         self.add_peb = env_config['add_peb']
+        self.add_dtt = env_config['add_dtt']
         self.is_her = env_config['is_her']
         self.max_reset_period = env_config['max_reset_period']
         self.reset_change_period = env_config['reset_change_period']
@@ -265,7 +266,10 @@ class ManipulatorEnv(gym.Env):
         end_vel = self.sim.data.get_site_xvelp('robot0:tip')
         achieved_goal = end_pos
         ftg = self.goal - achieved_goal
-        obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel, ftg])
+        if self.add_dtt:
+            obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel, ftg])
+        else:
+            obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel])
         return {
             'observation': obs.copy(),
             'achieved_goal': achieved_goal.copy(),
@@ -395,66 +399,77 @@ if __name__ == '__main__':
         'distance_threshold': 0.02,
         'reward_type': 'dense distance',
         'max_angles_vel': 10,  # 10degree/s
-        'num_joints': 12,
+        'num_joints': 24,
         'num_segments': 2,
         'cc_model': False,
         'plane_model': False,
         'goal_set': 'random',
+        'eval_goal_set': 'random',
         'max_episode_steps': 100,
         'collision_cnt': 15,
-        'scene_file': 'mani_env_6.xml',
+        'scene_file': 'mani_block3_env_12.xml',
         'headless_mode': False,
         'n_substeps': 100,
         'random_initial_state': False,
         'add_ta': False,
         'add_peb': False,
-        'is_her': False,
+        'add_dtt': True,
+        'is_her': True,
+        'max_reset_period': 10,
+        'reset_change_point': 20,
+        'reset_change_period': 30,
+        'fixed_reset': False,
     }
     env = ManipulatorEnv(env_config)
     # action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
-    # obs = env.reset()
-    # while True:
-    #     pass
+    obs = env.reset()
 
-    time_a = time.time()
-    lines = []
-    for i in range(5):
-        line = []
-        obs = env.reset('random')
-        # print(obs['achieved_goal'])
-
-        for j in range(env_config['max_episode_steps']):
-            time_a = time.time()
-            env.render()
-            if j<99:
-                # action_ = np.array([-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0])
-                action_ = np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]) * 2
-                # # action_ = np.ones((6, )) * j
-                # action_ = np.ones((12, )) * -1
-            else:
-                action_ = np.zeros((env.action_dim, ))
-            obs, reward, done, info = env.step(action_)
-            if env.last_obs is not None:
-                print('-'*20)
-                print(env.last_obs['observation'].shape)
-                print(env.last_obs['observation'][12] * RAD2DEG)
-                print(env.last_obs['observation'][12])
-            time_b = time.time()
-            # print(time_b - time_a)
-            # print(env.sim.model.opt.timestep)
-
-            # print(obs['observation'].shape)
-            line.append(obs['observation'][1] * RAD2DEG)
-        lines.append(line)
+    while True:
+        env.render()
+        # pass
+        # obs, reward, done, info = env.step(np.zeros(24, ))
+        # env.render()
 
 
-    # time_b = time.time()
-    # print(time_b - time_a)
-
-    # from matplotlib import pyplot as plt
-    # for i in range(1):
-    #     plt.plot(lines[0])
-    # plt.show()
+    # time_a = time.time()
+    # lines = []
+    # for i in range(5):
+    #     line = []
+    #     obs = env.reset('random')
+    #     # print(obs['achieved_goal'])
+    #
+    #     for j in range(env_config['max_episode_steps']):
+    #         time_a = time.time()
+    #         env.render()
+    #         if j<99:
+    #             # action_ = np.array([-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0])
+    #             action_ = np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]) * 2
+    #             # # action_ = np.ones((6, )) * j
+    #             # action_ = np.ones((12, )) * -1
+    #         else:
+    #             action_ = np.zeros((env.action_dim, ))
+    #         obs, reward, done, info = env.step(action_)
+    #         if env.last_obs is not None:
+    #             print('-'*20)
+    #             print(env.last_obs['observation'].shape)
+    #             print(env.last_obs['observation'][12] * RAD2DEG)
+    #             print(env.last_obs['observation'][12])
+    #         time_b = time.time()
+    #         # print(time_b - time_a)
+    #         # print(env.sim.model.opt.timestep)
+    #
+    #         # print(obs['observation'].shape)
+    #         line.append(obs['observation'][1] * RAD2DEG)
+    #     lines.append(line)
+    #
+    #
+    # # time_b = time.time()
+    # # print(time_b - time_a)
+    #
+    # # from matplotlib import pyplot as plt
+    # # for i in range(1):
+    # #     plt.plot(lines[0])
+    # # plt.show()
 
 
 

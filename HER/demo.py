@@ -63,7 +63,8 @@ def set_axes_equal(ax):
 
 if __name__ == '__main__':
     args = get_args()
-    model_path = 'saved_models/her_80/999.pt'
+    model_path = '/media/cq/000CF0AE00072D66/saved_models/her_17/4188.pt'
+    # model_path = 'saved_models/her_17/4188.pt'
     # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_46/model.pt'
     o_mean, o_std, g_mean, g_std, model = torch.load(model_path, map_location=lambda storage, loc: storage)
     env_config = {
@@ -85,9 +86,11 @@ if __name__ == '__main__':
         'add_ta': False,
         'add_peb': False,
         'is_her': True,
+        'add_dtt': args.add_dtt,
         'max_reset_period': args.max_reset_period,
         'reset_change_point': args.reset_change_point,
         'reset_change_period': args.reset_change_period,
+        'fixed_reset': args.fixed_reset,
     }
     if args.env_name == 'mani':
         env_name = ManipulatorEnv
@@ -171,8 +174,8 @@ if __name__ == '__main__':
             achieved_path.append(observation_new['achieved_goal'])
             obs = observation_new['observation']
             if done:
-                # if not args.headless_mode:
-                #     env.render()
+                if not args.headless_mode:
+                    env.render()
                 # if done and path_length < args.max_episode_steps and not any(info['collision_state']):
                 if done and length < args.max_episode_steps:
                     result = 1
@@ -194,7 +197,7 @@ if __name__ == '__main__':
     # time.sleep(4)
     # env.viewer._video_queue.put(None)
     # env.viewer._video_process.join()
-
+    print(np.array(result_list).sum())
     env.close()
 
     # 目标达成情况
@@ -234,5 +237,6 @@ if __name__ == '__main__':
     ax.set_zlabel('Z')
     set_axes_equal(ax)
     ax.legend()
+    plt.savefig('/home/cq/code/manipulator/plot/saved_fig/her_eval_on_gate_2.png', bbox_inches='tight')
     plt.show()
 

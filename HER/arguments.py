@@ -42,8 +42,8 @@ def get_args():
     parser.add_argument('--noise', type=float, default=0.1)
     parser.add_argument('--noise-clip', type=float, default=0.5)
     # net config
-    parser.add_argument('--actor-type', type=str, default='dense')
-    parser.add_argument('--critic-type', type=str, default='dense')
+    parser.add_argument('--actor-type', type=str, default='normal')
+    parser.add_argument('--critic-type', type=str, default='normal')
 
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=50)
@@ -55,9 +55,9 @@ def get_args():
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
     parser.add_argument('--goal-set', type=str, default='random')
-    parser.add_argument('--eval-goal-set', type=str, default='random')
+    parser.add_argument('--eval-goal-set', type=str, default='block4')
     parser.add_argument('--collision-cnt', type=int, default=27)
-    parser.add_argument('--scene-file', type=str, default='mani_env_12.xml')
+    parser.add_argument('--scene-file', type=str, default='mani_block4_env_12.xml')
     parser.add_argument('--headless-mode', action='store_true')
     parser.add_argument('--random-initial-state', action='store_true')
     parser.add_argument('--max-reset-period', type=int, default=10)
@@ -67,6 +67,7 @@ def get_args():
 
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--use-td3', action='store_true')
+    parser.add_argument('--add-dtt', action='store_true')
     args = parser.parse_args()
 
     return args

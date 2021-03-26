@@ -391,6 +391,11 @@ td3_195 one step max_angle_vel 70  reward * 10
 #----------------------------------------------------------------------------------------------------------------------
 
 
+td3_200 random goal joints 24 dense distance  3D add peb 归一化 gamma=0.6
+td3_201 random goal joints 24 dense potential 3D add peb 归一化 special goal random eval goal gamma=0.6
+td3_202 random goal joints 24 dense potential 3D add peb 归一化 special1 goal special1 eval goal gamma=0.6
+td3_203 random goal joints 24 dense potential 3D add peb 归一化 special1 goal special1 eval goal gamma=0.0
+
 -------------------------------------her -------------------------------------------------  
 her_3 her on pyrep env num_joints 12  
 her_4 her on pyrep env num_joints 24  
@@ -408,6 +413,9 @@ her_14 her on mujoco env num_joints 24 block3 goal
 her_15 her on mujoco env num_joints 24 block3 goal block env
 her_16 her on mujoco env num_joints 24 block0 goal block env plane model
 her_17 her on mujoco env num_joints 24 block0 goal block env plane model with heatmap
+
+her_86 joints 24 3D block4 goal dt .02 dense action_l2 1 block4_env
+her_87 joints 24 3D block4 goal dt .02 dense action_l2 1 
 
 #---------------------------------------------------测试不同网络下不同精度的效果--------------------------------------------------------------
 her_21 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500
@@ -485,7 +493,7 @@ her_75 joints 12 3D random goal dt .02 denseASF hidden [16] random init_1-->10(3
 ~~her_77 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 0.1 add_dtt~~  
  
 her_30 joints 12 3D random goal dt .02 dense action_l2 1 random-initial-state 永不复位 
-her_98 joints 12 3D random goal dt .02 dense action_l2 1 random-initial-state-10 fixed reset
+her_98 joints 24 3D random goal dt .02 dense action_l2 1 random-initial-state-10 fixed reset
 her_78 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(100--30-->10)  种子和her_32一致
 her_79 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30-->10)  
 her_81 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(20--30-->10)  
@@ -497,8 +505,7 @@ her_84 joints 24 3D random goal dt .02 dense action_l2 0.1 random_initial(50--30
 her_83 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(20--30-->10)  double_q critic_ratio 0.1  
 her_85 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30-->10)  double_q critic_ratio 1
 
-her_86 joints 24 3D block4 goal dt .02 dense action_l2 1 block4_env
-her_87 joints 24 3D block4 goal dt .02 dense action_l2 1 
+
 
 her_94 joints 24 3D special1 goal eval special1 goal 
 her_95 joints 24 3D random   goal eval special1 goal
@@ -510,4 +517,14 @@ her_101 jonins 24 3D dt .02 dense random goal action_l2 0.1
 her_103 jonins 24 3D dt .02 dense random goal action_l2 5
 her_102 jonins 24 3D dt .02 dense random goal action_l2 10
 
- 
+#这里q-action是反的
+her_104 jonins 24 3D dt .02 dense random goal q-action 0.1
+her_105 jonins 24 3D dt .02 dense random goal q-action 5
+her_106 jonins 24 3D dt .02 dense random goal q-action 10
+#q-action正的
+her_107 jonins 24 3D dt .02 dense random goal q-action 0.1
+her_108 jonins 24 3D dt .02 dense random goal q-action 1
+
+
+------------------------------------------------------------------------------------------------------------------- 
+

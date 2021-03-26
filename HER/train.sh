@@ -62,9 +62,10 @@
 #python train.py --code-version her_105 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --double-q --critic2-ratio 1
 #python train.py --code-version her_106 --train --headless-mode --cuda --actor-type dense --critic-type dense --n-epochs 500 --double-q --critic2-ratio 5
 
-python train.py --code-version her_107 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --double-q --critic2-ratio 0.1
-python train.py --code-version her_108 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --double-q --critic2-ratio 1
-python train.py --code-version her_109 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --goal special1 --eval-goal special1
+#python train.py --code-version her_107 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --double-q --critic2-ratio 0.1
+#python train.py --code-version her_108 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --double-q --critic2-ratio 1
+#python train.py --code-version her_109 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --goal special1 --eval-goal special1
+python train.py --code-version her_110 --train --headless-mode --cuda --n-epochs 1000 --use-td3 --n-batches 100 --distance-threshold 0.015
 
 
 

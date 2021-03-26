@@ -48,7 +48,7 @@ gate_data = [[565, 70],
 
 def create_path_0():
     path_list = []
-    for i in range(100):
+    for i in range(1000):
         path_list.append([1.2 + 0.2 * np.cos(i * 2 * np.pi / 18), 0.2 * np.sin(i * 2 * np.pi / 18), 1])
     return np.array(path_list)
 

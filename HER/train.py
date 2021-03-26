@@ -96,6 +96,7 @@ def launch(args):
         'n_substeps': 100,
         'random_initial_state': args.random_initial_state,
         'add_ta': False,
+        'add_dtt': args.add_dtt,
         'add_peb': False,
         'is_her': True,
         'max_reset_period': args.max_reset_period,
