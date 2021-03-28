@@ -392,6 +392,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
             else:
                 if done:
                     result = 0.
+                    print(result)
                     if done and episode_length < max_episode_length:
                     # if done and episode_length < max_episode_length and not any(info['collision_state']):
                         result = 1.

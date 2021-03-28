@@ -1,5 +1,6 @@
 import importmagic
 from mujoco.env import ManipulatorEnv
+from mujoco.env_test import EnvTest
 from TD3.td3_agent import TD3Agent, td3_torcs
 import visdom
 import numpy as np
@@ -111,7 +112,11 @@ def playGame(args_, train=True, episode_count=2000):
         'reset_change_period': args_.reset_change_period,
         'fixed_reset': args_.fixed_reset,
     }
-    env = ManipulatorEnv(env_config)
+    if args.env_name == 'mani':
+        env_name = ManipulatorEnv
+    elif args.env_name == 'test':
+        env_name = EnvTest
+    env = env_name(env_config)
     env.action_space.seed(args_.seed)
     # env = gym.make('LunarLanderContinuous-v2')
     obs = env.reset()
@@ -268,6 +273,7 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=1)
     # unused
     parser.add_argument('--fixed-reset', action='store_true')
+    parser.add_argument('--env-name', type=str, default='mani', help='the environment name')
     #  TD3 config
     parser.add_argument('--actor-hidden', type=list, default=[128, 128])
     parser.add_argument('--critic-hidden', type=list, default=[64, 64])

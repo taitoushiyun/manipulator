@@ -26,7 +26,7 @@ class EnvTest(gym.Env):
         self.action_space = spaces.Box(low=-1., high=1, shape=(self.action_dim,), dtype=np.float32)
         self._elapsed_steps = 0
         self.max_angles_vel = 0.05
-        self._max_episode_steps = 50
+        self._max_episode_steps = env_config['max_episode_steps']
 
         model_xml_path = os.path.join(os.path.dirname(__file__), 'mani', env_config['scene_file'])
         if not os.path.exists(model_xml_path):
@@ -55,38 +55,41 @@ class EnvTest(gym.Env):
     def step(self, action):
         self._elapsed_steps += 1
         assert action.size == self.action_dim
-        if self.plane_model:
-            next_pos = self.pos + self.max_angles_vel * action
-            x_limit = 0.03 <= np.absolute(next_pos[0] - self.goal[0]) <= 0.1
-            z_limit = 0.7 <= next_pos[1] <= 0.8
-            if x_limit and z_limit:
-                if x_limit:
-                    next_pos[0] = self.pos[0]
-                if z_limit:
-                    if action[1] > 0:
-                        next_pos[1] = 0.7
-                    elif action[1] < 0:
-                        next_pos[1] = 0.8
-                    else:
-                        next_pos[1] = self.pos[1]
-        else:
-            next_pos = self.pos + self.max_angles_vel * action
-            x_y_limit = 0.03 <= np.linalg.norm(next_pos[:2] - self.goal[:2]) <= 0.1
-            z_limit = 0.7 <= next_pos[2] <= 0.8
-            if x_y_limit and z_limit:
-                if x_y_limit:
-                    next_pos[:2] = self.pos[:2]
-                if z_limit:
-                    if action[2] > 0:
-                        next_pos[2] = 0.7
-                    elif action[2] < 0:
-                        next_pos[2] = 0.8
-                    else:
-                        next_pos[2] = self.pos[2]
+        next_pos = self.pos + self.max_angles_vel * action
+        # if self.plane_model:
+        #     next_pos = self.pos + self.max_angles_vel * action
+        #     x_limit = 0.03 <= np.absolute(next_pos[0] - self.goal[0]) <= 0.1
+        #     z_limit = 0.7 <= next_pos[1] <= 0.8
+        #     if x_limit and z_limit:
+        #         if x_limit:
+        #             next_pos[0] = self.pos[0]
+        #         if z_limit:
+        #             if action[1] > 0:
+        #                 next_pos[1] = 0.7
+        #             elif action[1] < 0:
+        #                 next_pos[1] = 0.8
+        #             else:
+        #                 next_pos[1] = self.pos[1]
+        # else:
+        #     next_pos = self.pos + self.max_angles_vel * action
+        #     x_y_limit = 0.03 <= np.linalg.norm(next_pos[:2] - self.goal[:2]) <= 0.1
+        #     z_limit = 0.7 <= next_pos[2] <= 0.8
+        #     if x_y_limit and z_limit:
+        #         if x_y_limit:
+        #             next_pos[:2] = self.pos[:2]
+        #         if z_limit:
+        #             if action[2] > 0:
+        #                 next_pos[2] = 0.7
+        #             elif action[2] < 0:
+        #                 next_pos[2] = 0.8
+        #             else:
+        #                 next_pos[2] = self.pos[2]
 
         self.pos = next_pos
-        reward = -(np.linalg.norm(self.goal - self.pos, axis=-1) > 0.02).astype(np.float32)
+        reward = -(np.linalg.norm(self.goal - self.pos, axis=-1)).astype(np.float32)
         done = np.linalg.norm(self.goal - self.pos, axis=-1) < 0.02
+        if self._elapsed_steps >= self._max_episode_steps:
+            done = True
         info = {'is_success': done}
         return {'observation': self.pos.copy(),
                 'desired_goal': self.goal.copy(),

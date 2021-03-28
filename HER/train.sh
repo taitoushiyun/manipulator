@@ -64,10 +64,16 @@
 
 #python train.py --code-version her_107 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --double-q --critic2-ratio 0.1
 #python train.py --code-version her_108 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --double-q --critic2-ratio 1
-#python train.py --code-version her_109 --train --headless-mode --cuda --actor-type dense --critic-type dense --random-initial-state --n-epochs 1000 --goal special1 --eval-goal special1
-python train.py --code-version her_110 --train --headless-mode --cuda --n-epochs 1000 --use-td3 --n-batches 100 --distance-threshold 0.015
 
+#python train.py --code-version her_110 --train --headless-mode --cuda --n-epochs 1000 --use-td3 --n-batches 100 --distance-threshold 0.015
+#python train.py --code-version her_111 --train --headless-mode --cuda --n-epochs 500 --double-q --critic2-ratio 0.1 --add-dtt
+#python train.py --code-version her_112 --train --headless-mode --cuda --n-epochs 500 --double-q --critic2-ratio 1 --add-dtt
+#python train.py --code-version her_113 --train --headless-mode --cuda --n-epochs 500 --add-dtt
+#python train.py --code-version her_114 --train --headless-mode --cuda --n-epochs 500 --double-q --critic2-ratio 1 --add-dtt
 
-
+#python train.py --code-version her_116 --train --headless-mode --cuda --n-epochs 500 --add-dtt
+#python train.py --code-version her_117 --train --headless-mode --cuda --n-epochs 500 --double-q --critic2-ratio 10 --add-dtt
+#python train.py --code-version her_118 --train --headless-mode --cuda --add-dtt --random-initial-state --n-epochs 1000
+python train.py --code-version her_119 --train --headless-mode --cuda --add-dtt --random-initial-state --n-epochs 1000 --double-q --critic2-ratio 1e-4
 
 

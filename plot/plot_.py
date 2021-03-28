@@ -525,6 +525,34 @@ def plot_random_init_compare():
     plt.savefig('saved_fig/her_random_init_7', bbox_inches='tight')
     plt.show()
 
+def plot_test_gamma():
+    df = pd.DataFrame(columns=('version', 'seed', 'Episodes', 'Return', 'gamma'))
+    version = [ 1, 2]
+    gamma = ['gamma=0',
+                    'gamma=0.99'
+                    ]
+
+
+    for i in range(len(version)):
+        file_name = f'a_test_{version[i]}'
+        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval reward']['content']['data'][0]
+        x = d['x'][1:]
+        y = d['y'][1:]
+        # x = smoother(x, a=0.9, w=10, mode="window")
+        # y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Episodes': float(x_), 'Return': float(y_),
+                      'gamma': gamma[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Episodes', y="Return", data=df, hue="gamma")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/test_gamma_1_eval_reward.png', bbox_inches='tight')
+    plt.show()
+
 if __name__ == '__main__':
     os.makedirs('saved_fig', exist_ok=True)
     sns.set()
@@ -533,6 +561,6 @@ if __name__ == '__main__':
     sns.set_palette(sns.color_palette('deep', 4))
     # plot_her()   # ylabel='Success Rate(%)'
     # plot_td3_random_precise(ylabel='Success Rate(%)')
-    plot_random_init_compare()
+    plot_test_gamma()
 
 

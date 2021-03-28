@@ -91,24 +91,24 @@ class ddpg_agent:
         # load the weights into the target networks
         self.actor_target_network.load_state_dict(self.actor_network.state_dict())
         self.critic_target_network.load_state_dict(self.critic_network.state_dict())
-        if self.args.double_q:
-            self.critic2_network = critic(env_params)
-            self.critic2_target_network = critic(env_params)
-            self.critic2_target_network.load_state_dict(self.critic2_network.state_dict())
+        # if self.args.double_q:
+        self.critic2_network = critic(env_params)
+        self.critic2_target_network = critic(env_params)
+        self.critic2_target_network.load_state_dict(self.critic2_network.state_dict())
         # if use gpu
         if self.args.cuda:
             self.actor_network.cuda()
             self.critic_network.cuda()
             self.actor_target_network.cuda()
             self.critic_target_network.cuda()
-            if self.args.double_q:
-                self.critic2_network.cuda()
-                self.critic2_target_network.cuda()
+            # if self.args.double_q:
+            self.critic2_network.cuda()
+            self.critic2_target_network.cuda()
         # create the optimizer
         self.actor_optim = torch.optim.Adam(self.actor_network.parameters(), lr=self.args.lr_actor)
         self.critic_optim = torch.optim.Adam(self.critic_network.parameters(), lr=self.args.lr_critic)
-        if self.args.double_q:
-            self.critic2_optim = torch.optim.Adam(self.critic2_network.parameters(), lr=self.args.lr_critic)
+        # if self.args.double_q:
+        self.critic2_optim = torch.optim.Adam(self.critic2_network.parameters(), lr=self.args.lr_critic)
         # her sampler
         self.her_module = her_sampler(self.args.replay_strategy, self.args.replay_k, self.env.compute_reward)
         # create the replay buffer
@@ -135,6 +135,12 @@ class ddpg_agent:
             self.vis.line(X=[0], Y=[0], win='reward', opts=dict(Xlabel='episode', Ylabel='reward', title='reward'))
             self.vis.line(X=[0], Y=[0], win='mean reward', opts=dict(Xlabel='episode', Ylabel='reward', title='mean reward'))
             self.vis.line(X=[0], Y=[0], win='eval reward', opts=dict(Xlabel='episode', Ylabel='reward', title='eval reward'))
+        self.vis.line(X=[0], Y=[0], win='action_critic_loss', opts=dict(Xlabel='episode', Ylabel='loss', title='action_critic_loss'))
+        self.vis.line(X=[0], Y=[0], win='action_l2_loss', opts=dict(Xlabel='episode', Ylabel='loss', title='action_l2_loss'))
+        self.vis.line(X=[0], Y=[0], win='q_action_loss', opts=dict(Xlabel='episode', Ylabel='loss', title='q_action_loss'))
+        self.vis.line(X=[0], Y=[0], win='actor_loss', opts=dict(Xlabel='episode', Ylabel='loss', title='actor_loss'))
+        self.vis.line(X=[0], Y=[0], win='actor_loss_1', opts=dict(Xlabel='episode', Ylabel='loss', title='actor_loss_1'))
+        self.vis.line(X=[0], Y=[0], win='critic_loss', opts=dict(Xlabel='episode', Ylabel='loss', title='critic_loss'))
         self.result_deque = deque(maxlen=20)
         self.score_deque = deque(maxlen=10)
         self.eval_result_queue = deque(maxlen=10)
@@ -228,12 +234,32 @@ class ddpg_agent:
                 # store the episodes
                 self.buffer.store_episode([mb_obs, mb_ag, mb_g, mb_actions])
                 self._update_normalizer([mb_obs, mb_ag, mb_g, mb_actions])
+                action_critic_loss_batch = 0
+                action_l2_loss_batch = 0
+                q_action_loss_batch = 0
+                actor_loss_batch = 0
+                actor_loss1_batch = 0
+                critic_loss_batch = 0
                 for _ in range(self.args.n_batches):
                     # train the network
-                    self._update_network()
+                    action_critic_loss, actor_loss1, action_l2_loss, q_action_loss, actor_loss, critic_loss = self._update_network()
+                    action_critic_loss_batch += action_critic_loss
+                    action_l2_loss_batch += action_l2_loss
+                    q_action_loss_batch += q_action_loss
+                    actor_loss_batch += actor_loss
+                    actor_loss1_batch += actor_loss1
+                    critic_loss_batch += critic_loss
+                self.vis.line(X=[i_episode], Y=[action_critic_loss_batch], win='action_critic_loss', update='append')
+                self.vis.line(X=[i_episode], Y=[action_l2_loss_batch], win='action_l2_loss', update='append')
+                self.vis.line(X=[i_episode], Y=[q_action_loss_batch], win='q_action_loss', update='append')
+                self.vis.line(X=[i_episode], Y=[actor_loss_batch], win='actor_loss', update='append')
+                self.vis.line(X=[i_episode], Y=[actor_loss1_batch], win='actor_loss_1', update='append')
+                self.vis.line(X=[i_episode], Y=[critic_loss_batch], win='critic_loss', update='append')
                 # soft update
                 self._soft_update_target_network(self.actor_target_network, self.actor_network)
                 self._soft_update_target_network(self.critic_target_network, self.critic_network)
+                if self.args.double_q:
+                    self._soft_update_target_network(self.critic2_target_network, self.critic2_network)
                 time_b = time.time()
                 print(time_b - time_a)
             # start to do the evaluation
@@ -328,21 +354,24 @@ class ddpg_agent:
         transitions['obs'], transitions['g'] = self._preproc_og(o, g)
         transitions['obs_next'], transitions['g_next'] = self._preproc_og(o_next, g)
 
-        if self.args.double_q:
-            next_joint_state = transitions['obs_next'][::, self.env.j_ang_idx]
-            action_q_target = torch.pow(torch.from_numpy(next_joint_state) / 1.57, 2).mean().detach()
-            # next_joint_state = transitions['obs'][::, self.env.j_ang_idx] \
-            #                    + DEG2RAD * 0.2 * self.args.max_angles_vel * transitions['actions']
-            # if self.args.plane_model:
-            #     action_q_target = torch.from_numpy(np.absolute(next_joint_state[::, :-1] -
-            #                                                    next_joint_state[::, 1:]).sum(
-            #         axis=-1, keepdims=True)).detach()
-            # else:
-            #     action_q_target = torch.from_numpy(np.absolute(np.concatenate([
-            #         next_joint_state[::, range(0, self.env.action_dim - 2, 2)] - next_joint_state[::, range(2, self.env.action_dim, 2)],
-            #         next_joint_state[::, range(1, self.env.action_dim - 2, 2)] - next_joint_state[::, range(3, self.env.action_dim, 2)]
-            #     ], axis=-1)).sum(
-            #         axis=-1, keepdims=True)).detach()
+        # if self.args.double_q:
+        next_joint_state = transitions['obs_next'][::, self.env.j_ang_idx]
+        # action_q_target = torch.pow(torch.from_numpy(next_joint_state) / 1.57, 2).mean().detach()
+        # next_joint_state = transitions['obs'][::, self.env.j_ang_idx] \
+        #                    + DEG2RAD * 0.2 * self.args.max_angles_vel * transitions['actions']
+        if self.args.plane_model:
+            action_q_target = torch.from_numpy(np.absolute(next_joint_state[::, :-1] -
+                                                           next_joint_state[::, 1:]).sum(
+                axis=-1, keepdims=True)).detach()
+        else:
+            action_q_target = torch.pow(torch.from_numpy(np.concatenate([
+                next_joint_state[::, range(0, self.env.action_dim - 2, 2)] - next_joint_state[::,
+                                                                             range(2, self.env.action_dim, 2)],
+                next_joint_state[::, range(1, self.env.action_dim - 2, 2)] - next_joint_state[::,
+                                                                             range(3, self.env.action_dim, 2)]
+            ], axis=-1)), 4)
+            action_q_target = torch.sum(action_q_target, dim=-1, keepdim=True)
+
 
         # start to do the update
         obs_norm = self.o_norm.normalize(transitions['obs'])
@@ -361,8 +390,8 @@ class ddpg_agent:
             inputs_next_norm_tensor = inputs_next_norm_tensor.cuda()
             actions_tensor = actions_tensor.cuda()
             r_tensor = r_tensor.cuda()
-            if self.args.double_q:
-                action_q_target = action_q_target.cuda()
+            # if self.args.double_q:
+            action_q_target = action_q_target.cuda()
         # calculate the target Q value function
         with torch.no_grad():
             # do the normalization
@@ -379,16 +408,19 @@ class ddpg_agent:
         real_q_value = self.critic_network(inputs_norm_tensor, actions_tensor)
         critic_loss = (target_q_value - real_q_value).pow(2).mean()
 
-        if self.args.double_q:
-            action_q_value = self.critic2_network(inputs_norm_tensor, actions_tensor)
-            action_critic_loss = (action_q_target - action_q_value).pow(2).mean()
+        # if self.args.double_q:
+        action_q_value = self.critic2_network(inputs_norm_tensor, actions_tensor)
+        action_critic_loss = (action_q_target - action_q_value).pow(2).mean()
 
         # the actor loss
         actions_real = self.actor_network(inputs_norm_tensor)
-        actor_loss = -self.critic_network(inputs_norm_tensor, actions_real).mean()
+        actor_loss_1 = -self.critic_network(inputs_norm_tensor, actions_real).mean()
+        actor_loss_2 = self.args.action_l2 * (actions_real / self.env_params['action_max']).pow(2).mean()
         if self.args.double_q:
-            actor_loss += self.args.critic2_ratio * self.critic2_network(inputs_norm_tensor, actions_real).mean()
-        actor_loss += self.args.action_l2 * (actions_real / self.env_params['action_max']).pow(2).mean()
+            actor_loss_3 = self.args.critic2_ratio * self.critic2_target_network(inputs_norm_tensor, actions_real).mean()
+        actor_loss = actor_loss_1 + actor_loss_2
+        if self.args.double_q:
+            actor_loss += actor_loss_3
         # start to update the network
         self.actor_optim.zero_grad()
         actor_loss.backward()
@@ -403,6 +435,20 @@ class ddpg_agent:
             self.critic2_optim.zero_grad()
             action_critic_loss.backward()
             self.critic_optim.step()
+            return (action_critic_loss.detach().item(),
+                    actor_loss_1.detach().item(),
+                    actor_loss_2.detach().item(),
+                    actor_loss_3.detach().item(),
+                    actor_loss.detach().item(),
+                    critic_loss.detach().item())
+        else:
+            return (action_critic_loss.detach().item(),
+                    actor_loss_1.detach().item(),
+                    actor_loss_2.detach().item(),
+                    0,
+                    actor_loss.detach().item(),
+                    critic_loss.detach().item())
+
 
     # do the evaluation
     def _eval_agent(self, n_epoch):

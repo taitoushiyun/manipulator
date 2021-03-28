@@ -305,6 +305,9 @@ class ManipulatorEnv(gym.Env):
         #     #     assert len(self.initial_state.qpos) == len(initial_state)
         #     #     for i in range(len(initial_state)):
         #     #         self.initial_state.qpos[i] = initial_state[i]
+        # initial_state = [0, 45, 0, -90, 0, 90, 0, -90, 0, 90, 0, -90, 0, 90, 0, -90, 0, 90, 0, -90, 0, 90, 0, -90]
+        # for i in range(len(initial_state)):
+        #     self.initial_state.qpos[i] = initial_state[i]
         self.sim.set_state(self.initial_state)
         self.sim.forward()
 
@@ -407,7 +410,7 @@ if __name__ == '__main__':
         'eval_goal_set': 'random',
         'max_episode_steps': 100,
         'collision_cnt': 15,
-        'scene_file': 'mani_block3_env_12.xml',
+        'scene_file': 'mani_env_12.xml',
         'headless_mode': False,
         'n_substeps': 100,
         'random_initial_state': False,

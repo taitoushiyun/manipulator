@@ -63,10 +63,6 @@ def set_axes_equal(ax):
 
 if __name__ == '__main__':
     args = get_args()
-    model_path = '/media/cq/000CF0AE00072D66/saved_models/her_17/4188.pt'
-    # model_path = 'saved_models/her_17/4188.pt'
-    # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_46/model.pt'
-    o_mean, o_std, g_mean, g_std, model = torch.load(model_path, map_location=lambda storage, loc: storage)
     env_config = {
         'distance_threshold': args.distance_threshold,
         'reward_type': args.reward_type,
@@ -97,11 +93,11 @@ if __name__ == '__main__':
     elif args.env_name == 'test':
         env_name = EnvTest
     env = env_name(env_config)
-    env.action_space.seed(args.seed)
-    env.seed()
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
+    # env.action_space.seed(args.seed)
+    # env.seed()
+    # random.seed(args.seed)
+    # np.random.seed(args.seed)
+    # torch.manual_seed(args.seed)
     observation = env.reset()
     env_params = {'obs': observation['observation'].shape[0], 
                   'goal': observation['desired_goal'].shape[0], 
@@ -119,9 +115,6 @@ if __name__ == '__main__':
         actor = ActorDenseASF
     else:
         raise ValueError
-    actor_network = actor(args, env_params)
-    actor_network.load_state_dict(model)
-    actor_network.eval()
 
     vis = visdom.Visdom(port=6016, env=args.code_version)
     vis.line(X=[0], Y=[0], win='result', opts=dict(Xlabel='episode', Ylabel='result', title='result'))
@@ -146,47 +139,78 @@ if __name__ == '__main__':
     achieved_path = []
     result_list = []
 
-    for i in range(args.demo_length):
-        observation = env.reset(eval=True)
-        achieved_path.append(observation['achieved_goal'])
-        # env.render()
-        goal_list.append(observation['desired_goal'])
-        # start to do the demo
-        obs = observation['observation']
-        g = observation['desired_goal']
-        length = 0
-        result = 0
-        for t in range(env._max_episode_steps):
-            length += 1
-            if not args.headless_mode:
-                env.render()
-            inputs = process_inputs(obs, g, o_mean, o_std, g_mean, g_std, args)
-            with torch.no_grad():
-                pi = actor_network(inputs.unsqueeze(0))
-            action = pi.detach().numpy().squeeze()
-            # noise = np.random.normal(0, 0.05, size=action.shape)
-            # # Add noise to the action for exploration
-            # action = (action + noise).clip(env.action_space.low, env.action_space.high)
+    actor_network = actor(args, env_params)
+    # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_17/4188.pt'
+    # model_path = 'saved_models/her_32/10000.pt'
+    # model_path = 'saved_models/her_111/model.pt'
+    # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_46/model.pt'
+    file_list = [
+                 # 'saved_models/her_32/10000.pt',
+        'saved_models/her_80/999.pt',
+        # 'saved_models/her_112/model.pt',
+                 ]
+    dice_list = [[] for _ in range(len(file_list))]
+    path_len_list = [[] for _ in range(len(file_list))]
+    for file_list_ in range(len(file_list)):
+        env.action_space.seed(args.seed)
+        env.seed()
+        random.seed(args.seed)
+        np.random.seed(args.seed)
+        torch.manual_seed(args.seed)
 
-            # put actions into the environment
-            observation_new, reward, done, info = env.step(action)
-            # print(observation_new['achieved_goal'])
-            achieved_path.append(observation_new['achieved_goal'])
-            obs = observation_new['observation']
-            if done:
+        o_mean, o_std, g_mean, g_std, model = torch.load(file_list[file_list_], map_location=lambda storage, loc: storage)
+        actor_network.load_state_dict(model)
+        actor_network.eval()
+        for i in range(args.demo_length):
+            observation = env.reset(eval=True)
+            achieved_path.append(observation['achieved_goal'])
+            # env.render()
+            goal_list.append(observation['desired_goal'])
+            # print(observation['desired_goal'])
+            # start to do the demo
+            obs = observation['observation']
+            g = observation['desired_goal']
+            length = 0
+            result = 0
+            dice = 0
+            for t in range(env._max_episode_steps):
+                length += 1
                 if not args.headless_mode:
                     env.render()
-                # if done and path_length < args.max_episode_steps and not any(info['collision_state']):
-                if done and length < args.max_episode_steps:
-                    result = 1
-                break
-        result_list.append(result + 1)
-        result_queue.append(result)
-        eval_success_rate = sum(result_queue) / len(result_queue)
-        vis.line(X=[i], Y=[result], win='result', update='append')
-        vis.line(X=[i], Y=[length], win='path len', update='append')
-        vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
-        print('the episode is: {}, length is {}, is success: {}'.format(i, length, info['is_success']))
+                inputs = process_inputs(obs, g, o_mean, o_std, g_mean, g_std, args)
+                with torch.no_grad():
+                    pi = actor_network(inputs.unsqueeze(0))
+                action = pi.detach().numpy().squeeze()
+                # noise = np.random.normal(0, 0.05, size=action.shape)
+                # # Add noise to the action for exploration
+                # action = (action + noise).clip(env.action_space.low, env.action_space.high)
+
+                # put actions into the environment
+                observation_new, reward, done, info = env.step(action)
+                next_joint_state = observation_new['observation'][env.j_ang_idx]
+                dice += np.absolute(np.concatenate([
+                    next_joint_state[range(0, env.action_dim - 2, 2)] - next_joint_state[range(2, env.action_dim, 2)],
+                    next_joint_state[range(1, env.action_dim - 2, 2)] - next_joint_state[range(3, env.action_dim, 2)]
+                ], axis=-1)).sum(axis=-1)
+                # print(observation_new['achieved_goal'])
+                achieved_path.append(observation_new['achieved_goal'])
+                obs = observation_new['observation']
+                if done:
+                    if not args.headless_mode:
+                        env.render()
+                    # if done and path_length < args.max_episode_steps and not any(info['collision_state']):
+                    if done and length < args.max_episode_steps:
+                        result = 1
+                    break
+            path_len_list[file_list_].append(length)
+            dice_list[file_list_].append(dice)
+            result_list.append(result + 1)
+            result_queue.append(result)
+            eval_success_rate = sum(result_queue) / len(result_queue)
+            vis.line(X=[i], Y=[result], win='result', update='append')
+            vis.line(X=[i], Y=[length], win='path len', update='append')
+            vis.line(X=[i], Y=[eval_success_rate * 100], win='success rate', update='append')
+            print('the episode is: {}, length is {}, is success: {}'.format(i, length, info['is_success']))
 
 
     # fps = (1 / env.viewer._time_per_render)
@@ -197,9 +221,11 @@ if __name__ == '__main__':
     # time.sleep(4)
     # env.viewer._video_queue.put(None)
     # env.viewer._video_process.join()
-    print(np.array(result_list).sum())
+
+    # print(np.array(result_list).sum())
     env.close()
 
+    plt.show()
     # 目标达成情况
     result_list = np.array(result_list)
     goal_list = np.array(goal_list)
