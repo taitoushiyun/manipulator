@@ -47,7 +47,7 @@ def get_args():
 
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=50)
-    parser.add_argument('--distance-threshold', type=float, default=0.03)
+    parser.add_argument('--distance-threshold', type=float, default=0.1)
     parser.add_argument('--reward-type', type=str, default='sparse')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
     parser.add_argument('--num-joints', type=int, default=24)
