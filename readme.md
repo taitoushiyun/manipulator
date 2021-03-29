@@ -403,7 +403,7 @@ her_5 her on mujoco env  num_joints 12
 her_31 her on mujoco env num_joints 12 random goal distance-threshold 0.02 epoch 500 DenseNet add_dtt  跑错了实验  seed  1 
 her_6 her on mujoco env  num_joints 24  
 her_7 her on mujoco env num_joints 12 hard goal   
-
+#------------------------------------------------------------测试block------------------------------------------------------------
 her_8 her on mujoco env num_joints 12 block0 goal  
 her_9 her on mujoco env num_joints 12 block0 goal block env  
 her_10 her on mujococ env num_joints 12 block1 goal  
@@ -417,6 +417,7 @@ her_17 her on mujoco env num_joints 24 block0 goal block env plane model with he
 
 her_86 joints 24 3D block4 goal dt .02 dense action_l2 1 block4_env
 her_87 joints 24 3D block4 goal dt .02 dense action_l2 1 
+her_115 joints 24 3D dt .02 dense block4 goal  带loss显示
 
 #---------------------------------------------------测试不同网络下不同精度的效果--------------------------------------------------------------
 her_21 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500
@@ -425,7 +426,8 @@ her_20 her on mujoco env num_joints 24 random goal distance-threshold 0.01 epoch
 her_19 her on mujoco env num_joints 24 random goal distance-threshold 0.005 epoch 1000  
 
 her_110 her on mujoco env num_joints 24 random goal distance-threshold 0.02  epoch 1000 DenseNet seed  1 add_dtt  td3
-her_32 her on mujoco env num_joints 24 random goal distance-threshold 0.02  epoch  500 DenseNet seed  1 add_dtt  
+her_32  her on mujoco env num_joints 24 random goal distance-threshold 0.02  epoch  500 DenseNet seed  1 add_dtt  
+her_116 her on mujoco env num_joints 24 random goal distance-threshold 0.02  epoch  500 DenseNet seed  1 add_dtt  带loss显示，种子有变
 her_27 her on mujoco env num_joints 24 random goal distance-threshold 0.02  epoch  500 DenseNet seed  1  
 her_28 her on mujoco env num_joints 24 random goal distance-threshold 0.015 epoch 1000 DenseNet seed  1  
 her_29 her on mujoco env num_joints 24 random goal distance-threshold 0.01  epoch 1000 DenseNet seed  1  
@@ -440,6 +442,8 @@ her_24 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch
 her_91 her on mujoco env num_joints 24 random goal distance-threshold 0.02 epoch 500 尖峰学，均匀评估 sample method  
 her_25 her_6 9800 eval
 #------------------------------------------------------------------------------------------------------------------------------
+
+#---------------------------------------------------测试 random reset-----------------------------------------------------------
 her_33 her on mujoco env num_joints 4 random goal distance-threshold 0.02 epoch 500 DenseNet plane model   
 her_35 her on mujoco env num_joints 4 random goal distance-threshold 0.02 epoch 500 DenseNet plane model random initial action_l2 1  
 her_36 her on mujoco env num_joints 4 random goal distance-threshold 0.02 epoch 500 DenseNet plane model random initial action_l2 0.1  
@@ -481,19 +485,22 @@ her_69 joints 18 random goal dt .02 denseASF hidden [16] random init_10 3D  crit
 her_70 joints 20 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0  
 
 her_71 joints 10 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt distance to target  
-her_72 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt max_joint_speed 20  
-her_73 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt 1500 episode sample cnt decay
-her_74 retry her_66
-her_75 joints 12 3D random goal dt .02 denseASF hidden [16] random init_1-->10(30)  add_dtt 
+~~her_72 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt max_joint_speed 20~~  
+~~her_73 joints 8 random goal dt .02 denseASF hidden [16] random init_10 3D  critic2-ratio 0 add_dtt 1500 episode sample cnt decay~~
+~~her_74 retry her_66~~
+
 ~~her_76 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 1   add_dtt~~  
 ~~her_77 joints 24 3D random goal dt .02 denseASF hidden [16] action_l2 0.1 add_dtt~~  
  
 her_30 joints 12 3D random goal dt .02 dense action_l2 1 random-initial-state 永不复位 
+her_75 joints 12 3D random goal dt .02 denseASF hidden [16] random init_1-->10(30)  add_dtt  
+
 her_98 joints 24 3D random goal dt .02 dense action_l2 1 random-initial-state-10 fixed reset
 her_78 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(100--30-->10)  种子和her_32一致
 her_79 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30-->10)  
 her_81 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(20--30-->10)  
 her_80 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(0--30-->10)  999.pth二校门 
+her_118 joints 24 3D random goal dt .02 dense action_l2 1 (random_initial0--30-->10)  the same as her_80
 her_100 joints 24 3D random goal dt .02 mlp action_l2 1 random_initial(0--30-->10) 
 
 her_82 joints 24 3D random goal dt .02 dense action_l2 0.1 random_initial(50--30-->10)  
@@ -514,20 +521,18 @@ her_103 jonins 24 3D dt .02 dense random goal action_l2 5
 her_102 jonins 24 3D dt .02 dense random goal action_l2 10
 
 #这里q-action是反的
-her_104 jonins 24 3D dt .02 dense random goal q-action 0.1
-her_105 jonins 24 3D dt .02 dense random goal q-action 5
-her_106 jonins 24 3D dt .02 dense random goal q-action 10
+~~her_104 jonins 24 3D dt .02 dense random goal q-action 0.1~~ 二范数形式  
+~~her_105 jonins 24 3D dt .02 dense random goal q-action 5~~  二范数形式  
+~~her_106 jonins 24 3D dt .02 dense random goal q-action 10~~  二范数形式  
 #q-action正的
-her_107 jonins 24 3D dt .02 dense random goal q-action 0.1 二范数形式
+her_107 jonins 24 3D dt .02 dense random goal q-action 0.1 二范数形式   负面影响大 
 her_108 jonins 24 3D dt .02 dense random goal q-action 1   二范数形式
 
-her_111 joints 24 3D dt .02 dense random goal q-action 0.1 残差形式
-~~her_113 joints 24 3D dt .02 dense random goal add-dtt~~  
-her-116 joints 24 3D dt .02 dense random goal add-dtt 
-her_113 joints 24 3D dt .02 dense random goal q-action 0.1
-her_115 joints 24 3D dt .02 dense block4 goal
+her_111 joints 24 3D dt .02 dense random goal add-dtt q-action 0.1 残差形式  负面影响小
+her-117 joints 24 3D dt .02 dense random goal add-dtt q-action 10  残差形式  负面影响大，完全学不出
+her-119 joints 24 3D dt .02 dense random goal random_initial(0--30-->10)  add-dtt q-action  1e-4 一言难尽
+her-119 joints 24 3D dt .02 dense random goal random_initial(0--30-->10)  goal special1 eval goal special1 一言难尽
 
-her-117 joints 24 3D dt .02 dense random goal add-dtt q-action 10
 
 ------------------------------------------------------------------------------------------------------------------- 
 

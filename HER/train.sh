@@ -74,6 +74,9 @@
 #python train.py --code-version her_116 --train --headless-mode --cuda --n-epochs 500 --add-dtt
 #python train.py --code-version her_117 --train --headless-mode --cuda --n-epochs 500 --double-q --critic2-ratio 10 --add-dtt
 #python train.py --code-version her_118 --train --headless-mode --cuda --add-dtt --random-initial-state --n-epochs 1000
-python train.py --code-version her_119 --train --headless-mode --cuda --add-dtt --random-initial-state --n-epochs 1000 --double-q --critic2-ratio 1e-4
+#python train.py --code-version her_119 --train --headless-mode --cuda --add-dtt --random-initial-state --n-epochs 1000 --double-q --critic2-ratio 1e-4
+#python train.py --code-version her_120 --train --headless-mode --cuda --add-dtt --random-initial-state --n-epochs 1000 --goal-set special1 --eval-goal-set special1
 
+python train.py --code-version her_121 --train --headless-mode --cuda --add-dtt --n-epochs 500 --goal-set special1 --eval-goal-set special1
+#python train.py --code-version her_122 --train --headless-mode --cuda --add-dtt --n-epochs 500 --goal-set special1 --eval-goal-set special1 --actor-type normal --critic-type normal
 
