@@ -37,6 +37,8 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
                          'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10, 20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                          'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0, -50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
 
+GOAL_JOINT = np.array([0, -20, 0, -20, 0, -20, 0, 30, 0, 20, 0, 40, 0, 40, 0, 40, 0, 40, 0, -40, 0, -20, 0, 0]) * DEG2RAD
+
 
 class ManipulatorEnv(gym.Env):
     def __init__(self, env_config):
@@ -111,6 +113,7 @@ class ManipulatorEnv(gym.Env):
         self.dh_model = DHModel(self.num_joints)
         self.sample_cnt = 0
         self.goal_index = -1
+        # _, self.goal, _ = self._sample_goal(self.goal_set, 0)
         _, self.goal, _ = self._sample_goal(self.goal_set, 0)
         self.goal_index = -1
         self.has_reset = False
@@ -264,7 +267,7 @@ class ManipulatorEnv(gym.Env):
         joint_vel = self.manipulator.get_joint_velocities()
         end_pos = self.sim.data.get_site_xpos('robot0:tip')
         end_vel = self.sim.data.get_site_xvelp('robot0:tip')
-        achieved_goal = end_pos
+        achieved_goal = joint_pos
         ftg = self.goal - achieved_goal
         if self.add_dtt:
             obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel, ftg])
@@ -305,14 +308,16 @@ class ManipulatorEnv(gym.Env):
         #     #     assert len(self.initial_state.qpos) == len(initial_state)
         #     #     for i in range(len(initial_state)):
         #     #         self.initial_state.qpos[i] = initial_state[i]
-        # initial_state = [0, 45, 0, -90, 0, 90, 0, -90, 0, 90, 0, -90, 0, 90, 0, -90, 0, 90, 0, -90, 0, 90, 0, -90]
+        # initial_state = [0, -20, 0, -20, 0, -20, 0, 30, 0, 20, 0, 40, 0, 40, 0, 40, 0, 40, 0, -40, 0, -20, 0, 0]
+        # initial_state = np.asarray(initial_state) * DEG2RAD
+        # initial_state += np.random.uniform(low=-0.5, high=0.5, size=(24,)) * DEG2RAD
         # for i in range(len(initial_state)):
         #     self.initial_state.qpos[i] = initial_state[i]
         self.sim.set_state(self.initial_state)
         self.sim.forward()
 
     def _sample_goal(self, goal_set, i_epoch):
-        # sample_range = 0.3 + 0.7 * min(1, i_epoch / 60)
+        return None, GOAL_JOINT,  None
         sample_range = 1
         if goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][goal_set]) * DEG2RAD
@@ -385,10 +390,11 @@ class ManipulatorEnv(gym.Env):
         self.viewer.cam.elevation = -14.
 
     def _render_callback(self):
-        sites_offset = (self.sim.data.site_xpos - self.sim.model.site_pos).copy()
-        site_id = self.sim.model.site_name2id('target0')
-        self.sim.model.site_pos[site_id] = self.goal - sites_offset[0]
-        self.sim.forward()
+        pass
+        # sites_offset = (self.sim.data.site_xpos - self.sim.model.site_pos).copy()
+        # site_id = self.sim.model.site_name2id('target0')
+        # self.sim.model.site_pos[site_id] = self.goal - sites_offset[0]
+        # self.sim.forward()
 
     def _step_callback(self):
         pass
@@ -410,7 +416,7 @@ if __name__ == '__main__':
         'eval_goal_set': 'random',
         'max_episode_steps': 100,
         'collision_cnt': 15,
-        'scene_file': 'mani_env_12.xml',
+        'scene_file': 'mani_block5_env_12.xml',
         'headless_mode': False,
         'n_substeps': 100,
         'random_initial_state': False,
@@ -425,10 +431,17 @@ if __name__ == '__main__':
     }
     env = ManipulatorEnv(env_config)
     # action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
-    obs = env.reset()
 
-    while True:
-        env.render()
+    delta = []
+    for i in range(100):
+        obs = env.reset()
+        dis = np.linalg.norm(obs['achieved_goal'] - np.array([0, -20, 0, -20, 0, -20, 0, 30, 0, 20, 0, 40, 0, 40, 0, 40, 0, 40, 0, -40, 0, -20, 0, 0]) * DEG2RAD, axis=-1)
+        delta.append(dis)
+        # env.render()
+    import matplotlib.pyplot as plt
+
+    plt.plot(delta)
+    plt.show()
         # pass
         # obs, reward, done, info = env.step(np.zeros(24, ))
         # env.render()

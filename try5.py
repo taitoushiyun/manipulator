@@ -35,4 +35,4 @@ def visdom_speed_test():
 
 
 if __name__ == '__main__':
-    pass
+    print(5 * 3.14 / 180)
