@@ -528,11 +528,12 @@ her_102 jonins 24 3D dt .02 dense random goal action_l2 10
 her_107 jonins 24 3D dt .02 dense random goal q-action 0.1 二范数形式   负面影响大 
 her_108 jonins 24 3D dt .02 dense random goal q-action 1   二范数形式
 
-her_111 joints 24 3D dt .02 dense random goal add-dtt q-action 0.1 残差形式  负面影响小
-her-117 joints 24 3D dt .02 dense random goal add-dtt q-action 10  残差形式  负面影响大，完全学不出
-her-119 joints 24 3D dt .02 dense random goal random_initial(0--30-->10)  add-dtt q-action  1e-4 一言难尽
-her-119 joints 24 3D dt .02 dense random goal random_initial(0--30-->10)  goal special1 eval goal special1 一言难尽
-
+her_111 joints 24 3D dt .02 dense random goal add-dtt q-action 0.1 残差形式  负面影响小 阶次不确定
+her-117 joints 24 3D dt .02 dense random goal add-dtt q-action 10  残差形式  负面影响大，完全学不出 四阶
+her-119 joints 24 3D dt .02 dense random goal random_initial(0--30-->10)  add-dtt q-action  1e-4 一言难尽  四阶
+her-120 joints 24 3D dt .02 dense random goal random_initial(0--30-->10)  goal special1 eval goal special1 一言难尽
+her-121 joints 24 3D dt .02 dense random goal goal special1 eval goal special1 
+her-122 joints 24 3D dt .02 dense random goal goal special1 eval goal random
 
 ------------------------------------------------------------------------------------------------------------------- 
 

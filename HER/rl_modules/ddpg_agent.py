@@ -369,8 +369,7 @@ class ddpg_agent:
                                                                              range(2, self.env.action_dim, 2)],
                 next_joint_state[::, range(1, self.env.action_dim - 2, 2)] - next_joint_state[::,
                                                                              range(3, self.env.action_dim, 2)]
-            ], axis=-1)), 4)
-            action_q_target = torch.sum(action_q_target, dim=-1, keepdim=True)
+            ], axis=-1)), 2).mean(dim=-1, keepdim=True)
 
 
         # start to do the update
