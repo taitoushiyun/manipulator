@@ -8,7 +8,7 @@ Here are the param for the training
 def get_args():
     parser = argparse.ArgumentParser()
     # the environment setting
-    parser.add_argument('--code-version', type=str, default='zzz')
+    parser.add_argument('--code-version', type=str, default='block_6')
     parser.add_argument('--vis-port', type=int, default=6016)
     parser.add_argument('--env-name', type=str, default='mani', help='the environment name')
     parser.add_argument('--n-epochs', type=int, default=1000, help='the number of epochs to train the agent')
@@ -47,7 +47,7 @@ def get_args():
 
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=50)
-    parser.add_argument('--distance-threshold', type=float, default=0.1)
+    parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='sparse')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
     parser.add_argument('--num-joints', type=int, default=24)

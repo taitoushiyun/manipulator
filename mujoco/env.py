@@ -113,7 +113,6 @@ class ManipulatorEnv(gym.Env):
         self.dh_model = DHModel(self.num_joints)
         self.sample_cnt = 0
         self.goal_index = -1
-        # _, self.goal, _ = self._sample_goal(self.goal_set, 0)
         _, self.goal, _ = self._sample_goal(self.goal_set, 0)
         self.goal_index = -1
         self.has_reset = False
@@ -267,7 +266,7 @@ class ManipulatorEnv(gym.Env):
         joint_vel = self.manipulator.get_joint_velocities()
         end_pos = self.sim.data.get_site_xpos('robot0:tip')
         end_vel = self.sim.data.get_site_xvelp('robot0:tip')
-        achieved_goal = joint_pos
+        achieved_goal = end_pos
         ftg = self.goal - achieved_goal
         if self.add_dtt:
             obs = np.concatenate([joint_pos, joint_vel, end_pos, end_vel, ftg])
@@ -317,8 +316,7 @@ class ManipulatorEnv(gym.Env):
         self.sim.forward()
 
     def _sample_goal(self, goal_set, i_epoch):
-        return None, GOAL_JOINT,  None
-        sample_range = 1
+        return None, np.array([0.57, 0, 0.7]),  None
         if goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][goal_set]) * DEG2RAD
             if self.num_joints == 12:
@@ -328,18 +326,18 @@ class ManipulatorEnv(gym.Env):
         elif goal_set == 'random':
             if self.plane_model and not self.cc_model:
                 theta = np.vstack((np.zeros((self.action_dim,)),
-                                   sample_range * 45 * DEG2RAD * np.random.uniform(low=-1, high=1,
+                                   45 * DEG2RAD * np.random.uniform(low=-1, high=1,
                                                                     size=(self.action_dim,)))).T.flatten()
             elif not self.plane_model and not self.cc_model:
-                theta = sample_range * 45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.action_dim, ))
+                theta = 45 * DEG2RAD * np.random.uniform(low=-1, high=1, size=(self.action_dim, ))
             elif self.plane_model and self.cc_model:
-                theta = sample_range * 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
+                theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
                         * np.ones((self.action_dim, self.num_joints // (2 * self.action_dim)))
                 theta = theta.flatten()
                 theta = np.vstack((np.zeros((self.num_joints // 2,)),
                                    theta)).T.flatten()
             elif not self.plane_model and self.cc_model:
-                theta = sample_range * 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
+                theta = 45 * DEG2RAD * np.random.uniform(-1, 1, size=(self.action_dim, 1)) \
                         * np.ones((self.action_dim, self.num_joints // self.action_dim))
                 theta = theta.flatten()
             else:
@@ -355,6 +353,8 @@ class ManipulatorEnv(gym.Env):
                 return None, np.array([0.8, 0, 0.73]), 0
             elif goal_set == 'block4':
                 return None, np.array([1.2, 0, 0.8]), 0
+            elif goal_set == 'block5':
+                return None, np.array([5.7, 0, 0.7]), 0
         elif isinstance(goal_set, str) and goal_set.startswith('draw'):
             path_index = int(goal_set.strip('draw'))
             self.goal_index += 1

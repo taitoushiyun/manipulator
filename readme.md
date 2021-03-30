@@ -538,7 +538,10 @@ her-122 joints 24 3D dt .02 dense random goal goal special1 eval goal random
 
 ------------------------------------------------------------------------------------------------------------------- 
 
-block_0  dt 0.03 joint_goal block5
+block_0  dt 0.03 joint_goal block_env block5
 block_1  dt 0.03 joint_goal 
-block_2  dt 0.02 goal       
+block_2  dt 0.02 goal       block5
 block_3  dt 0.1  joint_goal 
+block_4  dt 0.2  joint_goal 
+block_5  dt 0.2  goal     sparse reward  td3  
+
