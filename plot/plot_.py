@@ -55,6 +55,16 @@ def smoother(x, a=0.9, w=10, mode="moving"):
         raise NotImplementedError
     return y
 
+def smoother_2(x, w=10):
+    mean = []
+    std_max = []
+    std_min = []
+    for i in range(len(x)):
+        mean.append(np.mean(x[max(i - w, 0):i + 1]))
+        std_max.append(max(x[max(i - w, 0):i + 1]))
+        std_min.append(min(x[max(i - w, 0):i + 1]))
+    return np.array(mean), np.array(std_max), np.array(std_min)
+
 
 def plot_curve(index, dfs, label=None, shaded_err=False, shaded_std=True):
     color = sns.color_palette()[index]
@@ -553,14 +563,43 @@ def plot_test_gamma():
     plt.savefig('saved_fig/test_gamma_1_eval_reward.png', bbox_inches='tight')
     plt.show()
 
+def plot_her_28(pleate):
+    df = pd.DataFrame(columns=('version', 'seed', 'Success Rate(%)', 'Epochs', 'gamma'))
+    version = [80, 98, 100, 32]
+    label = ['DenseNet + variable reset period',
+                    'DenseNet + reset every 10 episode',
+                    'MLP + variable reset period',
+                    'DenseNet = reset every episode']
+    color = ['r', 'b']
+    for i in range(4):
+        file_name = f'her_{version[i]}'
+        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][1:]
+        y = d['y'][1:]
+        mean, std_max, std_min = smoother_2(y, w=50)
+        std_max = smoother(std_max, a=0.9, w=50, mode="window")
+        std_min = smoother(std_min, a=0.9, w=50, mode="window")
+        std_max = np.array(std_max)
+        std_min = np.array(std_min)
+        sns.lineplot(x=x, y=mean, color=pleate[i], label=label[i])
+        plt.fill_between(x, std_max, std_min, color=pleate[i], alpha=.4)
+
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/test.png', bbox_inches='tight')
+    plt.show()
+
 if __name__ == '__main__':
     os.makedirs('saved_fig', exist_ok=True)
     sns.set()
     fig, ax = plt.subplots(1, 1, figsize=(6, 4), dpi=500)
     ax.xaxis.get_major_formatter().set_powerlimits((0, 1))
-    sns.set_palette(sns.color_palette('deep', 4))
+    # sns.set_palette(sns.color_palette('deep', 4))
+    pleate = sns.color_palette('deep', 4)
     # plot_her()   # ylabel='Success Rate(%)'
     # plot_td3_random_precise(ylabel='Success Rate(%)')
-    plot_test_gamma()
+    plot_her_28(pleate)
 
 

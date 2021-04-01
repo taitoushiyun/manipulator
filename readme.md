@@ -543,5 +543,15 @@ block_1  dt 0.03 joint_goal
 block_2  dt 0.02 goal       block5
 block_3  dt 0.1  joint_goal 
 block_4  dt 0.2  joint_goal 
-block_5  dt 0.2  goal     sparse reward  td3  
+block_5  dt 0.02  goal     sparse reward  td3  
+block_6  dt 0.02 block5 goal block-env 3D
+block_7  dt 0.02 block3 goal block-env plane
+block_8  dt 0.02 block3 goal non-block-env plane
+block_9  dt 0.02 block3 goal non-block-env plane actor MLP 
+block_10 dt 0.02 block0 goal block-env block0_1_env_6 
+block_11 dt 0.02 block0_1 goal block-env block0_1_env_6 
+block_12 dt 0.02 block0_2 goal block-env block0_1_env_6
+block_13 dt 0.02 block0_2 goal block-env block0_2_env_6
+ 
+
 

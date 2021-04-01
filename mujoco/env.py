@@ -35,10 +35,18 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
         (False, False): {'easy': [20, 20, 20, 20, -10, -10, -15, -15, 20, 20, 0, 0],
                          # 'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                          'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10, 20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
-                         'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0, -50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
+                         'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0, -50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]},
+        'block0': np.array([0.7, 0, 0.8]),
+        'block0_1': np.array([0.65, 0.1, 0.75]),
+        'block0_2': np.array([0.7, 0.1, 0.85]),
+        'block1': np.array([0.6, 0, 1.2]),
+        'block2': np.array([0.5, 0, 0.73]),
+        'block3': np.array([0.8, 0, 0.73]),
+        'blcok4': np.array([1.2, 0, 0.8]),
+        'blcok5': np.array([0.57, 0, 0.7]),
+        }
 
 GOAL_JOINT = np.array([0, -20, 0, -20, 0, -20, 0, 30, 0, 20, 0, 40, 0, 40, 0, 40, 0, 40, 0, -40, 0, -20, 0, 0]) * DEG2RAD
-
 
 class ManipulatorEnv(gym.Env):
     def __init__(self, env_config):
@@ -140,6 +148,7 @@ class ManipulatorEnv(gym.Env):
         # self.g_pos_idx = range(self.joint_state_dim + 6, self.joint_state_dim + 9)
 
         self.last_obs = None
+        self.block_pos = np.array([0.57, 0, 0.7])
 
 
     @property
@@ -316,7 +325,6 @@ class ManipulatorEnv(gym.Env):
         self.sim.forward()
 
     def _sample_goal(self, goal_set, i_epoch):
-        return None, np.array([0.57, 0, 0.7]),  None
         if goal_set in ['easy', 'hard', 'super hard']:
             theta = np.asarray(GOAL[(self.cc_model, self.plane_model)][goal_set]) * DEG2RAD
             if self.num_joints == 12:
@@ -343,18 +351,7 @@ class ManipulatorEnv(gym.Env):
             else:
                 raise ValueError
         elif isinstance(goal_set, str) and goal_set.startswith('block'):
-            if goal_set == 'block0':
-                return None, np.array([0.7, 0, 0.8]), 0
-            elif goal_set == 'block1':
-                return None, np.array([0.6, 0, 1.2]), 0
-            elif goal_set == 'block2':
-                return None, np.array([0.5, 0, 0.73]), 0
-            elif goal_set == 'block3':
-                return None, np.array([0.8, 0, 0.73]), 0
-            elif goal_set == 'block4':
-                return None, np.array([1.2, 0, 0.8]), 0
-            elif goal_set == 'block5':
-                return None, np.array([5.7, 0, 0.7]), 0
+            return None, GOAL[goal_set], 0
         elif isinstance(goal_set, str) and goal_set.startswith('draw'):
             path_index = int(goal_set.strip('draw'))
             self.goal_index += 1
@@ -390,11 +387,22 @@ class ManipulatorEnv(gym.Env):
         self.viewer.cam.elevation = -14.
 
     def _render_callback(self):
-        pass
-        # sites_offset = (self.sim.data.site_xpos - self.sim.model.site_pos).copy()
-        # site_id = self.sim.model.site_name2id('target0')
-        # self.sim.model.site_pos[site_id] = self.goal - sites_offset[0]
+        sites_offset = (self.sim.data.site_xpos - self.sim.model.site_pos).copy()
+        site_id = self.sim.model.site_name2id('target0')
+        self.sim.model.site_pos[site_id] = self.goal - sites_offset[0]
+        self.sim.forward()
+
+
+        # block_id = self.sim.model.geom_name2id('block0')
+        # block_offset = self.sim.data.geom_xpos[block_id] - self.sim.model.geom_pos[block_id]
+        # self.sim.model.geom_pos[block_id] = self.block_pos
+        # self.sim.data.geom_xpos[block_id][0] = self.block_pos
+        # print(type(self.sim.data.geom_xpos[block_id]))
         # self.sim.forward()
+        # print(self.sim.data.geom_xpos[block_id])
+        # print('-'*40)
+        # print(self.sim.data.geom_xpos[block_id])
+        # print(self.sim.model.geom_pos[block_id])
 
     def _step_callback(self):
         pass
@@ -408,15 +416,15 @@ if __name__ == '__main__':
         'distance_threshold': 0.02,
         'reward_type': 'dense distance',
         'max_angles_vel': 10,  # 10degree/s
-        'num_joints': 24,
+        'num_joints': 12,
         'num_segments': 2,
         'cc_model': False,
-        'plane_model': False,
-        'goal_set': 'random',
-        'eval_goal_set': 'random',
+        'plane_model': True,
+        'goal_set': 'block0',
+        'eval_goal_set': 'block0',
         'max_episode_steps': 100,
         'collision_cnt': 15,
-        'scene_file': 'mani_block5_env_12.xml',
+        'scene_file': 'mani_block0_1_env_6.xml',
         'headless_mode': False,
         'n_substeps': 100,
         'random_initial_state': False,
@@ -430,62 +438,27 @@ if __name__ == '__main__':
         'fixed_reset': False,
     }
     env = ManipulatorEnv(env_config)
-    # action_ = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
+    while True:
+        env.reset()
+        env.render()
+    # block_id = env.sim.model.geom_name2id('block0')
+    # print(env.sim.data.geom_xpos[block_id])
+    # print(env.sim.model.geom_pos[block_id])
+    # # env.goal = np.array([1.2, 0, 0.8])
+    # # env.sim.set_state(env.initial_state)
+    # env.sim.forward()
+    # print(env.sim.data.geom_xpos[block_id])
+    # print(env.sim.model.geom_pos[block_id])
+    # env.block_pos = np.array([2,1,1])
+    # print('*'*40)
+    # env.render()
+    # print(env.sim.data.geom_xpos[block_id])
+    # print(env.sim.model.geom_pos[block_id])
+    # print('*' * 40)
+    # env.render()
+    # print(env.sim.data.geom_xpos[block_id])
+    # print(env.sim.model.geom_pos[block_id])
 
-    delta = []
-    for i in range(100):
-        obs = env.reset()
-        dis = np.linalg.norm(obs['achieved_goal'] - np.array([0, -20, 0, -20, 0, -20, 0, 30, 0, 20, 0, 40, 0, 40, 0, 40, 0, 40, 0, -40, 0, -20, 0, 0]) * DEG2RAD, axis=-1)
-        delta.append(dis)
-        # env.render()
-    import matplotlib.pyplot as plt
-
-    plt.plot(delta)
-    plt.show()
-        # pass
-        # obs, reward, done, info = env.step(np.zeros(24, ))
-        # env.render()
-
-
-    # time_a = time.time()
-    # lines = []
-    # for i in range(5):
-    #     line = []
-    #     obs = env.reset('random')
-    #     # print(obs['achieved_goal'])
-    #
-    #     for j in range(env_config['max_episode_steps']):
-    #         time_a = time.time()
-    #         env.render()
-    #         if j<99:
-    #             # action_ = np.array([-1, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1, 0])
-    #             action_ = np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]) * 2
-    #             # # action_ = np.ones((6, )) * j
-    #             # action_ = np.ones((12, )) * -1
-    #         else:
-    #             action_ = np.zeros((env.action_dim, ))
-    #         obs, reward, done, info = env.step(action_)
-    #         if env.last_obs is not None:
-    #             print('-'*20)
-    #             print(env.last_obs['observation'].shape)
-    #             print(env.last_obs['observation'][12] * RAD2DEG)
-    #             print(env.last_obs['observation'][12])
-    #         time_b = time.time()
-    #         # print(time_b - time_a)
-    #         # print(env.sim.model.opt.timestep)
-    #
-    #         # print(obs['observation'].shape)
-    #         line.append(obs['observation'][1] * RAD2DEG)
-    #     lines.append(line)
-    #
-    #
-    # # time_b = time.time()
-    # # print(time_b - time_a)
-    #
-    # # from matplotlib import pyplot as plt
-    # # for i in range(1):
-    # #     plt.plot(lines[0])
-    # # plt.show()
 
 
 
