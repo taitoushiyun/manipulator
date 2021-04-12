@@ -26,13 +26,22 @@ def plot_joint_sample_dist():
 def visdom_speed_test():
     import visdom
     vis = visdom.Visdom(port=6016, env='a_test_3')
-    vis.line(X=[0], Y=[0], win='ha')
-    vis.line(X=[0], Y=[0], win='hah')
+    vis.line(X=[0], Y=[0], win='ha', opts=dict(legend=['1', '2'], showlegend=True))
+    # vis.line(X=[0], Y=[0], win='hah')
     for i in range(10000):
-        vis.line(X=[i], Y=[i], win='ha', update='append')
-        vis.line(X=[i], Y=[i], win='hah', update='append')
-        time.sleep(10)
+        vis.line(X=[i], Y=[i], win='ha', update='append', name='1')
+        vis.line(X=[i], Y=[2 * i], win='ha', update='append', name='2')
+        # vis.line(X=[i], Y=[i], win='hah', update='append')
+        # time.sleep(10)
+def plot_function():
+    import numpy as np
+    import matplotlib.pyplot as plt
+    x = np.linspace(0, 100, num=100)
+    beta = 0.1
+    y = 1 / (1- (1-beta)**x)
+    plt.plot(x, y)
+    plt.show()
 
 
 if __name__ == '__main__':
-    print(5 * 3.14 / 180)
+    plot_function()

@@ -1,6 +1,0 @@
-Mon Mar 15 19:50:27 2021
-ERROR: Invalid activation key
-
-Sat Mar 27 11:47:28 2021
-ERROR: Invalid activation key
-

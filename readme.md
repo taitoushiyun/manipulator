@@ -538,6 +538,11 @@ her-122 joints 24 3D dt .02 dense random goal goal special1 eval goal random
 
 ------------------------------------------------------------------------------------------------------------------- 
 
+block0_1_env_6 一块平面长板
+block0_2_env_6 两块间隔0.1长板
+block0_3_env_6 两块间隔0.2～0.15长板
+
+
 block_0  dt 0.03 joint_goal block_env block5
 block_1  dt 0.03 joint_goal 
 block_2  dt 0.02 goal       block5
@@ -548,10 +553,41 @@ block_6  dt 0.02 block5 goal block-env 3D
 block_7  dt 0.02 block3 goal block-env plane
 block_8  dt 0.02 block3 goal non-block-env plane
 block_9  dt 0.02 block3 goal non-block-env plane actor MLP 
-block_10 dt 0.02 block0 goal block-env block0_1_env_6 
+block_10 dt 0.02 block0 goal block-env block0_1_env_6    
 block_11 dt 0.02 block0_1 goal block-env block0_1_env_6 
 block_12 dt 0.02 block0_2 goal block-env block0_1_env_6
 block_13 dt 0.02 block0_2 goal block-env block0_2_env_6
- 
+block_14 dt 0.02 block0_2 goal block-env block0_3_env_6   0.75~0.9
+block_15 dt 0.02 block0_2 goal block-env block0_3_env_6   0.7~0.9
+# HER_RND
+block_16 dt 0.02 block0_2 goal block-env block0_1_env_6 add-dtt 带normalization action_l2 0.1 
+~~block_17 dt 0.02 block0_2 goal block-env block0_1_env_6 add-dtt action_l2 0~~ 
+block_18 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 
+block_19 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_art
+
+# 无效乌鸡哥
+~~block_20 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_art beta 3e-4
+block_21 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_art beta 3e-3
+block_22 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_art beta 3e-2
+block_23 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_art beta 0.1
+block_24 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_art beta 3e-5
+block_25 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_art beta 3e-6~~
+
+~~block_27 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0   same as block_17 block_18~~
+block_29 dt 0.02 block0_2 goal block-env block0_1_env_6 add-dtt action_l2 0   same as block_17 block_18
+block_28 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 pop_art beta 3e-4 
+
+block_30 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 beta 1e-4 
+block_31 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-4  
+block_32 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-4  target含义有改变，为未归一化时的target
+
+#有效乌鸡哥
+block_34 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-5 min_step 800000
+block_35 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-4 min_step 800000
+block_36 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-5 min_step 100000
 
 
+block_37 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-4 min_step 100000
+block_38 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0.1 art beta 1e-4 min_step 100000
+block_39 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0.01 art beta 1e-4 min_step 100000
+block_40 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 1 art beta 1e-4 min_step 100000
