@@ -540,7 +540,9 @@ her-122 joints 24 3D dt .02 dense random goal goal special1 eval goal random
 
 block0_1_env_6 一块平面长板
 block0_2_env_6 两块间隔0.1长板
-block0_3_env_6 两块间隔0.2～0.15长板
+block0_3_env_6 两块间隔0.2长板
+block0_4_env_6 两块间隔0.15长板
+block0_5_env_6 两块间隔0.05长板
 
 
 block_0  dt 0.03 joint_goal block_env block5
@@ -578,7 +580,7 @@ block_29 dt 0.02 block0_2 goal block-env block0_1_env_6 add-dtt action_l2 0   sa
 block_28 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 pop_art beta 3e-4 
 
 block_30 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 beta 1e-4 
-block_31 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-4  
+~~block_31 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-4~~  
 block_32 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-4  target含义有改变，为未归一化时的target
 
 #有效乌鸡哥
@@ -591,3 +593,40 @@ block_37 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-
 block_38 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0.1 art beta 1e-4 min_step 100000
 block_39 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0.01 art beta 1e-4 min_step 100000
 block_40 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 1 art beta 1e-4 min_step 100000
+
+block_41 dt 0.02 block0_2 goal block-env block0_3_env_6 action_l2 0.1 art beta 1e-4 min_step 100000
+block_42 dt 0.02 block0_2 goal block-env block0_4_env_6 action_l2 0.1 art beta 1e-4 min_step 100000
+#正式加入curiosity
+block_48 dt 0.02 block3 goal block-env block3_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略
+
+block_43 dt 0.02 block0_2 goal block-env block0_4_env_6 reward_weight 1.0 explore_weight 0.0 eval使用train时的相同策略
+block_44 dt 0.02 block0_2 goal block-env block0_4_env_6 reward_weight 1.0 explore_weight 0.0 eval使用不同的策略
+block_45 dt 0.02 block0_2 goal block-env block0_4_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略
+
+block_46 dt 0.02 block0_2 goal block-env block0_2_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略
+block_47 dt 0.02 block0_2 goal block-env block0_2_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 same as block_46 46中获取的是train的策略
+block_49 dt 0.02 block0_2 goal block-env block0_2_env_6 reward_weight 1 explore_weight 0 eval使用不同的策略
+
+#两块平面板相距0.05米
+block_52 dt 0.02 block0_5 goal block-env block0_5_env_6 dense critic  fail
+block_51 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 1.0 explore_weight 0.0 eval使用不同的策略 不稳定popart fail
+block_50 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 不稳定popart success
+block_53 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 不稳定popart success
+block_56 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 pop-art 直接进入pop-art reward pop art 发散
+block_55 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 art fail
+~~block_54 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.5 explore_weight 0.5 eval使用不同的策略~~  
+block_57 block0_5 goal block-env block0_5_env_6 reward_weight 1 explore_weight 0 stable 0.05 min_step 100000 不稳定
+block_58 block0_5 goal block-env block0_5_env_6 reward_weight 1 explore_weight 0 stable 0.005 min_step 100000 不稳定
+
+block_59 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 forward dynamic stable success
+block_65 block0_5 goal block-env block0_5_env_6 reward_weight 0.5 explore_weight 0.5 RND 稳定版本pop-art
+
+#终极两块平面板
+block_61 block0_5 goal block-env block0_6_env_6 reward_weight 0.8 explore_weight 0.2 forward dynamic 向左，同样是很慢
+block_63 block0_5 goal block-env block0_6_env_6 reward_weight 0.5 explore_weight 0.5 forward dynamic 和block_64差不多，向右但是速度很慢
+block_64 block0_5 goal block-env block0_6_env_6 reward_weight 0.5 explore_weight 0.5 RND  没学到， 有学到的迹象，向右转而不是向左转， 但是跑得很慢导致50步没出结果
+block_66 block0_5 goal block-env block0_6_env_6 reward_weight 0.2 explore_weight 0.8 RND  没学到
+
+#平面钻孔
+block_60 block3   goal block-env block3_env_12 reward_weight 0.8 explore_weight 0.2 stable 0.005 min_step 100000 plane
+block_62 block3   goal block-env block3_env_12 reward_weight 0.5 explore_weight 0.5 forward dynamic plane

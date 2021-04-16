@@ -44,4 +44,5 @@ def plot_function():
 
 
 if __name__ == '__main__':
-    plot_function()
+    a = {'a': 1}
+    print(a.get('a'))

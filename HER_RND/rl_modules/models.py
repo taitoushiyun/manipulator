@@ -184,7 +184,7 @@ class DNet(nn.Module):
     def __init__(self, env_params, args):
         super(DNet, self).__init__()
         self.max_action = env_params['action_max']
-        self.k0 = env_params['obs'] + env_params['goal'] + env_params['action']
+        self.k0 = env_params['obs'] + env_params['action']
         self.k = 4
         self.layers = nn.ModuleList([nn.Linear(self.k0 + i * 256, 256) for i in range(self.k)])
         self.q_out = nn.Linear(256, env_params['obs'])
@@ -196,6 +196,39 @@ class DNet(nn.Module):
             bypass = torch.cat([bypass, x], -1)
         obs_predict = self.q_out(x)
         return obs_predict
+
+    def compute_loss(self, state, action, next_state):
+        loss = (self.forward(state, action) - next_state.detach()).pow(2)
+        return loss
+
+
+class RND(nn.Module):
+    def __init__(self, env_params, args):
+        super(RND, self).__init__()
+        self.max_action = env_params['action_max']
+        self.k0 = env_params['obs']
+        self.k = 4
+        self.layers = nn.ModuleList([nn.Linear(self.k0 + i * 256, 256) for i in range(self.k)])
+        self.q_out = nn.Linear(256, 256)
+
+    def forward(self, state):
+        bypass = state
+        for i in range(self.k):
+            x = F.relu(self.layers[i](bypass))
+            bypass = torch.cat([bypass, x], -1)
+        obs_predict = self.q_out(x)
+        return obs_predict
+
+
+class Dynamic(nn.Module):
+    def __init__(self, env_params, args):
+        super(Dynamic, self).__init__()
+        self.target_net = RND(env_params, args)
+        self.predict_net = RND(env_params, args)
+
+    def compute_loss(self, state, action, next_action):
+        loss = (self.target_net(next_action).detach() - self.predict_net(next_action)).pow(2)
+        return loss
 
 
 class CriticLowerLayer(nn.Module):

@@ -139,14 +139,14 @@ if __name__ == '__main__':
     achieved_path = []
     result_list = []
 
-    actor_network = actor(args, env_params)
+    actor_network = actor(env_params, args)
     # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_17/4188.pt'
     # model_path = 'saved_models/her_32/10000.pt'
     # model_path = 'saved_models/her_111/model.pt'
     # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_46/model.pt'
     file_list = [
                  # 'saved_models/her_32/10000.pt',
-        'saved_models/block_12/149.pt',
+        'saved_models/block_67/model.pt',
         # 'saved_models/her_112/model.pt',
                  ]
     dice_list = [[] for _ in range(len(file_list))]
