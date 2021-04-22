@@ -13,6 +13,7 @@ sys.path.append(os.path.join(main_dir, 'mujoco'))
 
 # from vrep_pyrep.env import ManipulatorEnv
 from mujoco.env import ManipulatorEnv
+from mujoco.vec_env import SubprocVecEnv
 from mujoco.env_test import EnvTest
 
 
@@ -55,8 +56,8 @@ def get_logger(code_version):
 def get_env_params(env, goal_set):
     obs = env.reset()
     # close the environment
-    params = {'obs': obs['observation'].shape[0],
-            'goal': obs['desired_goal'].shape[0],
+    params = {'obs': obs['observation'].shape[1],
+            'goal': obs['desired_goal'].shape[1],
             'action': env.action_space.shape[0],
             'action_max': env.action_space.high[0],
             }
@@ -104,12 +105,9 @@ def launch(args):
         'reset_change_period': args.reset_change_period,
         'fixed_reset': args.fixed_reset,
     }
-    if args.env_name == 'mani':
-        env_name = ManipulatorEnv
-    elif args.env_name == 'test':
-        env_name = EnvTest
-    env = env_name(env_config)
-    env.action_space.seed(args.seed)
+    env_fans = [ManipulatorEnv for _ in range(args.nenvs)]
+    env = SubprocVecEnv(env_fans, env_config)
+
     # env.seed()
 
     # get the environment parameters

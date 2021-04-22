@@ -66,38 +66,3 @@ class normalizer_torch:
         if clip_range is None:
             clip_range = self.default_clip_range
         return torch.clip((v - self.mean) / (self.std), -clip_range, clip_range)
-
-
-class Normalizer_torch2:
-    def __init__(self, device, size, eps=1e-2, default_clip_range=np.inf):
-        self.mu = torch.zeros(size, dtype=torch.float32, device=device)
-        self.sigma = torch.ones(size, dtype=torch.float32, device=device)
-        self.count = 0
-        self.default_clip_range = default_clip_range
-
-    def update(self, x):
-        batch_mean = torch.mean(x, dim=0)
-        batch_var = torch.var(x, dim=0)
-        batch_count = x.shape[0]
-        self.update_from_moments(batch_mean, batch_var, batch_count)
-
-    def update_from_moments(self, batch_mean, batch_var, batch_count):
-        self.mu, self.sigma, self.count = self.update_mean_var_count_from_moments(
-            self.mu, self.sigma, self.count, batch_mean, batch_var, batch_count)
-
-    def update_mean_var_count_from_moments(self, mean, var, count, batch_mean, batch_var, batch_count):
-        delta = batch_mean - mean
-        tot_count = count + batch_count
-
-        new_mean = mean + delta * batch_count / tot_count
-        m_a = var * count
-        m_b = batch_var * batch_count
-        M2 = m_a + m_b + torch.square(delta) * count * batch_count / (count + batch_count)
-        new_var = M2 / (count + batch_count)
-        new_count = batch_count + count
-        return new_mean, new_var, new_count
-
-    def normalize(self, v, clip_range=None):
-        if clip_range is None:
-            clip_range = self.default_clip_range
-        return torch.clip((v - self.mu) / (self.sigma), -clip_range, clip_range)

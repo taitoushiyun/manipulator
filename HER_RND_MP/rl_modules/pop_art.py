@@ -52,5 +52,3 @@ class PopArt(nn.Module):
         self.sigma = self.sigma_new
 
 
-
-

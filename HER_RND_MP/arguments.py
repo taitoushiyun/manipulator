@@ -17,7 +17,7 @@ def get_args():
     parser.add_argument('--n-batches', type=int, default=40, help='the times to update the network')
     parser.add_argument('--save-interval', type=int, default=5, help='the interval that save the trajectory')
     parser.add_argument('--seed', type=int, default=1, help='random seed')
-    parser.add_argument('--num-workers', type=int, default=1, help='the number of cpus to collect samples')
+
     parser.add_argument('--replay-strategy', type=str, default='future', help='the HER strategy')
     parser.add_argument('--save-dir', type=str, default='saved_models/', help='the path to save the models')
     parser.add_argument('--noise-eps', type=float, default=0.2, help='noise eps')
@@ -42,11 +42,11 @@ def get_args():
     parser.add_argument('--noise-clip', type=float, default=0.5)
     parser.add_argument('--use-her', type=bool, default=True)
 
-    parser.add_argument('--action-l2', type=float, default=0.1, help='l2 reg')  # TODO
+    parser.add_argument('--action-l2', type=float, default=1, help='l2 reg')  # TODO
     parser.add_argument('--double-q', action='store_true')
     parser.add_argument('--critic2-ratio', type=float, default=0.1)
-    parser.add_argument('--q-reward-weight', type=float, default=1.0)
-    parser.add_argument('--q-explore-weight', type=float, default=0.1)
+    parser.add_argument('--q-reward-weight', type=float, default=1)
+    parser.add_argument('--q-explore-weight', type=float, default=0)
 
     # net config
     parser.add_argument('--actor-type', type=str, default='dense')
@@ -54,12 +54,12 @@ def get_args():
     parser.add_argument('--curiosity-type', type=str, choices=['forward', 'rnd'], default='rnd')
     parser.add_argument('--rnd-net', type=str, choices=['mlp', 'densenet'], default='densenet')
     parser.add_argument('--use-popart', action='store_true')
-    parser.add_argument('--use-rms-reward', action='store_true')
     parser.add_argument('--use-td3', action='store_true')
     parser.add_argument('--add-dtt', action='store_true')
     parser.add_argument('--beta', type=float, default=1e-4)
 
     # env config
+    parser.add_argument('--nenvs', type=int, default=1)
     parser.add_argument('--max-episode-steps', type=int, default=50)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='sparse')
@@ -68,10 +68,10 @@ def get_args():
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
-    parser.add_argument('--goal-set', type=str, default='block2')
-    parser.add_argument('--eval-goal-set', type=str, default='block2')
+    parser.add_argument('--goal-set', type=str, default='random')
+    parser.add_argument('--eval-goal-set', type=str, default='random')
     parser.add_argument('--collision-cnt', type=int, default=27)
-    parser.add_argument('--scene-file', type=str, default='mani_block2_env_6.xml')
+    parser.add_argument('--scene-file', type=str, default='mani_env_6.xml')
     parser.add_argument('--headless-mode', action='store_true')
     parser.add_argument('--random-initial-state', action='store_true')
     parser.add_argument('--max-reset-period', type=int, default=10)

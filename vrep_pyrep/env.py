@@ -26,6 +26,7 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
                         'hard': [0, 20, 0, 15, 0,  20, 0,  20, 0, 20, 0, -10],
                         'super hard': [0, -50, 0, -50, 0, -20, 0, 40, 0, 30, 0, 0]},
         (False, False): {'easy': [20, 20, 20, 20, -10, -10, -15, -15, 20, 20, 0, 0],
+                         # 'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                          'hard': [20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10, 20, 20, 15, 15, 20, 20, 20, 20, 20, 20, -10, -10],
                          'super hard': [-50, -50, -50, -50, -20, -20, 40, 40, 30, 30, 0, 0]}}
 
@@ -235,23 +236,22 @@ if __name__ == '__main__':
         'max_episode_steps': 100,
         'collision_cnt': 27,
         'scene_file': 'simple_24_1.ttt',
-        'headless_mode': False,
+        'headless_mode': True,
     }
     env = ManipulatorEnv(env_config)
     print('env created success')
     # action_ = [-1, 1]
 
-    # for i in range(100):
-    #     action_ = np.random.uniform(low=-1, high=1, size=(2, ))
-    #     step = 0
-    #     obs = env.reset()
-    #     while True:
-    #         obs, reward, done, info = env.step(action_)
-    #         step += 1
-    #         if done:
-    #             step = 0
-    #             break
-    obs = env.reset()
-    print(obs[env.e_pos_idx])
+    for i in range(2):
+        action_ = np.random.uniform(low=-1, high=1, size=(24, ))
+        step = 0
+        obs = env.reset('hard')
+        for j in range(100):
+            time_a = time.time()
+            obs, reward, done, info = env.step(action_)
+            time_b = time.time()
+            print(time_b -time_a)
+            step += 1
+
     time.sleep(1)
     env.end_simulation()

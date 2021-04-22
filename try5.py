@@ -44,5 +44,7 @@ def plot_function():
 
 
 if __name__ == '__main__':
-    a = {'a': 1}
-    print(a.get('a'))
+    import time
+    print('2')
+    time.sleep(10)
+    print('2-')

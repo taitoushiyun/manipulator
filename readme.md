@@ -405,11 +405,18 @@ her_6 her on mujoco env  num_joints 24
 her_7 her on mujoco env num_joints 12 hard goal   
 #------------------------------------------------------------测试block------------------------------------------------------------
 her_8 her on mujoco env num_joints 12 block0 goal  
+block_100 her on mujoco env num_joints 12 block0 goal  noise eval  
 her_9 her on mujoco env num_joints 12 block0 goal block env  
+
 her_10 her on mujococ env num_joints 12 block1 goal  
+block_101 her on mujoco env num_joints 12 block1 goal  noise eval  
 her_11 her on mujoco env num_joints 12 block1 goal block env  
+
+her_13 her on mujoco env num_joints 12 block2 goal 
+block_102 her on mujoco env num_joints 12 block2 goal  noise eval
+block_103 her on mujoco env num_joints 12 block2 goal  noise eval not add-dtt
 her_12 her on mujoco env num_joints 12 block2 goal block env  
-her_13 her on mujoco env num_joints 12 block2 goal  
+
 her_14 her on mujoco env num_joints 24 block3 goal
 her_15 her on mujoco env num_joints 24 block3 goal block env
 her_16 her on mujoco env num_joints 24 block0 goal block env plane model
@@ -545,11 +552,11 @@ block0_4_env_6 两块间隔0.15长板
 block0_5_env_6 两块间隔0.05长板
 
 
-block_0  dt 0.03 joint_goal block_env block5
+~~block_0  dt 0.03 joint_goal block_env block5
 block_1  dt 0.03 joint_goal 
 block_2  dt 0.02 goal       block5
 block_3  dt 0.1  joint_goal 
-block_4  dt 0.2  joint_goal 
+block_4  dt 0.2  joint_goal~~
 block_5  dt 0.02  goal     sparse reward  td3  
 block_6  dt 0.02 block5 goal block-env 3D
 block_7  dt 0.02 block3 goal block-env plane
@@ -598,12 +605,13 @@ block_41 dt 0.02 block0_2 goal block-env block0_3_env_6 action_l2 0.1 art beta 1
 block_42 dt 0.02 block0_2 goal block-env block0_4_env_6 action_l2 0.1 art beta 1e-4 min_step 100000
 #正式加入curiosity
 block_48 dt 0.02 block3 goal block-env block3_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略
-
+#两快相隔0.15平面板
 block_43 dt 0.02 block0_2 goal block-env block0_4_env_6 reward_weight 1.0 explore_weight 0.0 eval使用train时的相同策略
 block_44 dt 0.02 block0_2 goal block-env block0_4_env_6 reward_weight 1.0 explore_weight 0.0 eval使用不同的策略
 block_45 dt 0.02 block0_2 goal block-env block0_4_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略
 
-block_46 dt 0.02 block0_2 goal block-env block0_2_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略
+#两快相隔0.1的平面板
+~~block_46 dt 0.02 block0_2 goal block-env block0_2_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略~~
 block_47 dt 0.02 block0_2 goal block-env block0_2_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 same as block_46 46中获取的是train的策略
 block_49 dt 0.02 block0_2 goal block-env block0_2_env_6 reward_weight 1 explore_weight 0 eval使用不同的策略
 
@@ -611,15 +619,15 @@ block_49 dt 0.02 block0_2 goal block-env block0_2_env_6 reward_weight 1 explore_
 block_52 dt 0.02 block0_5 goal block-env block0_5_env_6 dense critic  fail
 block_51 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 1.0 explore_weight 0.0 eval使用不同的策略 不稳定popart fail
 block_50 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 不稳定popart success
-block_53 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 不稳定popart success
+~~block_53 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 不稳定popart success~~
+~~block_57 block0_5 goal block-env block0_5_env_6 reward_weight 1 explore_weight 0 stable 0.05 min_step 100000~~ 
+block_58 block0_5 goal block-env block0_5_env_6 reward_weight 1 explore_weight 0 stable 0.005 min_step 100000 
 block_56 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 pop-art 直接进入pop-art reward pop art 发散
 block_55 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 art fail
 ~~block_54 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.5 explore_weight 0.5 eval使用不同的策略~~  
-block_57 block0_5 goal block-env block0_5_env_6 reward_weight 1 explore_weight 0 stable 0.05 min_step 100000 不稳定
-block_58 block0_5 goal block-env block0_5_env_6 reward_weight 1 explore_weight 0 stable 0.005 min_step 100000 不稳定
 
 block_59 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 forward dynamic stable success
-block_65 block0_5 goal block-env block0_5_env_6 reward_weight 0.5 explore_weight 0.5 RND 稳定版本pop-art
+block_65 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 RND 稳定版本pop-art
 
 #终极两块平面板
 block_61 block0_5 goal block-env block0_6_env_6 reward_weight 0.8 explore_weight 0.2 forward dynamic 向左，同样是很慢
@@ -630,3 +638,46 @@ block_66 block0_5 goal block-env block0_6_env_6 reward_weight 0.2 explore_weight
 #平面钻孔
 block_60 block3   goal block-env block3_env_12 reward_weight 0.8 explore_weight 0.2 stable 0.005 min_step 100000 plane
 block_62 block3   goal block-env block3_env_12 reward_weight 0.5 explore_weight 0.5 forward dynamic plane
+
+block_69 reward 0.5 explore 0.5              fail 
+block_73 reward 0.8 explore 0.2              success
+block_70 mlp-256 RND reward 0.8 explore 0.2  success
+block_72 mlp-10  RND reward 0.8 explore 0.2  fail
+
+# predict dynamic compare
+block_73 forward dynamic reward 1.0 explore 0.0  block0_5_env_6  fail
+block_74 forward dynamic reward 0.8 explore 0.2  block0_5_env_6  success 
+block_75 forward dynamic reward 0.5 explore 0.5  block0_5_env_6  fail q有上升迹象
+
+block_76 RND MLP         reward 1.0 explore 0.0  block0_5_env_6  fail
+block_77 RND MLP         reward 0.8 explore 0.2  block0_5_env_6  suceess 
+block_78 RND MLP         reward 0.5 explore 0.5  block0_5_env_6  fail
+
+block_79 RND densenet    reward 1.0 explore 0.0  block0_5_env_6
+block_80 RND densenet    reward 0.8 explore 0.2  block0_5_env_6
+block_81 RND densenet    reward 0.5 explore 0.5  block0_5_env_6
+
+#测试action-l2的影响
+block_82 block2 mani_env_6 action_l2 0.1 pop-art
+~~block_85 block2 mani_env_6 action_l2 0.1 pop-art~~
+block_86 block2 mani_env_6 action_l2 0.5 pop-art
+block_87 block2 mani_env_6 action_l2 1.0 pop-art
+
+block_83 block2 mani_env_6 action_l2 0.1  不要popart
+blcok_84 blcok2 mani_env_6 action_l2 1    不要popart
+
+#---------------------测试rms形式explore--------------------------------------------
+block_88 block2 mani_env_6 action_l2 1 rms  reward 0.9 explore 0.1 
+
+block_84 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 0 
+block_90 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 0.01 
+block_91 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 0.1 
+block_92 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 1 
+block_93 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 10 
+block_94 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 100 
+block_95 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 1000 
+# 在无障碍环境中表现可以，有障碍时不行
+block_99 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 0.1
+block_96 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 1
+block_97 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 10 
+block_98 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 100 

@@ -7,9 +7,9 @@ import numpy as np
 # from mpi_utils.mpi_utils import sync_networks, sync_grads
 from rl_modules.replay_buffer import replay_buffer
 from rl_modules.models import Actor, Critic, ActorDense, CriticDense, ActorDenseSimple, CriticDenseSimple, ActorDenseASF
-from rl_modules.models import DNet, PopArtCritic, Dynamic
+from rl_modules.models import DNet, Dynamic, create_pop_art_cls
 from rl_modules.pop_art import PopArt
-from mpi_utils.normalizer import normalizer, normalizer_torch
+from mpi_utils.normalizer import normalizer, normalizer_torch, Normalizer_torch2
 from her_modules.her import her_sampler
 import visdom
 import copy
@@ -22,16 +22,16 @@ DEG2RAD = np.pi / 180.
 RAD2DEG = 180. / np.pi
 
 
-def normalize(y, pop_art):
-    if pop_art is None:
+def normalize(y, rms):
+    if rms is None:
         return y
-    return (y - pop_art.mu) / pop_art.sigma
+    return (y - rms.mu) / rms.sigma
 
 
-def denormalize(y, pop_art):
-    if pop_art is None:
+def denormalize(y, rms):
+    if rms is None:
         return y
-    return pop_art.sigma * y + pop_art.mu
+    return rms.sigma * y + rms.mu
 
 
 class HeatBuffer:
@@ -90,23 +90,16 @@ class ddpg_agent:
             critic = CriticDense
         elif self.args.critic_type == 'dense_simple':
             critic = CriticDenseSimple
-        elif self.args.critic_type == 'pop_art':
-            critic = PopArtCritic
         else:
             raise ValueError
+        if self.args.use_popart:
+            critic = create_pop_art_cls(critic)
         self.env = env
         self.env_params = env_params
         self.actor_network = actor(env_params, args)
         self.actor_eval_network = actor(env_params, args)
         self.critic_network = critic(env_params, args)
         self.critic_explore_network = critic(env_params, args)
-        if self.args.curiosity_type == 'forward':
-            self.predict_network = DNet(env_params, args)
-        elif self.args.curiosity_type == 'rnd':
-            self.predict_network = Dynamic(env_params, args)
-        else:
-            raise ValueError('curiosity type must be forward or rnd')
-
         # build up the target network
         self.actor_target_network = actor(env_params, args)
         self.critic_target_network = critic(env_params, args)
@@ -116,12 +109,20 @@ class ddpg_agent:
         self.critic_target_network.load_state_dict(self.critic_network.state_dict())
         self.critic_explore_target_network.load_state_dict(self.critic_explore_network.state_dict())
 
-        if self.args.critic_type == 'pop_art':
+        if self.args.curiosity_type == 'forward':
+            self.predict_network = DNet(env_params, args)
+        elif self.args.curiosity_type == 'rnd':
+            self.predict_network = Dynamic(env_params, args)
+        else:
+            raise ValueError('curiosity type must be forward or rnd')
+
+        if self.args.use_popart:
             self.pop_art = PopArt(args, stable_rate=0.005)
             self.pop_art_explore = PopArt(args, stable_rate=0.05)
         else:
             self.pop_art = None
             self.pop_art_explore = None
+
         # if use gpu
         if self.args.cuda:
             self.actor_network.cuda()
@@ -132,13 +133,20 @@ class ddpg_agent:
             self.critic_target_network.cuda()
             self.critic_explore_target_network.cuda()
             self.predict_network.cuda()
-            self.pop_art.cuda()
+            if self.pop_art is not None:
+                self.pop_art.cuda()
+            if self.pop_art_explore is not None:
+                self.pop_art_explore.cuda()
 
         # create the optimizer
         self.actor_optim = torch.optim.Adam(self.actor_network.parameters(), lr=self.args.lr_actor)
         self.actor_eval_optim = torch.optim.Adam(self.actor_eval_network.parameters(), lr=self.args.lr_actor)
-        self.critic_optim = torch.optim.Adam(self.critic_network.lower_layer.parameters(), lr=self.args.lr_critic)
-        self.critic_explore_optim = torch.optim.Adam(self.critic_explore_network.lower_layer.parameters(), lr=self.args.lr_critic)
+        if self.args.use_popart:
+            self.critic_optim = torch.optim.Adam(self.critic_network.lower_layer.parameters(), lr=self.args.lr_critic)
+            self.critic_explore_optim = torch.optim.Adam(self.critic_explore_network.lower_layer.parameters(), lr=self.args.lr_critic_explore)
+        else:
+            self.critic_optim = torch.optim.Adam(self.critic_network.parameters(), lr=self.args.lr_critic)
+            self.critic_explore_optim = torch.optim.Adam(self.critic_explore_network.parameters(), lr=self.args.lr_critic_explore)
         self.predict_optim = torch.optim.Adam(self.predict_network.parameters(), lr=self.args.lr_predict)
         # her sampler
         self.her_module = her_sampler(args, self.args.replay_strategy, self.args.replay_k, self.env.compute_reward)
@@ -148,8 +156,12 @@ class ddpg_agent:
         self.o_norm = normalizer(size=env_params['obs'], default_clip_range=self.args.clip_range)
         self.g_norm = normalizer(size=env_params['goal'], default_clip_range=self.args.clip_range)
         device = 'cuda' if self.args.cuda else 'cpu'
-        self.q_norm = normalizer_torch(device=device, size=1, default_clip_range=self.args.clip_range)
-        self.q_explore_norm = normalizer_torch(device=device, size=1, default_clip_range=self.args.clip_range)
+        if self.args.use_rms_reward:
+            self.r_norm = Normalizer_torch2(device=device, size=1, default_clip_range=self.args.clip_range)
+            self.r_explore_norm = Normalizer_torch2(device=device, size=1, default_clip_range=self.args.clip_range)
+        else:
+            self.r_norm = None
+            self.r_explore_norm = None
         self.action_l2_norm = normalizer_torch(device=device, size=env_params['action'], default_clip_range=self.args.clip_range)
 
         # create the dict for store the model
@@ -319,8 +331,16 @@ class ddpg_agent:
                 time_b = time.time()
                 print(time_b - time_a)
                 self._soft_update_target_network(self.actor_target_network, self.actor_network)
-                self._soft_update_target_network(self.critic_target_network.lower_layer, self.critic_network.lower_layer)
-                self._soft_update_target_network(self.critic_explore_target_network.lower_layer, self.critic_explore_network.lower_layer)
+                if self.args.use_popart:
+                    self._soft_update_target_network(self.critic_target_network.lower_layer,
+                                                     self.critic_network.lower_layer)
+                    self._soft_update_target_network(self.critic_explore_target_network.lower_layer,
+                                                     self.critic_explore_network.lower_layer)
+                else:
+                    self._soft_update_target_network(self.critic_target_network,
+                                                     self.critic_network)
+                    self._soft_update_target_network(self.critic_explore_target_network,
+                                                     self.critic_explore_network)
                 # if self.args.double_q:
                 #     self._soft_update_target_network(self.critic2_target_network, self.critic2_network)
 
@@ -431,6 +451,7 @@ class ddpg_agent:
             actions_tensor = actions_tensor.cuda()
             r_tensor = r_tensor.cuda()
 
+
         # predict model
         predict_loss_ = self.predict_network.compute_loss(inputs_norm_tensor[..., :-3], actions_tensor, inputs_next_norm_tensor[..., :-3])
         r_explore_tensor = predict_loss_.mean(dim=-1, keepdim=True).detach()
@@ -438,6 +459,9 @@ class ddpg_agent:
         self.predict_optim.zero_grad()
         predict_loss.backward()
         self.predict_optim.step()
+
+        if self.args.use_rms_reward:
+            self.r_explore_norm.update(r_explore_tensor)
 
         # calculate the target Q value function of reward and explore
         with torch.no_grad():
@@ -455,13 +479,14 @@ class ddpg_agent:
 
             q_explore_next_value = self.critic_explore_target_network(inputs_next_norm_tensor, actions_next).detach()
             q_explore_next_value = denormalize(q_explore_next_value, self.pop_art_explore)
+            r_explore_tensor = denormalize(r_explore_tensor, self.r_explore_norm)
             target_q_explore_value = r_explore_tensor + self.args.gamma * q_explore_next_value
             target_q_explore_value = target_q_explore_value.detach()
             target_q_explore_value_output = target_q_explore_value.mean()
             r_explore_tensor_output = r_explore_tensor.mean()
 
         # q reward loss
-        if self.args.critic_type == "pop_art":
+        if self.args.use_popart:
             self.pop_art.update(target_q_value, [self.critic_network, self.critic_target_network])
             target_q_value = normalize(target_q_value, self.pop_art)
         predicted_q_value = self.critic_network(inputs_norm_tensor, actions_tensor)
@@ -469,7 +494,7 @@ class ddpg_agent:
         critic_reward_loss = (target_q_value - predicted_q_value).pow(2).mean()
 
         # q explore loss
-        if self.args.critic_type == "pop_art":
+        if self.args.use_popart:
             self.pop_art_explore.update(target_q_explore_value, [self.critic_explore_network, self.critic_explore_target_network])
             target_q_explore_value = normalize(target_q_explore_value, self.pop_art_explore)
         predicted_q_explore_value = self.critic_explore_network(inputs_norm_tensor, actions_tensor)
@@ -508,14 +533,14 @@ class ddpg_agent:
         critic_explore_loss.backward()
         self.critic_explore_optim.step()
 
-        mu = self.pop_art.mu
-        mu_plus_sigma = self.pop_art.mu + self.pop_art.sigma
-        mu_minis_sigma = self.pop_art.mu - self.pop_art.sigma
-        mu_explore = self.pop_art_explore.mu
-        mu_plus_sigma_explore = self.pop_art_explore.mu + self.pop_art_explore.sigma
-        mu_minis_sigma_explore = self.pop_art_explore.mu - self.pop_art_explore.sigma
-        pop_is_active = torch.tensor(self.pop_art.pop_is_active)
-        pop_is_active_explore = torch.tensor(self.pop_art_explore.pop_is_active)
+        mu = self.pop_art.mu if self.pop_art is not None else torch.tensor(0)
+        mu_plus_sigma = self.pop_art.mu + self.pop_art.sigma if self.pop_art is not None else torch.tensor(0)
+        mu_minis_sigma = self.pop_art.mu - self.pop_art.sigma if self.pop_art is not None else torch.tensor(0)
+        mu_explore = self.pop_art_explore.mu if self.pop_art_explore is not None else torch.tensor(0)
+        mu_plus_sigma_explore = self.pop_art_explore.mu + self.pop_art_explore.sigma if self.pop_art_explore is not None else torch.tensor(0)
+        mu_minis_sigma_explore = self.pop_art_explore.mu - self.pop_art_explore.sigma if self.pop_art_explore is not None else torch.tensor(0)
+        pop_is_active = torch.tensor(self.pop_art.pop_is_active) if self.pop_art is not None else torch.tensor(0)
+        pop_is_active_explore = torch.tensor(self.pop_art_explore.pop_is_active)if self.pop_art_explore is not None else torch.tensor(0)
         debug_items = dict()
         for debug_item, value in self.debug_items.items():
             if value.get('legend') is None:
@@ -539,9 +564,9 @@ class ddpg_agent:
                     pi = self.actor_eval_network(input_tensor)
                     # convert the actions
                     actions = pi.detach().cpu().numpy().squeeze()
-                    # noise = np.random.normal(0, 0.05, size=actions.shape)
-                    # # Add noise to the action for exploration
-                    # actions = (actions + noise).clip(self.env.action_space.low, self.env.action_space.high)
+                    noise = np.random.normal(0, 0.05, size=actions.shape)
+                    # Add noise to the action for exploration
+                    actions = (actions + noise).clip(self.env.action_space.low, self.env.action_space.high)
                 if not self.args.headless_mode:
                     self.env.render()
                 observation_new, _, _, info = self.env.step(actions)
