@@ -36,12 +36,21 @@
 #python train.py --cuda --headless-mode --add-dtt --train --code-version block_106 --q-reward-weight 0.5 --q-explore-weight 0.5 --n-epochs 100 --goal-set block2 --eval-goal-set  block2 --scene-file mani_env_6.xml --use-popart &
 #python train.py --cuda --headless-mode --add-dtt --train --code-version block_107 --q-reward-weight 1.0 --q-explore-weight 0.25 --n-epochs 100 --goal-set block2 --eval-goal-set  block2 --scene-file mani_env_6.xml --use-popart &
 #python train.py --cuda --headless-mode --add-dtt --train --code-version block_108 --q-reward-weight 1.0 --q-explore-weight 1.0 --n-epochs 100 --goal-set block2 --eval-goal-set  block2 --scene-file mani_env_6.xml --use-popart &
-#wait
-#python train.py --cuda --headless-mode --add-dtt --train --code-version block_109 --q-reward-weight 1.0 --q-explore-weight 0.0 --n-epochs 200 --goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-popart &
-#python train.py --cuda --headless-mode --add-dtt --train --code-version block_110 --q-reward-weight 0.8 --q-explore-weight 0.2 --n-epochs 200 --goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-popart &
-#python train.py --cuda --headless-mode --add-dtt --train --code-version block_111 --q-reward-weight 0.5 --q-explore-weight 0.5 --n-epochs 200 --goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-popart &
-#python train.py --cuda --headless-mode --add-dtt --train --code-version block_112 --q-reward-weight 1.0 --q-explore-weight 0.25 --n-epochs 200 --goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-popart &
-#python train.py --cuda --headless-mode --add-dtt --train --code-version block_113 --q-reward-weight 1.0 --q-explore-weight 1.0 --n-epochs 200 --goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-popart &
+
+
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_128 --q-explore-weight 10 --use-rms --lr-explore 0.0001 &
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_129 --q-explore-weight 10 --use-rms --lr-explore 0.0005 &
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_130 --q-explore-weight 10 --use-rms --lr-explore 0.001 &
+
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_128 --q-explore-weight 1 --use-rms --lr-explore 0.0001 &
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_129 --q-explore-weight 1 --use-rms --lr-explore 0.0005 &
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_130 --q-explore-weight 1 --use-rms --lr-explore 0.001 &
+wait
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_109 --q-reward-weight 1.0 --q-explore-weight 0.0 --n-epochs 200 --goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-popart &
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_110 --q-reward-weight 0.8 --q-explore-weight 0.2 --n-epochs 200 --goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-popart &
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_111 --q-reward-weight 0.5 --q-explore-weight 0.5 --n-epochs 200 --goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-popart &
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_112 --q-reward-weight 1.0 --q-explore-weight 0.25 --n-epochs 200 --goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-popart &
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_113 --q-reward-weight 1.0 --q-explore-weight 1.0 --n-epochs 200 --goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-popart &
 #
 #wait
 #python train.py --cuda --headless-mode --add-dtt --train --code-version block_114 --q-reward-weight 1.0 --q-explore-weight 0.0 --n-epochs 100 --goal-set block2 --eval-goal-set  block2 --scene-file mani_env_6.xml --lr-critic 0.0001 &
@@ -50,19 +59,18 @@
 #python train.py --cuda --headless-mode --add-dtt --train --code-version block_117 --q-reward-weight 1.0 --q-explore-weight 0.0 --n-epochs 100 --goal-set block2 --eval-goal-set  block2 --scene-file mani_env_6.xml --lr-critic 0.005 &
 #python train.py --cuda --headless-mode --add-dtt --train --code-version block_118 --q-reward-weight 1.0 --q-explore-weight 0.0 --n-epochs 100 --goal-set block2 --eval-goal-set  block2 --scene-file mani_env_6.xml --lr-critic 0.01 &
 #
-#wait
-#python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_119 --nenvs 1 --n-batches 40 --batch-size 256 &
-#python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_120 --nenvs 4 --n-batches 40 --batch-size 256 &
-#python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_121 --nenvs 8 --n-batches 40 --batch-size 256 &
-#wait
-#python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_122 --nenvs 16 --n-batches 40 --batch-size 256
-#wait
-#python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_123 --nenvs 4 --n-batches 40 --batch-size 512 &
-#python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_124 --nenvs 4 --n-batches 40 --batch-size 1024 &
-#wait
-#python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_125 --nenvs 16 --n-batches 40 --batch-size 2048
-#python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_126 --nenvs 16 --n-batches 80 --batch-size 2048
+wait
+python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_119 --nenvs 1 --n-batches 40 --batch-size 256 &
+python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_120 --nenvs 4 --n-batches 40 --batch-size 256 &
+python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_121 --nenvs 8 --n-batches 40 --batch-size 256 &
+wait
+python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_122 --nenvs 16 --n-batches 40 --batch-size 256
+wait
+python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_123 --nenvs 4 --n-batches 40 --batch-size 512 &
+python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_124 --nenvs 4 --n-batches 40 --batch-size 1024 &
+wait
+python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_125 --nenvs 16 --n-batches 40 --batch-size 2048
+python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_126 --nenvs 16 --n-batches 80 --batch-size 2048
 
 #python train.py --cuda --headless-mode --add-dtt --train --code-version block_127 --q-reward-weight 1.0 --q-explore-weight 0.0 --n-epochs 100 --goal-set block2 --eval-goal-set  block2 --scene-file mani_env_6.xml &
-wait
-python train.py --cuda --headless-mode --add-dtt --train --code-version block_97 --q-explore-weight 10 --use-rms
+

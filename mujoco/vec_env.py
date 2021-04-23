@@ -139,8 +139,6 @@ def worker(index, remote, parent_remote, env_fn_wrapper, env_config):
         cmd, data = remote.recv()
         if cmd == 'step':
             ob, reward, done, info = env.step(data)
-            if done:
-                ob = env.reset()
             remote.send((ob, reward, done, info))
         elif cmd == 'reset':
             ob = env.reset(**data)
@@ -156,7 +154,7 @@ def worker(index, remote, parent_remote, env_fn_wrapper, env_config):
             raise NotImplementedError
 
 
-class SubprocVecEnv(VecEnv, ManipulatorEnv):
+class SubprocVecEnv(VecEnv):
     def __init__(self, env_fns, env_config):
         """
         envs: list of gym environments to run in subprocesses
@@ -176,26 +174,9 @@ class SubprocVecEnv(VecEnv, ManipulatorEnv):
         self.remotes[0].send(('get_spaces', None))
         observation_space, action_space = self.remotes[0].recv()
         VecEnv.__init__(self, len(env_fns), observation_space, action_space)
-        self.max_angles_vel = env_config['max_angles_vel']
+        # self.max_angles_vel = env_config['max_angles_vel']
         self.distance_threshold = env_config['distance_threshold']
         self.reward_type = env_config['reward_type']
-        self.num_joints = env_config['num_joints']
-        self.num_segments = env_config['num_segments']
-        self.cc_model = env_config['cc_model']
-        self.plane_model = env_config['plane_model']
-        self.goal_set = env_config['goal_set']
-        self.eval_goal_set = env_config['eval_goal_set']
-        self._max_episode_steps = env_config['max_episode_steps']
-        self.collision_cnt = env_config['collision_cnt']
-        self.headless_mode = env_config['headless_mode']
-        self.random_initial_state = env_config.get('random_initial_state', False)
-        self.add_peb = env_config['add_peb']
-        self.add_dtt = env_config['add_dtt']
-        self.is_her = env_config['is_her']
-        self.max_reset_period = env_config['max_reset_period']
-        self.reset_change_period = env_config['reset_change_period']
-        self.reset_change_point = env_config['reset_change_point']
-        self.fixed_reset = env_config['fixed_reset']
 
     def step(self, actions):
         return VecEnv.step(self, actions)
@@ -240,6 +221,13 @@ class SubprocVecEnv(VecEnv, ManipulatorEnv):
         for p in self.ps:
             p.join()
         self.closed = True
+
+    def compute_reward(self, achieved_goal, goal, info):
+        d = np.linalg.norm(achieved_goal - goal, axis=-1)
+        if self.reward_type == 'sparse':
+            return -(d > self.distance_threshold).astype(np.float32)
+        else:
+            raise ValueError('reward type wrong')
 
     # def render(self, mode='human'):
     #     for pipe in self.remotes:
@@ -287,19 +275,15 @@ if __name__ == '__main__':
         'reset_change_period': 30,
         'fixed_reset': False,
     }
-
-    # env_fans = [ManipulatorEnv for i in range(2)]
-    # env = SubprocVecEnv(env_fans, env_config)
-    # obs = env.reset()
-    # print(obs)
-    # obs, reward, done, info = env.step(np.ones((4, 12)))
-    # print(obs, reward, done, info)
-    # for i in range(100):
-    #     action = np.ones((4, 12))
-    #     obs, reward, done, info = env.step(action)
-    #     print(obs)
-
-    a = np.ones((2,3,4,5)).swapaxes(1,2)
-    a = a.reshape(a.shape[0]*a.shape[1], *a.shape[2:])
-
-    print(a.shape)
+    import time
+    env_fans = [ManipulatorEnv for i in range(2)]
+    env = SubprocVecEnv(env_fans, env_config)
+    obs = env.reset()
+    print(obs)
+    obs, reward, done, info = env.step(np.random.uniform(low=-1, high=1, size=(2, 12)))
+    print(obs, reward, done, info)
+    for i in range(100):
+        action = np.ones((4, 12))
+        obs, reward, done, info = env.step(action)
+        time.sleep(1)
+        print(obs)

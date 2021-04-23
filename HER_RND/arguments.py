@@ -51,14 +51,13 @@ def get_args():
     # net config
     parser.add_argument('--actor-type', type=str, default='dense')
     parser.add_argument('--critic-type', type=str, default='dense')
+    parser.add_argument('--add-dtt', action='store_true')
     parser.add_argument('--curiosity-type', type=str, choices=['forward', 'rnd'], default='rnd')
     parser.add_argument('--rnd-net', type=str, choices=['mlp', 'densenet'], default='densenet')
     parser.add_argument('--use-popart', action='store_true')
     parser.add_argument('--use-rms-reward', action='store_true')
     parser.add_argument('--use-td3', action='store_true')
-    parser.add_argument('--add-dtt', action='store_true')
     parser.add_argument('--beta', type=float, default=1e-4)
-
     # env config
     parser.add_argument('--max-episode-steps', type=int, default=50)
     parser.add_argument('--distance-threshold', type=float, default=0.02)

@@ -53,15 +53,15 @@ def get_logger(code_version):
     return logger
 
 
-def get_env_params(env, goal_set):
+def get_env_params(args, env, goal_set):
     obs = env.reset()
     # close the environment
-    params = {'obs': obs['observation'].shape[1],
-            'goal': obs['desired_goal'].shape[1],
+    params = {'obs': obs['observation'].shape[-1],
+            'goal': obs['desired_goal'].shape[-1],
             'action': env.action_space.shape[0],
             'action_max': env.action_space.high[0],
             }
-    params['max_timesteps'] = env._max_episode_steps
+    params['max_timesteps'] = args.max_episode_steps
     return params
 
 
@@ -111,7 +111,7 @@ def launch(args):
     # env.seed()
 
     # get the environment parameters
-    env_params = get_env_params(env, args.goal_set)
+    env_params = get_env_params(args, env, args.goal_set)
     # create the ddpg agent to interact with the environment
     if args.use_td3:
         trainer = TD3Agent(args, env, env_params)

@@ -72,8 +72,9 @@ class HeatBuffer:
 
 
 def batch_process(obs):
-    obs = obs.swapaxes(1, 2)
-    obs = obs.reshape(obs.shape[0] * obs.shape[1], *obs.shape[2:])
+    if len(obs.shape) > 3:
+        obs = obs.swapaxes(1, 2)
+        obs = obs.reshape(obs.shape[0] * obs.shape[1], *obs.shape[2:])
     return obs
 
 class ddpg_agent:
@@ -120,13 +121,6 @@ class ddpg_agent:
         self.actor_target_network.load_state_dict(self.actor_network.state_dict())
         self.critic_target_network.load_state_dict(self.critic_network.state_dict())
         self.critic_explore_target_network.load_state_dict(self.critic_explore_network.state_dict())
-
-        if self.args.curiosity_type == 'forward':
-            self.predict_network = DNet(env_params, args)
-        elif self.args.curiosity_type == 'rnd':
-            self.predict_network = Dynamic(env_params, args)
-        else:
-            raise ValueError('curiosity type must be forward or rnd')
 
         if self.args.use_popart:
             self.pop_art = PopArt(args, stable_rate=0.005)
@@ -262,7 +256,6 @@ class ddpg_agent:
                             input_tensor = self._preproc_inputs(obs, g)
                             pi = self.actor_network(input_tensor)
                             action = self._select_actions(pi)
-                            # print(action.shape)
                         # feed the actions into the environment
                         # self.env.render()
                         if not self.args.headless_mode:
@@ -307,7 +300,7 @@ class ddpg_agent:
                         if self.args.reward_type == 'dense distance':
                             self.vis.line(X=[i_episode], Y=[score], win='reward', update='append')
                             self.vis.line(X=[i_episode], Y=[mean_score], win='mean reward', update='append')
-                    self.vis.line(X=[i_episode], Y=[result], win='result', update='append')
+                    self.vis.line(X=[i_episode], Y=[sum(result)/len(result)], win='result', update='append')
                     self.vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
                     self.vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
 
@@ -379,8 +372,6 @@ class ddpg_agent:
         obs_norm = self.o_norm.normalize(obs)
         g_norm = self.g_norm.normalize(g)
         # concatenate the stuffs
-        # print(obs_norm.shape)
-        # print(g_norm.shape)
         inputs = np.concatenate([obs_norm, g_norm], axis=-1)
         inputs = torch.tensor(inputs, dtype=torch.float32)
         if self.args.cuda:
@@ -395,7 +386,7 @@ class ddpg_agent:
         action = np.clip(action, -self.env_params['action_max'], self.env_params['action_max'])
         # random actions...
         random_actions = np.random.uniform(low=-self.env_params['action_max'], high=self.env_params['action_max'], \
-                                            size=self.env_params['action'])
+                                           size=(self.args.nenvs, self.env_params['action']))
         # choose if use the random actions
         action += np.random.binomial(1, self.args.random_eps, 1)[0] * (random_actions - action)
         return action
