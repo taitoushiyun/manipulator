@@ -544,7 +544,8 @@ her-122 joints 24 3D dt .02 dense random goal goal special1 eval goal random
 
 
 ------------------------------------------------------------------------------------------------------------------- 
-
+block0_env_6   一块横板
+block1_env_6   一块竖板
 block0_1_env_6 一块平面长板
 block0_2_env_6 两块间隔0.1长板
 block0_3_env_6 两块间隔0.2长板
@@ -552,27 +553,37 @@ block0_4_env_6 两块间隔0.15长板
 block0_5_env_6 两块间隔0.05长板
 
 
+
 ~~block_0  dt 0.03 joint_goal block_env block5
-block_1  dt 0.03 joint_goal 
-block_2  dt 0.02 goal       block5
-block_3  dt 0.1  joint_goal 
-block_4  dt 0.2  joint_goal~~
-block_5  dt 0.02  goal     sparse reward  td3  
-block_6  dt 0.02 block5 goal block-env 3D
-block_7  dt 0.02 block3 goal block-env plane
-block_8  dt 0.02 block3 goal non-block-env plane
-block_9  dt 0.02 block3 goal non-block-env plane actor MLP 
-block_10 dt 0.02 block0 goal block-env block0_1_env_6    
-block_11 dt 0.02 block0_1 goal block-env block0_1_env_6 
+block_1  dt 0.03 joint_goal~~ 
+# try to set joint-goal for her but fail
+block_3  dt 0.1  joint_goal  block5  fail 
+# TD3 sparse env
+block_4  dt 0.2  joint_goal sparse reward  td3  succeed
+block_5  dt 0.02 goal       sparse reward  td3  succeed 
+
+
+# before adding curiosity 
+block_10 dt 0.02 block0   goal block-env block0_1_env_6    succeed at 80
+
+block_7  dt 0.02 block3 goal block-env plane    fail
+block_8  dt 0.02 block3 goal plane              succeed at 47 epoch
+block_9  dt 0.02 block3 goal plane actor MLP    succeed at 82 epoch
+
+block_11 dt 0.02 block0_1 goal block-env block0_1_env_6    
 block_12 dt 0.02 block0_2 goal block-env block0_1_env_6
-block_13 dt 0.02 block0_2 goal block-env block0_2_env_6
-block_14 dt 0.02 block0_2 goal block-env block0_3_env_6   0.75~0.9
-block_15 dt 0.02 block0_2 goal block-env block0_3_env_6   0.7~0.9
+block_18 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0  succeed but has huge noise
+
+block_13 dt 0.02 block0_2 goal block-env block0_2_env_6  0.1m fail 
+block_14 dt 0.02 block0_2 goal block-env block0_3_env_6   0.75~0.9 0.15m fail  
+block_15 dt 0.02 block0_2 goal block-env block0_3_env_6   0.7~0.9  0.2m success
+
+block2   dt 0.02 block5 goal               succeed at 50 epoch  
+
+
 # HER_RND
-block_16 dt 0.02 block0_2 goal block-env block0_1_env_6 add-dtt 带normalization action_l2 0.1 
 ~~block_17 dt 0.02 block0_2 goal block-env block0_1_env_6 add-dtt action_l2 0~~ 
-block_18 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 
-block_19 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_art
+~~block_19 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_art~~
 
 # 无效乌鸡哥
 ~~block_20 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_art beta 3e-4
@@ -583,12 +594,12 @@ block_24 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_
 block_25 dt 0.02 block0_2 goal block_env block0_1_env_6 add-dtt action_l2 0 pop_art beta 3e-6~~
 
 ~~block_27 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0   same as block_17 block_18~~
-block_29 dt 0.02 block0_2 goal block-env block0_1_env_6 add-dtt action_l2 0   same as block_17 block_18
-block_28 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 pop_art beta 3e-4 
+~~block_29 dt 0.02 block0_2 goal block-env block0_1_env_6 add-dtt action_l2 0   same as block_17 block_18~~
+~~block_28 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 pop_art beta 3e-4~~
 
-block_30 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 beta 1e-4 
+~~block_30 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 beta 1e-4~~ 
 ~~block_31 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-4~~  
-block_32 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-4  target含义有改变，为未归一化时的target
+~~block_32 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-4  target含义有改变，为未归一化时的target~~
 
 #有效乌鸡哥
 block_34 dt 0.02 block0_2 goal block-env block0_1_env_6 action_l2 0 art beta 1e-5 min_step 800000
@@ -621,13 +632,29 @@ block_51 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 1.0 explor
 block_50 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 不稳定popart success
 ~~block_53 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 不稳定popart success~~
 ~~block_57 block0_5 goal block-env block0_5_env_6 reward_weight 1 explore_weight 0 stable 0.05 min_step 100000~~ 
-block_58 block0_5 goal block-env block0_5_env_6 reward_weight 1 explore_weight 0 stable 0.005 min_step 100000 
+~~block_58 block0_5 goal block-env block0_5_env_6 reward_weight 1 explore_weight 0 stable 0.005 min_step 100000~~ 
+~~block_54 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.5 explore_weight 0.5 eval使用不同的策略~~  
+# two kinds of pop-art, both fail
 block_56 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 pop-art 直接进入pop-art reward pop art 发散
 block_55 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 eval使用不同的策略 art fail
-~~block_54 dt 0.02 block0_5 goal block-env block0_5_env_6 reward_weight 0.5 explore_weight 0.5 eval使用不同的策略~~  
 
-block_59 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 forward dynamic stable success
-block_65 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 RND 稳定版本pop-art
+
+~~block_59 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 forward dynamic stable success~~
+~~block_65 block0_5 goal block-env block0_5_env_6 reward_weight 0.8 explore_weight 0.2 RND 稳定版本pop-art~~
+
+block_104 pop-art block0_5 goal mani_env_6  [1.0, 0.0]  succeed but huge noise
+block_127         block0_5 goal mani_env_6  [1.0, 0.0]  succeed without much noise
+block_105 pop-art block0_5 goal mani_env_6  [0.8, 0.2]  succeed but huge noise
+block_106 pop-art block0_5 goal mani_env_6  [0.5, 0.5]  succeed but huge noise slower
+block_107 pop-art block0_5 goal mani_env_6  [1.0, 0.25]  succeed but huge noise
+block_108 pop-art block0_5 goal mani_env_6  [1.0, 1.0]   better than block_106 and block_104 better stability
+
+block_109 pop-art block0_5 goal block0_5_env_6  [1.0, 0.0]
+block_110 pop-art block0_5 goal block0_5_env_6  [0.8, 0.2]
+block_111 pop-art block0_5 goal block0_5_env_6  [0.5, 0.5]
+block_112 pop-art block0_5 goal block0_5_env_6  [1.0, 0.25] succeed
+block_113 pop-art block0_5 goal block0_5_env_6  [1.0, 1.0]
+#it is obviously that extra explore loss is better than complementary explore loss
 
 #终极两块平面板
 block_61 block0_5 goal block-env block0_6_env_6 reward_weight 0.8 explore_weight 0.2 forward dynamic 向左，同样是很慢
@@ -657,7 +684,7 @@ block_79 RND densenet    reward 1.0 explore 0.0  block0_5_env_6
 block_80 RND densenet    reward 0.8 explore 0.2  block0_5_env_6
 block_81 RND densenet    reward 0.5 explore 0.5  block0_5_env_6
 
-#测试action-l2的影响
+#测试action-l2的影响， 对于简单的问题，适当增大对动作的限制似乎效果比较好  
 block_82 block2 mani_env_6 action_l2 0.1 pop-art
 ~~block_85 block2 mani_env_6 action_l2 0.1 pop-art~~
 block_86 block2 mani_env_6 action_l2 0.5 pop-art
@@ -665,10 +692,16 @@ block_87 block2 mani_env_6 action_l2 1.0 pop-art
 
 block_83 block2 mani_env_6 action_l2 0.1  不要popart
 blcok_84 blcok2 mani_env_6 action_l2 1    不要popart
+#测试 lr 影响, lr太大或者太小都会导致eval不稳定，popart中lr变化比较稳定
+block_114 block_2 mani_env_6 lr 0.0001
+block_115 block_2 mani_env_6 lr 0.0005
+block_116 block_2 mani_env_6 lr 0.001
+block_117 block_2 mani_env_6 lr 0.005
+block_118 block_2 mani_env_6 lr 0.01
 
 #---------------------测试rms形式explore--------------------------------------------
-block_88 block2 mani_env_6 action_l2 1 rms  reward 0.9 explore 0.1 
-
+~~block_88 block2 mani_env_6 action_l2 1 rms  reward 0.9 explore 0.1~~ 
+# explore loss 下降过快 
 block_84 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 0 
 block_90 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 0.01 
 block_91 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 0.1 

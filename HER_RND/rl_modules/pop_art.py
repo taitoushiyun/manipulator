@@ -51,6 +51,3 @@ class PopArt(nn.Module):
         self.nu = self.nu_new
         self.sigma = self.sigma_new
 
-
-
-

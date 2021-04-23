@@ -230,17 +230,12 @@ class RND1(nn.Module):
 class Dynamic(nn.Module):
     def __init__(self, env_params, args):
         super(Dynamic, self).__init__()
-        if args.curiosity_type == 'forward':
-            dynamic = DNet
-        elif args.curiosity_type == 'rnd':
-            if args.rnd_net == 'mlp':
-                dynamic = RND1
-            elif args.rnd_net == 'densenet':
-                dynamic = RND
-            else:
-                raise ValueError('rnd_net should only be mlp or densenet')
+        if args.rnd_net == 'mlp':
+            dynamic = RND1
+        elif args.rnd_net == 'densenet':
+            dynamic = RND
         else:
-            raise ValueError('curiosity type should be in choice of forward and rnd')
+            raise ValueError('rnd_net should only be mlp or densenet')
         self.target_net = dynamic(env_params, args)
         self.predict_net = dynamic(env_params, args)
 

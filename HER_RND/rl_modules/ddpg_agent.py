@@ -100,6 +100,13 @@ class ddpg_agent:
         self.actor_eval_network = actor(env_params, args)
         self.critic_network = critic(env_params, args)
         self.critic_explore_network = critic(env_params, args)
+        if self.args.curiosity_type == 'forward':
+            self.predict_network = DNet(env_params, args)
+        elif self.args.curiosity_type == 'rnd':
+            self.predict_network = Dynamic(env_params, args)
+        else:
+            raise ValueError('curiosity type must be forward or rnd')
+
         # build up the target network
         self.actor_target_network = actor(env_params, args)
         self.critic_target_network = critic(env_params, args)
@@ -108,13 +115,6 @@ class ddpg_agent:
         self.actor_target_network.load_state_dict(self.actor_network.state_dict())
         self.critic_target_network.load_state_dict(self.critic_network.state_dict())
         self.critic_explore_target_network.load_state_dict(self.critic_explore_network.state_dict())
-
-        if self.args.curiosity_type == 'forward':
-            self.predict_network = DNet(env_params, args)
-        elif self.args.curiosity_type == 'rnd':
-            self.predict_network = Dynamic(env_params, args)
-        else:
-            raise ValueError('curiosity type must be forward or rnd')
 
         if self.args.use_popart:
             self.pop_art = PopArt(args, stable_rate=0.005)
@@ -564,9 +564,9 @@ class ddpg_agent:
                     pi = self.actor_eval_network(input_tensor)
                     # convert the actions
                     actions = pi.detach().cpu().numpy().squeeze()
-                    noise = np.random.normal(0, 0.05, size=actions.shape)
-                    # Add noise to the action for exploration
-                    actions = (actions + noise).clip(self.env.action_space.low, self.env.action_space.high)
+                    # noise = np.random.normal(0, 0.05, size=actions.shape)
+                    # # Add noise to the action for exploration
+                    # actions = (actions + noise).clip(self.env.action_space.low, self.env.action_space.high)
                 if not self.args.headless_mode:
                     self.env.render()
                 observation_new, _, _, info = self.env.step(actions)
