@@ -9,7 +9,7 @@ from rl_modules.replay_buffer import replay_buffer
 from rl_modules.models import Actor, Critic, ActorDense, CriticDense, ActorDenseSimple, CriticDenseSimple, ActorDenseASF
 from rl_modules.models import DNet, Dynamic, create_pop_art_cls
 from rl_modules.pop_art import PopArt
-from mpi_utils.normalizer import normalizer, normalizer_torch
+from mpi_utils.normalizer import normalizer, normalizer_torch, Normalizer_torch2
 from her_modules.her import her_sampler
 import visdom
 import copy
@@ -163,8 +163,12 @@ class ddpg_agent:
         self.o_norm = normalizer(size=env_params['obs'], default_clip_range=self.args.clip_range)
         self.g_norm = normalizer(size=env_params['goal'], default_clip_range=self.args.clip_range)
         device = 'cuda' if self.args.cuda else 'cpu'
-        self.q_norm = normalizer_torch(device=device, size=1, default_clip_range=self.args.clip_range)
-        self.q_explore_norm = normalizer_torch(device=device, size=1, default_clip_range=self.args.clip_range)
+        if self.args.use_rms_reward:
+            self.r_norm = Normalizer_torch2(device=device, size=1, default_clip_range=self.args.clip_range)
+            self.r_explore_norm = Normalizer_torch2(device=device, size=1, default_clip_range=self.args.clip_range)
+        else:
+            self.r_norm = None
+            self.r_explore_norm = None
         self.action_l2_norm = normalizer_torch(device=device, size=env_params['action'], default_clip_range=self.args.clip_range)
 
         # create the dict for store the model
@@ -182,6 +186,7 @@ class ddpg_agent:
         self.vis.line(X=[0], Y=[0], win='eval result', opts=dict(Xlabel='episode', Ylabel='eval result', title='eval result'))
         self.vis.line(X=[0], Y=[0], win='eval path len', opts=dict(Xlabel='episode', Ylabel='len', title='eval path len'))
         self.vis.line(X=[0], Y=[0], win='eval success rate', opts=dict(Xlabel='episode', Ylabel='success rate (%)', title='eval success rate'))
+        self.vis.line(X=[0], Y=[0], win='time', opts=dict(Xlabel='epoch', Ylabel='seconds', title='time'))
         if args.goal_set != 'random':
             self.vis.line(X=[0], Y=[0], win='reward', opts=dict(Xlabel='episode', Ylabel='reward', title='reward'))
             self.vis.line(X=[0], Y=[0], win='mean reward', opts=dict(Xlabel='episode', Ylabel='reward', title='mean reward'))
@@ -234,6 +239,7 @@ class ddpg_agent:
         """
         # start to collect samples
         i_episode = 0
+        time_start = time.time()
         for epoch in range(self.args.n_epochs):
             for n_cycle in range(self.args.n_cycles):
                 mb_obs, mb_ag, mb_g, mb_actions = [], [], [], []
@@ -352,6 +358,8 @@ class ddpg_agent:
                 torch.save([self.o_norm.mean, self.o_norm.std, self.g_norm.mean, self.g_norm.std,
                             self.actor_eval_network.state_dict()], self.model_path + f'/model.pt')
             self._eval_agent(epoch)
+            time_cur = time.time()
+            self.vis.line(X=[epoch], Y=[time_cur - time_start], win='time', update='append')
             # if epoch % 2 == 0:
             #     self.vis.heatmap(
             #         X=self.heat_buffer.heat_map,
@@ -459,6 +467,9 @@ class ddpg_agent:
         predict_loss.backward()
         self.predict_optim.step()
 
+        if self.args.use_rms_reward:
+            self.r_explore_norm.update(r_explore_tensor)
+
         # calculate the target Q value function of reward and explore
         with torch.no_grad():
             # concatenate the stuffs
@@ -475,6 +486,7 @@ class ddpg_agent:
 
             q_explore_next_value = self.critic_explore_target_network(inputs_next_norm_tensor, actions_next).detach()
             q_explore_next_value = denormalize(q_explore_next_value, self.pop_art_explore)
+            r_explore_tensor = denormalize(r_explore_tensor, self.r_explore_norm)
             target_q_explore_value = r_explore_tensor + self.args.gamma * q_explore_next_value
             target_q_explore_value = target_q_explore_value.detach()
             target_q_explore_value_output = target_q_explore_value.mean()
@@ -501,15 +513,12 @@ class ddpg_agent:
         actor_reward_loss = -self.critic_network(inputs_norm_tensor, actions_real).mean() * self.args.q_reward_weight
         actor_explore_loss = -self.critic_explore_network(inputs_norm_tensor, actions_real).mean() * self.args.q_explore_weight
         actor_action_l2_loss = self.args.action_l2 * (actions_real / self.env_params['action_max']).pow(2).mean()
-        actor_loss = actor_reward_loss
-        actor_loss += actor_explore_loss
-        actor_loss += actor_action_l2_loss
+        actor_loss = actor_reward_loss + actor_explore_loss + actor_action_l2_loss
 
         actions_eval_real = self.actor_eval_network(inputs_norm_tensor)
         actor_eval_reward_loss = -self.critic_network(inputs_norm_tensor, actions_eval_real).mean()
         actor_eval_action_l2_loss = self.args.action_l2 * (actions_eval_real / self.env_params['action_max']).pow(2).mean()
-        actor_eval_loss = actor_eval_reward_loss
-        actor_eval_loss += actor_eval_action_l2_loss
+        actor_eval_loss = actor_eval_reward_loss + actor_eval_action_l2_loss
 
         # start to update the network
         self.actor_optim.zero_grad()

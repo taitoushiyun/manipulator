@@ -650,11 +650,14 @@ block_107 pop-art block0_5 goal mani_env_6  [1.0, 0.25]  succeed but huge noise
 block_108 pop-art block0_5 goal mani_env_6  [1.0, 1.0]   better than block_106 and block_104 better stability
 
 block_109 pop-art block0_5 goal block0_5_env_6  [1.0, 0.0]
-block_110 pop-art block0_5 goal block0_5_env_6  [0.8, 0.2]
+block_110 pop-art block0_5 goal block0_5_env_6  [0.8, 0.2] succeed
 block_111 pop-art block0_5 goal block0_5_env_6  [0.5, 0.5]
 block_112 pop-art block0_5 goal block0_5_env_6  [1.0, 0.25] succeed
 block_113 pop-art block0_5 goal block0_5_env_6  [1.0, 1.0]
-#it is obviously that extra explore loss is better than complementary explore loss
+
+
+
+#ratio is more important
 
 #终极两块平面板
 block_61 block0_5 goal block-env block0_6_env_6 reward_weight 0.8 explore_weight 0.2 forward dynamic 向左，同样是很慢
@@ -701,7 +704,7 @@ block_118 block_2 mani_env_6 lr 0.01
 
 #---------------------测试rms形式explore--------------------------------------------
 ~~block_88 block2 mani_env_6 action_l2 1 rms  reward 0.9 explore 0.1~~ 
-# explore loss 下降过快 
+# 简单任务action_l2=1稳定
 block_84 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 0 
 block_90 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 0.01 
 block_91 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 0.1 
@@ -709,8 +712,61 @@ block_92 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 1
 block_93 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 10 
 block_94 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 100 
 block_95 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 1000 
-# 在无障碍环境中表现可以，有障碍时不行
-block_99 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 0.1
+~~# 在无障碍环境中表现可以，有障碍时不行~~
+~~block_99 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 0.1
 block_96 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 1
 block_97 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 10 
-block_98 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 100 
+block_98 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 100~~ 
+block_136 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 0.1 lr_critic_explore 0.0001
+block_137 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 0.1 lr_critic_explore 0.0005
+block_138 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 0.1 lr_critic_explore 0.001
+
+block_139 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 1 lr_critic_explore 0.0001
+block_140 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 1 lr_critic_explore 0.0005
+block_141 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 1 lr_critic_explore 0.001
+
+block_142 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 10 lr_critic_explore 0.0001
+block_143 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 10 lr_critic_explore 0.0005
+block_144 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 10 lr_critic_explore 0.001
+
+block_145 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 100 lr_critic_explore 0.0001
+block_146 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 100 lr_critic_explore 0.0005
+block_147 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 100 lr_critic_explore 0.001
+
+block_148 rms block0_5 block0_5_env_6 [1.0 0.0] lr_critic_explore 0.001 action_l2 1
+block_149 rms block0_5 block0_5_env_6 [1.0 0.1] lr_critic_explore 0.001 action_l2 1
+block_150 rms block0_5 block0_5_env_6 [1.0 1]   lr_critic_explore 0.001 action_l2 1  success
+block_151 rms block0_5 block0_5_env_6 [1.0 10]  lr_critic_explore 0.001 action_l2 1
+
+block_152 rms block0_5 block0_5_env_6 [1.0 0.0] lr_critic_explore 0.001 action_l2 0.1
+block_153 rms block0_5 block0_5_env_6 [1.0 0.1] lr_critic_explore 0.001 action_l2 0.1 success
+block_154 rms block0_5 block0_5_env_6 [1.0 1]   lr_critic_explore 0.001 action_l2 0.1 late success
+block_155 rms block0_5 block0_5_env_6 [1.0 10]  lr_critic_explore 0.001 action_l2 0.1 success
+
+block_156 rms block0_5 block0_5_env_6 [1.0 0.0] lr_critic_explore 0.001 action_l2 0.01
+block_157 rms block0_5 block0_5_env_6 [1.0 0.1] lr_critic_explore 0.001 action_l2 0.01 
+block_158 rms block0_5 block0_5_env_6 [1.0 1]   lr_critic_explore 0.001 action_l2 0.01 
+block_159 rms block0_5 block0_5_env_6 [1.0 10]  lr_critic_explore 0.001 action_l2 0.01 
+
+block_160 rms block0_5 block0_5_env_6 [1.0 0.0] lr_critic_explore 0.001 action_l2 0.01
+block_161 rms block0_5 block0_5_env_6 [1.0 0.1] lr_critic_explore 0.001 action_l2 0.01 
+block_162 rms block0_5 block0_5_env_6 [1.0 1]   lr_critic_explore 0.001 action_l2 0.01 
+block_163 rms block0_5 block0_5_env_6 [1.0 10]  lr_critic_explore 0.001 action_l2 0.01 
+
+#-----------------------------HER_RND_MP------------------------------------------------
+block_119 random goal joints 12 --nenvs 1 --n-batches 40 --batch-size 256  
+block_121 random goal joints 12 --nenvs 8 --n-batches 40 --batch-size 256  
+block_122 random goal joints 12 --nenvs 16 --n-batches 40 --batch-size 256  
+
+block_120 random goal joints 12 --nenvs 4 --n-batches 40 --batch-size 256  
+block_123 random goal joints 12 --nenvs 4 --n-batches 40 --batch-size 512  
+block_124 random goal joints 12 --nenvs 4 --n-batches 40 --batch-size 1024  
+block_131 random goal joints 12 --nenvs 8 --n-batches 40 --batch-size 2048  
+block_125 random goal joints 12 --nenvs 16 --n-batches 40 --batch-size 2048  
+block_132 random goal joints 12 --nenvs 16 --n-batches 40 --batch-size 4096 
+block_133 random goal joints 12 --nenvs 16 --n-batches 40 --batch-size 8192   
+
+block_128 random goal joints 24 --nenvs 4 --n-batches 40 --batch-size 256  
+block_129 random goal joints 24 --nenvs 4 --n-batches 40 --batch-size 512 
+block_130 random goal joints 24 --nenvs 4 --n-batches 40 --batch-size 1024   
+

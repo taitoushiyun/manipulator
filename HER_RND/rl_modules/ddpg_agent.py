@@ -196,18 +196,18 @@ class ddpg_agent:
                                                    'title': 'critic_reward_loss'},
                             'critic_explore_loss': {'Xlabel': 'episode', 'Ylabel': 'loss',
                                                     'title': 'critic_explore_loss'},
-                            'q_value': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'q_value',
-                                        'legend': ['target_q_value_output', 'predicted_q_value_output']},
-                            'q_explore_value': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'q_value',
-                                                'legend': ['target_q_explore_value_output', 'predicted_q_explore_value_output']},
+                            # 'q_value': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'q_value',
+                            #             'legend': ['target_q_value_output', 'predicted_q_value_output']},
+                            # 'q_explore_value': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'q_value',
+                            #                     'legend': ['target_q_explore_value_output', 'predicted_q_explore_value_output']},
                             'pop_art': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'pop_art',
                                         'legend': ['mu', 'mu_plus_sigma', 'mu_minis_sigma']},
                             'pop_art_explore': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'pop_art',
                                         'legend': ['mu_explore', 'mu_plus_sigma_explore', 'mu_minis_sigma_explore']},
                             'r_tensor_output': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'r_tensor_output'},
                             'r_explore_tensor_output': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'r_explore_tensor_output'},
-                            'pop_is_active': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'pop_is_active'},
-                            'pop_is_active_explore': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'pop_is_active_explore'},
+                            # 'pop_is_active': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'pop_is_active'},
+                            # 'pop_is_active_explore': {'Xlabel': 'episode', 'Ylabel': 'value', 'title': 'pop_is_active_explore'},
                             }
         self.debug_items_dict = {}
         for key, value in self.debug_items.items():
@@ -506,15 +506,14 @@ class ddpg_agent:
         actor_reward_loss = -self.critic_network(inputs_norm_tensor, actions_real).mean() * self.args.q_reward_weight
         actor_explore_loss = -self.critic_explore_network(inputs_norm_tensor, actions_real).mean() * self.args.q_explore_weight
         actor_action_l2_loss = self.args.action_l2 * (actions_real / self.env_params['action_max']).pow(2).mean()
-        actor_loss = actor_reward_loss
-        actor_loss += actor_explore_loss
-        actor_loss += actor_action_l2_loss
+        actor_loss = actor_reward_loss + actor_explore_loss + actor_action_l2_loss
 
         actions_eval_real = self.actor_eval_network(inputs_norm_tensor)
         actor_eval_reward_loss = -self.critic_network(inputs_norm_tensor, actions_eval_real).mean()
         actor_eval_action_l2_loss = self.args.action_l2 * (actions_eval_real / self.env_params['action_max']).pow(2).mean()
-        actor_eval_loss = actor_eval_reward_loss
-        actor_eval_loss += actor_eval_action_l2_loss
+        actor_eval_loss = actor_eval_reward_loss + actor_eval_action_l2_loss
+
+        # print(actor_reward_loss.item(), actor_explore_loss.item(), actor_loss.item())
 
         # start to update the network
         self.actor_optim.zero_grad()
