@@ -770,3 +770,8 @@ block_128 random goal joints 24 --nenvs 4 --n-batches 40 --batch-size 256
 block_129 random goal joints 24 --nenvs 4 --n-batches 40 --batch-size 512 
 block_130 random goal joints 24 --nenvs 4 --n-batches 40 --batch-size 1024   
 
+tds_1 hard goal joint 12 
+tds_2 hard goal joint 12 --nenvs 1 --n-batches 1 --batch-size 64  dense distance 
+tds_3 hard goal joint 12 --nenvs 8 --n-batches 1 --batch-size 512 dense distance 
+tds_4 hard goal joint 12 --nenvs 8 --n-batches 1 --batch-size 512 dense distance 
+tds_4 hard goal joint 12 --nenvs 8 --n-batches 1 --batch-size 512 sparse 

@@ -72,6 +72,7 @@ class ManipulatorEnv(gym.Env):
         self.reset_change_period = env_config['reset_change_period']
         self.reset_change_point = env_config['reset_change_point']
         self.fixed_reset = env_config['fixed_reset']
+        self.nenvs = env_config['nenvs']
         self.reset_period = 1
 
         model_xml_path = os.path.join(os.path.dirname(__file__), 'mani', env_config['scene_file'])
@@ -133,7 +134,7 @@ class ManipulatorEnv(gym.Env):
             achieved_goal=spaces.Box(-np.inf, np.inf, shape=obs['achieved_goal'].shape, dtype='float32'),
             observation=spaces.Box(-np.inf, np.inf, shape=obs['observation'].shape, dtype='float32'),
         ))
-        self.action_space = spaces.Box(low=-1., high=1, shape=(self.action_dim,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1., high=1, shape=(self.nenvs, self.action_dim), dtype=np.float32)
 
         # self.ftg_idx = range(0, 3)
         # self.j_ang_idx = range(3, self.joint_state_dim // 2 + 3)
@@ -191,7 +192,7 @@ class ManipulatorEnv(gym.Env):
             'is_success': self._is_success(obs['achieved_goal'], self.goal),
         }
         reward = self.compute_reward(obs['achieved_goal'], self.goal, info)
-        done = np.linalg.norm(obs['achieved_goal'] - self.goal, axis=-1) <= self.distance_threshold
+        done = (np.linalg.norm(obs['achieved_goal'] - self.goal, axis=-1) <= self.distance_threshold).astype(np.float32)
         if not self.add_peb:
             if self._elapsed_steps >= self._max_episode_steps:
                 done = True

@@ -15,6 +15,9 @@ import matplotlib.pyplot as plt
 from itertools import count
 import logging
 import time
+from normalizer import Normalizer_torch2
+from pop_art import PopArt
+from models import DNet, Dynamic
 
 logger = logging.getLogger('mani')
 
@@ -44,8 +47,8 @@ class ReplayBuffer:
 
     def add(self, state, action, reward, next_state, done):
         """Add a new experience to memory."""
-        e = self.experience(state, action, reward, next_state, done)
-        self.memory.append(e)
+        for i in range(done.shape[0]):
+            self.memory.append(self.experience(state[i], action[i], reward[i], next_state[i], done[i]))
 
     def sample(self):
         """Randomly sample a batch of experiences from memory."""
@@ -97,54 +100,11 @@ class Actor(nn.Module):
             h = torch.relu(fc(h))
         return self.max_action * torch.tanh(self.actor_last(h))
 
-# class Actor(nn.Module):
-#     """Actor (Policy) Model."""
-#
-#     def __init__(self, state_size, action_size, actor_hidden, max_action):
-#         """Initialize parameters and build model.
-#         Params
-#         ======
-#             state_size (int): Dimension of each state
-#             action_size (int): Dimension of each action
-#             max_action (float): the maximum valid value for action
-#             fc1_units (int): Number of nodes in first hidden layer
-#             fc2_units (int): Number of nodes in second hidden layer
-#         """
-#         super(Actor, self).__init__()
-#         self.action_size = action_size
-#         self.actor_fcs = []
-#         actor_in_size = state_size
-#         for i, actor_next_size in enumerate(actor_hidden):
-#             actor_fc = nn.Linear(actor_in_size, actor_next_size)
-#             actor_in_size = actor_next_size
-#             self.__setattr__("actor_fc_{}".format(i), actor_fc)
-#             self.actor_fcs.append(actor_fc)
-#         self.attention = nn.Sequential(nn.Linear(state_size+action_size, 64),
-#                                        nn.ReLU(),
-#                                        nn.Linear(64, state_size),
-#                                        nn.ReLU(),
-#                                        )
-#         self.actor_last = nn.Linear(actor_in_size, action_size)
-#         self.max_action = max_action
-#
-#     def forward(self, state):
-#         """Build an actor (policy) network that maps states -> actions."""
-#         state = state.unsqueeze(-2).expand(*state.shape[:-1], self.action_size, state.shape[-1])
-#         h = torch.cat([state, torch.eye(self.action_size).unsqueeze(0).expand((*state.shape[:-2], self.action_size, self.action_size)).to(device)], dim=-1)
-#         h = self.attention(h).softmax(dim=-1)
-#         h = state * h
-#         for fc in self.actor_fcs:
-#             h = torch.relu(fc(h))
-#         h = self.actor_last(h)
-#         h = h * torch.eye(self.action_size).unsqueeze(0).expand((*h.shape[:-2], self.action_size, self.action_size)).to(device)
-#         h = h.sum(dim=-1)
-#         return self.max_action * torch.tanh(h)
-
 
 class Critic(nn.Module):
     """Critic (Value) Model."""
 
-    def __init__(self, state_size, action_size, critic_hidden):
+    def __init__(self, state_size, action_size, critic_hidden, max_action):
         """Initialize parameters and build model.
         Params
         ======
@@ -171,6 +131,53 @@ class Critic(nn.Module):
             h = torch.relu(fc(h))
         return self.critic_last(h)
 
+
+class ActorDense(nn.Module):
+    def __init__(self, state_size, action_size, actor_hidden, max_action):
+        super(ActorDense, self).__init__()
+        self.max_action = max_action
+        self.k0 = state_size
+        self.k = 4
+        self.layers = nn.ModuleList([nn.Linear(self.k0 + i * 256, 256) for i in range(self.k)])
+        self.action_out = nn.Linear(256, action_size)
+
+    def forward(self, state):
+        bypass = state
+        for i in range(self.k):
+            x = F.relu(self.layers[i](bypass))
+            bypass = torch.cat([bypass, x], -1)
+        actions = self.max_action * torch.tanh(self.action_out(x))
+
+        return actions
+
+
+class CriticDense(nn.Module):
+    def __init__(self, state_size, action_size, critic_hidden, max_action):
+        super(CriticDense, self).__init__()
+        self.max_action = max_action
+        self.k0 = state_size + action_size
+        self.k = 4
+        self.layers = nn.ModuleList([nn.Linear(self.k0 + i * 256, 256) for i in range(self.k)])
+        self.q_out = nn.Linear(256, 1)
+
+    def forward(self, state, actions):
+        bypass = torch.cat([state, actions / self.max_action], dim=1)
+        for i in range(self.k):
+            x = F.relu(self.layers[i](bypass))
+            bypass = torch.cat([bypass, x], -1)
+        q_value = self.q_out(x)
+        return q_value
+
+def normalize(y, pop_art):
+    if pop_art is None:
+        return y
+    return (y - pop_art.mu) / pop_art.sigma
+
+
+def denormalize(y, pop_art):
+    if pop_art is None:
+        return y
+    return pop_art.sigma * y + pop_art.mu
 
 class TD3Agent():
     """Interacts with and learns from the environment."""
@@ -209,28 +216,66 @@ class TD3Agent():
         self.seed = random.seed(random_seed)
 
         # Actor Network (w/ Target Network)
-        self.actor_local = Actor(state_size, action_size, actor_hidden, float(max_action[0])).to(device)
-        self.actor_target = Actor(state_size, action_size, actor_hidden, float(max_action[0])).to(device)
+        if args.actor_type == 'mlp':
+            actor = Actor
+        elif args.actor_type == 'dense':
+            actor = ActorDense
+        else:
+            raise ValueError
+        if args.critic_type == 'mlp':
+            critic = Critic
+        elif args.critic_type == 'dense':
+            critic = CriticDense
+        else:
+            raise ValueError
+        self.actor_local = actor(state_size+3, action_size, actor_hidden, float(max_action)).to(device)
+        self.actor_eval = actor(state_size + 3, action_size, actor_hidden, float(max_action)).to(device)
+        self.actor_eval.load_state_dict(self.actor_local.state_dict())
+        self.actor_target = actor(state_size+3, action_size, actor_hidden, float(max_action)).to(device)
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=lr_actor)
+        self.actor_eval_optimizer = optim.Adam(self.actor_eval.parameters(), lr=lr_actor)
+
 
         # Critic Network (w/ Target Network)
-        self.critic_local1 = Critic(state_size, action_size, critic_hidden).to(device)
-        self.critic_target1 = Critic(state_size, action_size, critic_hidden).to(device)
+        self.critic_local1 = critic(state_size+3, action_size, critic_hidden, float(max_action)).to(device)
+        self.critic_target1 = critic(state_size+3, action_size, critic_hidden, float(max_action)).to(device)
         self.critic_target1.load_state_dict(self.critic_local1.state_dict())
         self.critic_optimizer1 = optim.Adam(self.critic_local1.parameters(), lr=lr_critic)
 
-        self.critic_local2 = Critic(state_size, action_size, critic_hidden).to(device)
-        self.critic_target2 = Critic(state_size, action_size, critic_hidden).to(device)
+        self.critic_local2 = critic(state_size+3, action_size, critic_hidden, float(max_action)).to(device)
+        self.critic_target2 = critic(state_size+3, action_size, critic_hidden, float(max_action)).to(device)
         self.critic_target2.load_state_dict(self.critic_local2.state_dict())
         self.critic_optimizer2 = optim.Adam(self.critic_local2.parameters(), lr=lr_critic)
 
         if self.args.action_q:
-            self.critic_action = Critic(state_size, action_size, critic_hidden).to(device)
-            self.critic_action_target = Critic(state_size, action_size, critic_hidden).to(device)
+            self.critic_action = critic(state_size+3, action_size, critic_hidden, float(max_action)).to(device)
+            self.critic_action_target = critic(state_size+3, action_size, critic_hidden, float(max_action)).to(device)
             self.critic_action_target.load_state_dict(self.critic_action.state_dict())
             self.critic_action_optimizer = optim.Adam(self.critic_action.parameters(), lr=lr_critic)
         # Replay memory
         self.memory = ReplayBuffer(action_size, buffer_size, batch_size, random_seed)
+        if self.args.use_rms_reward:
+            self.r_explore_norm = Normalizer_torch2(device=device, size=1, default_clip_range=self.args.clip_range)
+        else:
+            self.r_explore_norm = None
+
+        env_params = {'obs': self.state_size,
+                      'goal': 3,
+                      'action': self.action_size,
+                      'action_max': self.max_action,
+                     }
+        if self.args.curiosity_type == 'forward':
+            self.predict_network = DNet(env_params, args).to(device)
+        elif self.args.curiosity_type == 'rnd':
+            self.predict_network = Dynamic(env_params, args).to(device)
+        else:
+            raise ValueError('curiosity type must be forward or rnd')
+        self.critic_explore_network = critic(state_size+3, action_size, critic_hidden, float(max_action)).to(device)
+        self.critic_explore_target_network = critic(state_size+3, action_size, critic_hidden, float(max_action)).to(device)
+        self.critic_explore_target_network.load_state_dict(self.critic_explore_network.state_dict())
+        self.critic_explore_optim = torch.optim.Adam(self.critic_explore_network.parameters(),
+                                                     lr=self.args.lr_critic_explore)
+        self.predict_optim = torch.optim.Adam(self.predict_network.parameters(), lr=self.args.lr_predict)
 
     def step(self, state, action, reward, next_state, done):
         """Save experience in replay memory"""
@@ -239,16 +284,19 @@ class TD3Agent():
 
     def act(self, state, episode_step=0, add_noise=True):
         """Returns actions for given state as per current policy."""
-        state = torch.from_numpy(state[None]).float().to(device)
+        state = torch.from_numpy(state).float().to(device)
         self.actor_local.eval()
         with torch.no_grad():
-            action = self.actor_local(state).squeeze(0).cpu().data.numpy()
+            if add_noise:
+                action = self.actor_local(state).cpu().data.numpy()
+            else:
+                action = self.actor_eval(state).cpu().data.numpy()
         if add_noise:
             # Generate a random noise
             sigma = 1. - (1. - .05) * min(1., episode_step / self.noise_drop_rate)
-            noise = np.random.normal(0, sigma, size=self.action_size)
+            noise = np.random.normal(0, sigma, size=(self.args.nenvs, self.action_size))
             # Add noise to the action for exploration
-            action = (action + noise).clip(self.min_action[0], self.max_action[0])
+            action = (action + noise).clip(self.min_action, self.max_action)
         self.actor_local.train()
         return action
 
@@ -265,17 +313,40 @@ class TD3Agent():
             for i in range(n_iteraion):
                 state, action, reward, next_state, done = self.memory.sample()
                 # action_ = action.cpu().numpy()
+                predict_loss_ = self.predict_network.compute_loss(state[..., :-3], action,
+                                                                  next_state[..., :-3])
+                r_explore_tensor = predict_loss_.mean(dim=-1, keepdim=True).detach()
+                predict_loss = predict_loss_.mean()
+                self.predict_optim.zero_grad()
+                predict_loss.backward()
+                self.predict_optim.step()
+
+                if self.args.use_rms_reward:
+                    self.r_explore_norm.update(r_explore_tensor)
+
+
 
                 # ---------------------------- update critic ---------------------------- #
                 # Get predicted next-state actions and Q values from target models
                 actions_next = self.actor_target(next_state)
 
+                q_explore_next_value = self.critic_explore_target_network(next_state, actions_next).detach()
+                r_explore_tensor = denormalize(r_explore_tensor, self.r_explore_norm)
+                target_q_explore_value = r_explore_tensor + self.args.gamma * q_explore_next_value
+                target_q_explore_value = target_q_explore_value.detach()
+                target_q_explore_value_output = target_q_explore_value.mean()
+                r_explore_tensor_output = r_explore_tensor.mean()
+                # q explore loss
+                predicted_q_explore_value = self.critic_explore_network(state, action)
+                # predicted_q_explore_value_output = predicted_q_explore_value.mean()
+                critic_explore_loss = (target_q_explore_value.detach() - predicted_q_explore_value).pow(2).mean()
+
                 # Generate a random noise
                 # noise = torch.FloatTensor(action_).data.normal_(0, self.noise).to(device)
                 noise = torch.normal(torch.zeros_like(actions_next), self.noise).to(device)
                 noise = noise.clamp(-self.noise_clip, self.noise_clip)
-                actions_next = (actions_next + noise).clamp(self.min_action[0].astype(float),
-                                                            self.max_action[0].astype(float))
+                actions_next = (actions_next + noise).clamp(self.min_action.astype(float),
+                                                            self.max_action.astype(float))
 
                 Q1_targets_next = self.critic_target1(next_state, actions_next)
                 Q2_targets_next = self.critic_target2(next_state, actions_next)
@@ -304,6 +375,11 @@ class TD3Agent():
                 critic_loss2.backward()
                 self.critic_optimizer2.step()
 
+                self.critic_explore_optim.zero_grad()
+                critic_explore_loss.backward()
+                self.critic_explore_optim.step()
+
+
                 if self.args.action_q:
                     self.critic_action_optimizer.zero_grad()
                     critic_action_loss.backward()
@@ -313,13 +389,21 @@ class TD3Agent():
                     # ---------------------------- update actor ---------------------------- #
                     # Compute actor loss
                     actions_pred = self.actor_local(state)
-                    actor_loss = -self.critic_local1(state, actions_pred).mean()
-                    if self.args.action_q:
-                        actor_loss += self.args.action_q_ratio * self.critic_action(state, actions_pred).mean()
+                    actor_loss_1 = -self.critic_local1(state, actions_pred).mean()
+                    actor_loss_2 = -self.critic_explore_network(state, actions_pred).mean() * self.args.q_explore_weight
+                    actor_loss = actor_loss_1 + actor_loss_2
+
+                    actions_eval_pred = self.actor_eval(state)
+                    actor_eval_loss = -self.critic_local1(state, actions_eval_pred).mean()
+
                     # Minimize the loss
                     self.actor_optimizer.zero_grad()
                     actor_loss.backward()
                     self.actor_optimizer.step()
+
+                    self.actor_eval_optimizer.zero_grad()
+                    actor_eval_loss.backward()
+                    self.actor_eval_optimizer.step()
 
                     # ----------------------- update target networks ----------------------- #
                     self.soft_update(self.critic_local1, self.critic_target1, self.tau)
@@ -327,9 +411,14 @@ class TD3Agent():
                     if self.args.action_q:
                         self.soft_update(self.critic_action, self.critic_action_target, self.tau)
                     self.soft_update(self.actor_local, self.actor_target, self.tau)
-            return critic_loss1.detach().item(), actor_loss.detach().item()
+            return (critic_loss1.detach().item(),
+                    actor_loss.detach().item(),
+                    actor_eval_loss.detach().item(),
+                    critic_explore_loss.detach().item(),
+                    target_q_explore_value_output.detach().item(),
+                    r_explore_tensor_output.detach().item())
         else:
-            return 0., 0.
+            return 0., 0., 0., 0., 0., 0.
 
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.
@@ -342,6 +431,13 @@ class TD3Agent():
         """
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)
+
+
+def batch_process(obs):
+    if len(obs.shape) > 3:
+        obs = obs.swapaxes(1, 2)
+        obs = obs.reshape(obs.shape[0] * obs.shape[1], *obs.shape[2:])
+    return obs
 
 
 def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_):
@@ -359,7 +455,10 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
 
         vis.line(X=[0], Y=[0], win='critic_loss', opts=dict(title='critic_loss'))
         vis.line(X=[0], Y=[0], win='actor_loss', opts=dict(title='actor_loss'))
-
+        vis.line(X=[0], Y=[0], win='actor_eval_loss', opts=dict(title='actor_eval_loss'))
+        vis.line(X=[0], Y=[0], win='critic_explore_loss', opts=dict(title='critic_explore_loss'))
+        vis.line(X=[0], Y=[0], win='target_q_explore', opts=dict(title='target_q_explore'))
+        vis.line(X=[0], Y=[0], win='r_explore', opts=dict(title='r_explore'))
     result_deque = deque(maxlen=20)
     score_deque = deque(maxlen=10)
     eval_result_queue = deque(maxlen=10)
@@ -375,47 +474,54 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
     for i_episode in range(start_episode, n_episodes):
         time_a = time.time()
         state_raw = env.reset()
-        state = np.concatenate([state_raw['observation'], state_raw['desired_goal']])
+        state = np.concatenate([state_raw['observation'], state_raw['desired_goal']], -1)
         score = 0
         episode_length = 0
         critic_loss_batch = 0
         actor_loss_batch = 0
+        dones = np.zeros((args_.nenvs,))
         for i in range(max_episode_length):
             if len(agent.memory) < args_.random_start and args_.load_model is None:
                 action = env.action_space.sample()
             else:
                 action = agent.act(state, episode_step=i_episode)
+            # time_a = time.time()
             next_state_raw, reward, done, info = env.step(action)
-            # state_change = np.concatenate([state_raw['observation'], next_state_raw['achieved_goal']])
-            next_state = np.concatenate([next_state_raw['observation'], next_state_raw['desired_goal']])
-            # next_state_change = np.concatenate([next_state_raw['observation'], next_state_raw['achieved_goal']])
-            # reward_change = 0
+            # time_b = time.time()
+            # print('a', time_b - time_a)
+            next_state = np.concatenate([next_state_raw['observation'], next_state_raw['desired_goal']], -1)
+            # time_c = time.time()
+            # print('b', time_c - time_b)
             agent.step(state, action, reward, next_state, done)
-            # agent.step(state_change, action, reward_change, next_state_change, done)
-
-
             state = next_state
-            score += reward
+            score += reward.mean()
             episode_length += 1
-            critic_loss, actor_loss = agent.learn(1)
-            critic_loss_batch += critic_loss
-            actor_loss_batch += actor_loss
-            if args_.add_peb:
-                if done or i == max_episode_length - 1:
-                    result = 0.
-                    if done:
-                        result = 1.
-                    break
-            else:
-                if done:
-                    result = 0.
-                    if done and episode_length < max_episode_length:
-                    # if done and episode_length < max_episode_length and not any(info['collision_state']):
-                        result = 1.
-                    break
-        vis.line(X=[i_episode], Y=[critic_loss_batch / episode_length], win='critic_loss', update='append')
-        vis.line(X=[i_episode], Y=[actor_loss_batch / episode_length], win='actor_loss', update='append')
 
+            dones = np.maximum(dones, done)
+            # if args_.add_peb:
+            #     if done or i == max_episode_length - 1:
+            #         result = 0.
+            #         if done:
+            #             result = 1.
+            #         break
+            # else:
+            #     if done:
+            #         result = 0.
+            #         if done and episode_length < max_episode_length:
+            #         # if done and episode_length < max_episode_length and not any(info['collision_state']):
+            #             result = 1.
+            #         break
+        # time_a = time.time()
+        critic_loss, actor_loss, actor_eval_loss, critic_explore_loss, target_q_explore, r_explore = agent.learn(max_episode_length)
+        result = dones.mean()
+        # time_b = time.time()
+        # print('c', time_b - time_a)
+        vis.line(X=[i_episode], Y=[critic_loss], win='critic_loss', update='append')
+        vis.line(X=[i_episode], Y=[actor_loss], win='actor_loss', update='append')
+        vis.line(X=[i_episode], Y=[actor_eval_loss], win='actor_eval_loss', update='append')
+        vis.line(X=[i_episode], Y=[critic_explore_loss], win='critic_explore_loss', update='append')
+        vis.line(X=[i_episode], Y=[target_q_explore], win='target_q_explore', update='append')
+        vis.line(X=[i_episode], Y=[r_explore], win='r_explore', update='append')
         result_deque.append(result)
         score_deque.append(score)
         success_rate = np.mean(result_deque)
@@ -433,83 +539,44 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         vis.line(X=[i_episode], Y=[result], win='result', update='append')
         vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
         vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
+        # time_c = time.time()
+        # print('d', time_c - time_b)
         if i_episode % 10 == 0:
             if i_episode > 0.9 * n_episodes:
-                torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, f'{i_episode}.pth'))
+                torch.save(agent.actor_eval.state_dict(), os.path.join(model_dir, f'{i_episode}.pth'))
             else:
-                torch.save(agent.actor_local.state_dict(), os.path.join(model_dir, 'model.pth'))
+                torch.save(agent.actor_eval.state_dict(), os.path.join(model_dir, 'model.pth'))
         time_b = time.time()
         print(time_b - time_a)
-        # if i_episode % args_.test_interval == 0:
-        #     total_result = 0
-        #     total_reward = 0
-        #     for _ in range(args_.n_test_rollouts):
-        #         state = env.reset(args_.eval_goal_set)
-        #         state = np.concatenate([state['observation'], state['desired_goal']])
-        #         eval_score = 0
-        #         total_len = 0
-        #         for i in range(max_episode_length):
-        #             action = agent.act(state, add_noise=False)
-        #             next_state, reward, done, info = env.step(action)
-        #             next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
-        #             eval_score += reward
-        #             total_len += 1
-        #             state = next_state
-        #             if done:
-        #                 eval_result = 0.
-        #                 if done and total_len < max_episode_length:
-        #                     eval_result = 1.
-        #                 break
-        #
-        #             # if done:
-        #             #     eval_result = 0.
-        #             #     if done and total_len < max_episode_length and not any(info['collision_state']):
-        #             #         eval_result = 1.
-        #             #     break
-        #
-        #             # if i == max_episode_length - 1:
-        #             #     if done:
-        #             #         eval_result = 1.
-        #             #     else:
-        #             #         eval_result = 0.
-        #         total_result += eval_result
-        #         total_reward += eval_score
-        #     eval_success_rate = total_result / args_.n_test_rollouts
-        #     eval_reward = total_reward / args_.n_test_rollouts
-        #     logger.info(
-        #         "Eval Epoch: %d, mean_result: %f" % (i_episode // args_.test_interval, eval_success_rate))
-        #     vis.line(X=[i_episode // args_.test_interval], Y=[eval_success_rate * 100], win='eval success rate', update='append')
-        #     if args_.goal_set != 'random':
-        #         if args_.reward_type == 'dense potential':
-        #             vis.line(X=[i_episode // args_.test_interval], Y=[100 * (eval_reward - env.max_rewards)], win='eval reward', update='append')
-        #         if args_.reward_type == 'dense distance':
-        #             vis.line(X=[i_episode // args_.test_interval], Y=[eval_reward], win='eval reward', update='append')
 
         if i_episode % 5 == 0:
             state = env.reset(eval=True)
-            state = np.concatenate([state['observation'], state['desired_goal']])
+            state = np.concatenate([state['observation'], state['desired_goal']], -1)
             eval_score = 0
             total_len = 0
+            eval_dones = np.ones((args_.nenvs, ))
             for i in range(max_episode_length):
                 action = agent.act(state, add_noise=False)
                 next_state, reward, done, info = env.step(action)
-                next_state = np.concatenate([next_state['observation'], next_state['desired_goal']])
-                eval_score += reward
+                next_state = np.concatenate([next_state['observation'], next_state['desired_goal']], -1)
+                eval_score += reward.mean()
                 total_len += 1
                 state = next_state
-                if args_.add_peb:
-                    if done or i == max_episode_length - 1:
-                        eval_result = 0.
-                        if done:
-                            eval_result = 1.
-                        break
-                else:
-                    if done:
-                        eval_result = 0.
-                        if done and total_len < max_episode_length:
-                        # if done and total_len < max_episode_length and not any(info['collision_state']):
-                            eval_result = 1.
-                        break
+                eval_dones = np.maximum(dones, done)
+                # if args_.add_peb:
+                #     if done or i == max_episode_length - 1:
+                #         eval_result = 0.
+                #         if done:
+                #             eval_result = 1.
+                #         break
+                # else:
+                #     if done:
+                #         eval_result = 0.
+                #         if done and total_len < max_episode_length:
+                #         # if done and total_len < max_episode_length and not any(info['collision_state']):
+                #             eval_result = 1.
+                #         break
+            eval_result = eval_dones.mean()
 
             eval_result_queue.append(eval_result)
             eval_success_rate = np.mean(eval_result_queue)

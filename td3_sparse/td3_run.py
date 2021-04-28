@@ -1,5 +1,6 @@
 import importmagic
 from mujoco.env import ManipulatorEnv
+from mujoco.vec_env import SubprocVecEnv
 from mujoco.env_test import EnvTest
 from td3_sparse.td3_agent import TD3Agent, td3_torcs
 import visdom
@@ -112,21 +113,26 @@ def playGame(args_, train=True, episode_count=2000):
         'reset_change_point': args_.reset_change_point,
         'reset_change_period': args_.reset_change_period,
         'fixed_reset': args_.fixed_reset,
+        'nenvs': args_.nenvs,
     }
-    if args.env_name == 'mani':
-        env_name = ManipulatorEnv
-    elif args.env_name == 'test':
-        env_name = EnvTest
-    env = env_name(env_config)
-    env.action_space.seed(args_.seed)
-    # env = gym.make('LunarLanderContinuous-v2')
+
+    env_fans = [ManipulatorEnv for _ in range(args.nenvs)]
+    env = SubprocVecEnv(env_fans, env_config)
+
+    # if args.env_name == 'mani':
+    #     env_name = ManipulatorEnv
+    # elif args.env_name == 'test':
+    #     env_name = EnvTest
+    # env = env_name(env_config)
+    # env.action_space.seed(args_.seed)
+
     obs = env.reset()
     agent = TD3Agent(args=args_,
                      env=env,
-                     state_size=obs['observation'].shape[0] + obs['desired_goal'].shape[0],
-                     action_size=env.action_space.shape[0],
-                     max_action=env.action_space.high,
-                     min_action=env.action_space.low,
+                     state_size=obs['observation'].shape[-1],
+                     action_size=env.action_space.shape[-1],
+                     max_action=env.action_space.high.flatten()[0],
+                     min_action=env.action_space.low.flatten()[0],
                      actor_hidden=args_.actor_hidden,
                      critic_hidden=args_.critic_hidden,
                      random_seed=0,
@@ -279,8 +285,8 @@ if __name__ == "__main__":
     parser.add_argument('--actor-hidden', type=list, default=[128, 128])
     parser.add_argument('--critic-hidden', type=list, default=[64, 64])
     parser.add_argument('--buffer-size', type=int, default=int(1e7))
-    parser.add_argument('--batch-size', type=int, default=64)
-    parser.add_argument('--gamma', type=float, default=0.98)
+    parser.add_argument('--batch-size', type=int, default=512)
+    parser.add_argument('--gamma', type=float, default=0.99)
     parser.add_argument('--tau', type=float, default=5e-3)
     parser.add_argument('--lr-actor', type=float, default=1e-3)
     parser.add_argument('--lr-critic', type=float, default=1e-3)
@@ -292,8 +298,20 @@ if __name__ == "__main__":
 
     parser.add_argument('--action-q-ratio', type=float, default=0.1)
     parser.add_argument('--action-q', action='store_true')
+
+    parser.add_argument('--actor-type', type=str, default='dense')
+    parser.add_argument('--critic-type', type=str, default='dense')
+    parser.add_argument('--curiosity-type', type=str, choices=['forward', 'rnd'], default='rnd')
+    parser.add_argument('--rnd-net', type=str, choices=['mlp', 'densenet'], default='densenet')
+    parser.add_argument('--use-popart', action='store_true')
+    parser.add_argument('--use-rms-reward', action='store_true')
+    parser.add_argument('--lr-critic-explore', type=float, default=0.001, help='the learning rate of the critic')
+    parser.add_argument('--clip-range', type=float, default=5, help='the clip range')  # TODO
+    parser.add_argument('--lr-predict', type=float, default=0.001, help='the learning rate of the predict net')
+    parser.add_argument('--q-explore-weight', type=float, default=1)
     # env config
-    parser.add_argument('--max-episode-steps', type=int, default=100)
+    parser.add_argument('--nenvs', type=int, default=16)
+    parser.add_argument('--max-episode-steps', type=int, default=50)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='sparse')
     parser.add_argument('--max-angles-vel', type=float, default=10.)
@@ -301,8 +319,8 @@ if __name__ == "__main__":
     parser.add_argument('--num-segments', type=int, default=2)
     parser.add_argument('--plane-model', action='store_true')
     parser.add_argument('--cc-model', action='store_true')
-    parser.add_argument('--goal-set', type=str, default='block1')
-    parser.add_argument('--eval-goal-set', type=str, default='block1')
+    parser.add_argument('--goal-set', type=str, default='hard')
+    parser.add_argument('--eval-goal-set', type=str, default='hard')
     parser.add_argument('--collision-cnt', type=int, default=15)
     parser.add_argument('--scene-file', type=str, default='mani_env_6.xml')
     parser.add_argument('--headless-mode', action='store_true')

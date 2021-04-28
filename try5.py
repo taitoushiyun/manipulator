@@ -44,7 +44,8 @@ def plot_function():
 
 
 if __name__ == '__main__':
-    import time
-    print('2')
-    time.sleep(10)
-    print('2-')
+    import numpy as np
+    a = np.array([[1,0],[1,1],[0,0]])
+    b = np.array([1,0,1])
+    c = np.array([0,0,1])
+    print(np.maximum(b,c))
