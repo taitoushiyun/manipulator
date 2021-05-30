@@ -146,8 +146,8 @@ if __name__ == '__main__':
     # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_46/model.pt'
     file_list = [
                  # 'saved_models/her_32/10000.pt',
-        'saved_models/block_67/model.pt',
-        # 'saved_models/her_112/model.pt',
+        # f'saved_models/block_202/{index}.pt' for index in range(181, 200)
+        'saved_models/block_202/199.pt',
                  ]
     dice_list = [[] for _ in range(len(file_list))]
     path_len_list = [[] for _ in range(len(file_list))]

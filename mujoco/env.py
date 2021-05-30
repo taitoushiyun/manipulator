@@ -40,11 +40,17 @@ GOAL = {(True, True): {'easy': [0, 20, 0, 20, 0, 20, 0, -10, 0, -10, 0, -10],
         'block0_1': np.array([0.65, 0.1, 0.75]),
         'block0_2': np.array([0.7, 0.1, 0.85]),
         'block0_5': np.array([0.7, 0.1, 0.875]),
+        'block0_6': np.array([0.7, 0, 0.875]),
+        'block0_7': np.array([0.7, -0.1, 0.875]),
         'block1': np.array([0.6, 0, 1.2]),
         'block2': np.array([0.5, 0, 0.73]),
         'block3': np.array([0.8, 0, 0.73]),
         'blcok4': np.array([1.2, 0, 0.8]),
         'blcok5': np.array([0.57, 0, 0.7]),
+        'block6': np.array([0.7,  0, 1.2]),
+        'block7': np.array([1.2,  0, 0.825]),
+        'block8': np.array([1.2,  0, 0.85]),
+        'block9': np.array([1.2,  0.1, 0.825]),
         }
 
 GOAL_JOINT = np.array([0, -20, 0, -20, 0, -20, 0, 30, 0, 20, 0, 40, 0, 40, 0, 40, 0, 40, 0, -40, 0, -20, 0, 0]) * DEG2RAD
@@ -72,7 +78,7 @@ class ManipulatorEnv(gym.Env):
         self.reset_change_period = env_config['reset_change_period']
         self.reset_change_point = env_config['reset_change_point']
         self.fixed_reset = env_config['fixed_reset']
-        self.nenvs = env_config['nenvs']
+        # self.nenvs = env_config['nenvs']
         self.reset_period = 1
 
         model_xml_path = os.path.join(os.path.dirname(__file__), 'mani', env_config['scene_file'])
@@ -134,7 +140,7 @@ class ManipulatorEnv(gym.Env):
             achieved_goal=spaces.Box(-np.inf, np.inf, shape=obs['achieved_goal'].shape, dtype='float32'),
             observation=spaces.Box(-np.inf, np.inf, shape=obs['observation'].shape, dtype='float32'),
         ))
-        self.action_space = spaces.Box(low=-1., high=1, shape=(self.nenvs, self.action_dim), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1., high=1, shape=(self.action_dim, ), dtype=np.float32)
 
         # self.ftg_idx = range(0, 3)
         # self.j_ang_idx = range(3, self.joint_state_dim // 2 + 3)
@@ -422,11 +428,11 @@ if __name__ == '__main__':
         'num_segments': 2,
         'cc_model': False,
         'plane_model': True,
-        'goal_set': 'block0',
-        'eval_goal_set': 'block0',
+        'goal_set': 'block0_5',
+        'eval_goal_set': 'block0_5',
         'max_episode_steps': 100,
         'collision_cnt': 15,
-        'scene_file': 'mani_block0_1_env_6.xml',
+        'scene_file': 'mani_block0_6_env_6.xml',
         'headless_mode': False,
         'n_substeps': 100,
         'random_initial_state': False,

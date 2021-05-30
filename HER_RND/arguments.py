@@ -42,11 +42,11 @@ def get_args():
     parser.add_argument('--noise-clip', type=float, default=0.5)
     parser.add_argument('--use-her', type=bool, default=True)
 
-    parser.add_argument('--action-l2', type=float, default=0.1, help='l2 reg')  # TODO
+    parser.add_argument('--action-l2', type=float, default=1, help='l2 reg')  # TODO
     parser.add_argument('--double-q', action='store_true')
     parser.add_argument('--critic2-ratio', type=float, default=0.1)
     parser.add_argument('--q-reward-weight', type=float, default=1.0)
-    parser.add_argument('--q-explore-weight', type=float, default=0.1)
+    parser.add_argument('--q-explore-weight', type=float, default=0.0)
 
     # net config
     parser.add_argument('--actor-type', type=str, default='dense')
@@ -70,7 +70,7 @@ def get_args():
     parser.add_argument('--goal-set', type=str, default='block0_5')
     parser.add_argument('--eval-goal-set', type=str, default='block0_5')
     parser.add_argument('--collision-cnt', type=int, default=27)
-    parser.add_argument('--scene-file', type=str, default='mani_block0_5_env_6.xml')
+    parser.add_argument('--scene-file', type=str, default='mani_block0_6_env_6.xml')
     parser.add_argument('--headless-mode', action='store_true')
     parser.add_argument('--random-initial-state', action='store_true')
     parser.add_argument('--max-reset-period', type=int, default=10)

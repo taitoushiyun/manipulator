@@ -145,8 +145,8 @@ if __name__ == '__main__':
     # model_path = 'saved_models/her_111/model.pt'
     # model_path = '/media/cq/000CF0AE00072D66/saved_models/her_46/model.pt'
     file_list = [
-                 # 'saved_models/her_32/10000.pt',
-        'saved_models/block_52/model.pt',
+                 'saved_models/her_32/10000.pt',
+        # 'saved_models/block_52/model.pt',
         # 'saved_models/her_112/model.pt',
                  ]
     dice_list = [[] for _ in range(len(file_list))]
@@ -162,7 +162,7 @@ if __name__ == '__main__':
         actor_network.load_state_dict(model)
         actor_network.eval()
         for i in range(args.demo_length):
-            observation = env.reset(eval=True)
+            observation = env.reset(eval=True, i_epoch=100000)
             achieved_path.append(observation['achieved_goal'])
             # env.render()
             goal_list.append(observation['desired_goal'])

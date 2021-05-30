@@ -131,26 +131,31 @@
 #python train.py --train --headless-mode --cuda --add-dtt --code-version block_170 --curiosity-type rnd --q-reward-weight 1.0 --q-explore-weight 0.0 --rnd-net mlp --use-popart --action-l2 0.1 --n-test-rollouts 1 &
 #python train.py --train --headless-mode --cuda --add-dtt --code-version block_171 --curiosity-type rnd --q-reward-weight 0.8 --q-explore-weight 0.2 --rnd-net mlp --use-popart --action-l2 0.1 --n-test-rollouts 1 &
 #python train.py --train --headless-mode --cuda --add-dtt --code-version block_172 --curiosity-type rnd --q-reward-weight 0.5 --q-explore-weight 0.5 --rnd-net mlp --use-popart --action-l2 0.1 --n-test-rollouts 1 &
+
 #python train.py --train --headless-mode --cuda --add-dtt --code-version block_173 --curiosity-type rnd --q-reward-weight 1.0 --q-explore-weight 1.25 --rnd-net mlp --use-popart --action-l2 0.1 --n-test-rollouts 1 &
 #python train.py --train --headless-mode --cuda --add-dtt --code-version block_174 --curiosity-type rnd --q-reward-weight 1.0 --q-explore-weight 1.0 --rnd-net mlp --use-popart --action-l2 0.1 --n-test-rollouts 1 &
 #
-#python train.py --train --headless-mode --cuda --add-dtt --code-version block_175 --curiosity-type rnd --q-reward-weight 1.0 --q-explore-weight 0.0 --rnd-net mlp --use-popart --action-l2 1 --n-test-rollouts 1 &
-#python train.py --train --headless-mode --cuda --add-dtt --code-version block_176 --curiosity-type rnd --q-reward-weight 0.8 --q-explore-weight 0.2 --rnd-net mlp --use-popart --action-l2 1 --n-test-rollouts 1 &
-#python train.py --train --headless-mode --cuda --add-dtt --code-version block_177 --curiosity-type rnd --q-reward-weight 0.5 --q-explore-weight 0.5 --rnd-net mlp --use-popart --action-l2 1 --n-test-rollouts 1 &
-#wait
-#python train.py --train --headless-mode --cuda --add-dtt --code-version block_178 --curiosity-type rnd --q-reward-weight 1.0 --q-explore-weight 0.0 --rnd-net mlp --use-popart --action-l2 0 --n-test-rollouts 1 &
-#python train.py --train --headless-mode --cuda --add-dtt --code-version block_179 --curiosity-type rnd --q-reward-weight 0.8 --q-explore-weight 0.2 --rnd-net mlp --use-popart --action-l2 0 --n-test-rollouts 1 &
-#python train.py --train --headless-mode --cuda --add-dtt --code-version block_180 --curiosity-type rnd --q-reward-weight 0.5 --q-explore-weight 0.5 --rnd-net mlp --use-popart --action-l2 0 --n-test-rollouts 1 &
-#wait
+python train.py --train --headless-mode --cuda --add-dtt --code-version block_175 --curiosity-type rnd --q-reward-weight 1.0 --q-explore-weight 0.0 --rnd-net densenet --use-popart --action-l2 1 --n-test-rollouts 1 &
+python train.py --train --headless-mode --cuda --add-dtt --code-version block_176 --curiosity-type rnd --q-reward-weight 0.8 --q-explore-weight 0.2 --rnd-net densenet --use-popart --action-l2 1 --n-test-rollouts 1 &
+python train.py --train --headless-mode --cuda --add-dtt --code-version block_177 --curiosity-type rnd --q-reward-weight 0.5 --q-explore-weight 0.5 --rnd-net densenet --use-popart --action-l2 1 --n-test-rollouts 1 &
+wait
+python train.py --train --headless-mode --cuda --add-dtt --code-version block_178 --curiosity-type rnd --q-reward-weight 1.0 --q-explore-weight 0.0 --rnd-net densenet --use-popart --action-l2 0 --n-test-rollouts 1 &
+python train.py --train --headless-mode --cuda --add-dtt --code-version block_179 --curiosity-type rnd --q-reward-weight 0.8 --q-explore-weight 0.2 --rnd-net densenet --use-popart --action-l2 0 --n-test-rollouts 1 &
+python train.py --train --headless-mode --cuda --add-dtt --code-version block_180 --curiosity-type rnd --q-reward-weight 0.5 --q-explore-weight 0.5 --rnd-net densenet --use-popart --action-l2 0 --n-test-rollouts 1 &
+wait
+
 #python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_181 --nenvs 8 --n-batches 40 --batch-size 2048 --num-joints 24 --scene-file mani_env_12.xml
 #python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_182 --nenvs 16 --n-batches 40 --batch-size 2048 --num-joints 24 --scene-file mani_env_12.xml
 #python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_183 --nenvs 16 --n-batches 40 --batch-size 4096 --num-joints 24 --scene-file mani_env_12.xml
 #python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_184 --nenvs 16 --n-batches 40 --batch-size 8192 --num-joints 24 --scene-file mani_env_12.xml
 
-python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_186 --q-reward-weight 1.0 --q-explore-weight 0.1 --n-epochs 200 --action-l2 0.1 \
---goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_6_env_6.xml --use-rms --nenvs 8 --n-batches 40 --batch-size 2048
+#python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_186 --q-reward-weight 1.0 --q-explore-weight 0.1 --n-epochs 200 --action-l2 0.1 \
+#--goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_6_env_6.xml --use-rms --nenvs 8 --n-batches 40 --batch-size 2048
+#
+#
+#python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_185 --q-reward-weight 1.0 --q-explore-weight 0.1 --n-epochs 200 --action-l2 0.1 \
+#--goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-rms --nenvs 8 --n-batches 40 --batch-size 2048
 
+#python train.py --cuda --headless-mode --add-dtt --train --code-version block_200 --q-reward-weight 1.0 --q-explore-weight 0.0 --n-epochs 200 --goal-set block6 --eval-goal-set  block6 --scene-file mani_block6_env_12.xml
 
-python /home/cq/code/manipulator/HER_RND_MP/train.py --train --headless-mode --add-dtt --cuda --code-version block_185 --q-reward-weight 1.0 --q-explore-weight 0.1 --n-epochs 200 --action-l2 0.1 \
---goal-set block0_5 --eval-goal-set  block0_5 --scene-file mani_block0_5_env_6.xml --use-rms --nenvs 8 --n-batches 40 --batch-size 2048
-
+python train.py --cuda --headless-mode --add-dtt --train --code-version block_201

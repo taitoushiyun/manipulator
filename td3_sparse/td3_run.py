@@ -308,9 +308,9 @@ if __name__ == "__main__":
     parser.add_argument('--lr-critic-explore', type=float, default=0.001, help='the learning rate of the critic')
     parser.add_argument('--clip-range', type=float, default=5, help='the clip range')  # TODO
     parser.add_argument('--lr-predict', type=float, default=0.001, help='the learning rate of the predict net')
-    parser.add_argument('--q-explore-weight', type=float, default=1)
+    parser.add_argument('--q-explore-weight', type=float, default=0.1)
     # env config
-    parser.add_argument('--nenvs', type=int, default=16)
+    parser.add_argument('--nenvs', type=int, default=8)
     parser.add_argument('--max-episode-steps', type=int, default=50)
     parser.add_argument('--distance-threshold', type=float, default=0.02)
     parser.add_argument('--reward-type', type=str, default='sparse')

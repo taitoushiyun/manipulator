@@ -235,7 +235,6 @@ class TD3Agent():
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=lr_actor)
         self.actor_eval_optimizer = optim.Adam(self.actor_eval.parameters(), lr=lr_actor)
 
-
         # Critic Network (w/ Target Network)
         self.critic_local1 = critic(state_size+3, action_size, critic_hidden, float(max_action)).to(device)
         self.critic_target1 = critic(state_size+3, action_size, critic_hidden, float(max_action)).to(device)
@@ -323,8 +322,6 @@ class TD3Agent():
 
                 if self.args.use_rms_reward:
                     self.r_explore_norm.update(r_explore_tensor)
-
-
 
                 # ---------------------------- update critic ---------------------------- #
                 # Get predicted next-state actions and Q values from target models
@@ -485,13 +482,8 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
                 action = env.action_space.sample()
             else:
                 action = agent.act(state, episode_step=i_episode)
-            # time_a = time.time()
             next_state_raw, reward, done, info = env.step(action)
-            # time_b = time.time()
-            # print('a', time_b - time_a)
             next_state = np.concatenate([next_state_raw['observation'], next_state_raw['desired_goal']], -1)
-            # time_c = time.time()
-            # print('b', time_c - time_b)
             agent.step(state, action, reward, next_state, done)
             state = next_state
             score += reward.mean()
@@ -511,11 +503,9 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
             #         # if done and episode_length < max_episode_length and not any(info['collision_state']):
             #             result = 1.
             #         break
-        # time_a = time.time()
+
         critic_loss, actor_loss, actor_eval_loss, critic_explore_loss, target_q_explore, r_explore = agent.learn(max_episode_length)
         result = dones.mean()
-        # time_b = time.time()
-        # print('c', time_b - time_a)
         vis.line(X=[i_episode], Y=[critic_loss], win='critic_loss', update='append')
         vis.line(X=[i_episode], Y=[actor_loss], win='actor_loss', update='append')
         vis.line(X=[i_episode], Y=[actor_eval_loss], win='actor_eval_loss', update='append')
@@ -539,8 +529,7 @@ def td3_torcs(env, agent, n_episodes, max_episode_length, model_dir, vis, args_)
         vis.line(X=[i_episode], Y=[result], win='result', update='append')
         vis.line(X=[i_episode], Y=[episode_length], win='path len', update='append')
         vis.line(X=[i_episode], Y=[success_rate * 100], win='success rate', update='append')
-        # time_c = time.time()
-        # print('d', time_c - time_b)
+
         if i_episode % 10 == 0:
             if i_episode > 0.9 * n_episodes:
                 torch.save(agent.actor_eval.state_dict(), os.path.join(model_dir, f'{i_episode}.pth'))

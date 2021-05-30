@@ -104,6 +104,7 @@ def launch(args):
         'reset_change_point': args.reset_change_point,
         'reset_change_period': args.reset_change_period,
         'fixed_reset': args.fixed_reset,
+        'nenvs': args.nenvs,
     }
     env_fans = [ManipulatorEnv for _ in range(args.nenvs)]
     env = SubprocVecEnv(env_fans, env_config)

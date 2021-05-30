@@ -121,123 +121,7 @@ def plot():
     plt.savefig('saved_fig/her_random_init_5', bbox_inches='tight')
     plt.show()
 
-
-def plot_random_init_10():
-    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'DOF', 'with normalization',
-                               'space_type', 'gamma', 'joints', 'reward_type', 'alg', 'accuracy', 'Net', 'reset period',
-                               'start_point'))
-    version = [36, 38, 40, 42, 44, 46, 49, 50, 48]
-    space_type = (['plane'] * 3 + ['3D'] * 3) * 4
-    gamma = ['0.95', '0.8', '0.6'] * 8
-    reward_type = ['distance', 'potential', 'mix']
-    joints = [f'{i} DOF' for i in range(2, 7)] + ['8 DOF', '9 DOF', '10 DOF', '12 DOF']
-    alg = ['ppo', 'ppo', 'td3', 'td3']
-    accuracy = ['0.02', '0.015', '0.01'] * 2
-    # net = ['MLP'] * 3 + ['DenseNet'] * 3
-    net = ['MLP'] * 3 + ['DenseNet'] * 3
-    reset_period = ['reset every episode', 'reset every 10 episode']
-    start_point = ['100 epoch', '50 epoch', '20 epoch', '0 epoch']
-
-    for i in range(9):
-        file_name = f'her_{version[i]}'
-        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
-            t = json.load(f)
-        d = t['jsons']['eval success rate']['content']['data'][0]
-        x = d['x']
-        y = d['y']
-        x = smoother(x, a=0.9, w=10, mode="window")
-        y = smoother(y, a=0.9, w=10, mode="window")
-        a = []
-        for x_, y_ in zip(x, y):
-            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
-                      'joints': joints[i]})
-        df = df.append(a, ignore_index=False)
-    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="joints")
-    plt.tight_layout()
-    plt.legend(fontsize=10, loc='lower right')
-    plt.savefig('saved_fig/her_random_init_5', bbox_inches='tight')
-    plt.show()
-
-
-def plot_sample_effect():
-    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'sample method'))
-    version = [94, 95, 96, 97]
-    sample_method = ['U shape', 'Uniform', 'Normal_1', 'Normal_2']
-
-    for i in range(4):
-        file_name = f'her_{version[i]}'
-        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
-            t = json.load(f)
-        d = t['jsons']['eval success rate']['content']['data'][0]
-        x = d['x']
-        y = d['y']
-        x = smoother(x, a=0.9, w=20, mode="window")
-        y = smoother(y, a=0.9, w=20, mode="window")
-        a = []
-        for x_, y_ in zip(x, y):
-            a.append({'version': str(version[i]), 'Epoch': float(x_), 'Success Rate(%)': float(y_),
-                      'sample method': sample_method[i]})
-        df = df.append(a, ignore_index=False)
-    sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="sample method")
-    plt.tight_layout()
-    plt.legend(fontsize=10, loc='lower right')
-    plt.savefig('saved_fig/her_sample_effect', bbox_inches='tight')
-    plt.show()
-
-
-def plot_dense_effect():
-    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'net', 'accuracy'))
-    version = [27, 28, 29, 90, 93, 21, 22, 20]
-    net = ['DenseNet', 'DenseNet', 'DenseNet', 'SimpleDenseNet', 'SimpleDenseNet', 'MLP', 'MLP', 'MLP']
-    accuracy = ['0.02', '0.015', '0.01', '0.015', '0.01', '0.02', '0.015', '0.01']
-
-    for i in range(8):
-        file_name = f'her_{version[i]}'
-        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
-            t = json.load(f)
-        d = t['jsons']['eval success rate']['content']['data'][0]
-        x = d['x']
-        y = d['y']
-        x = smoother(x, a=0.9, w=10, mode="window")
-        y = smoother(y, a=0.9, w=10, mode="window")
-        a = []
-        for x_, y_ in zip(x, y):
-            a.append({'version': str(version[i]), 'Epoch': float(x_), 'Success Rate(%)': float(y_),
-                      'net': net[i], 'accuracy': accuracy[i]})
-        df = df.append(a, ignore_index=False)
-    sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="accuracy", style='net')
-    plt.tight_layout()
-    plt.legend(fontsize=10, loc='lower right')
-    plt.savefig('saved_fig/her_dense_precise_effect', bbox_inches='tight')
-    plt.show()
-
-
-def plot_dense_effect2():
-    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'net'))
-    version = [ 100, 80]
-    net = ['MLP', 'DenseNet']
-
-    for i in range(len(version)):
-        file_name = f'her_{version[i]}'
-        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
-            t = json.load(f)
-        d = t['jsons']['eval success rate']['content']['data'][0]
-        x = d['x']
-        y = d['y']
-        x = smoother(x, a=0.9, w=10, mode="window")
-        y = smoother(y, a=0.9, w=10, mode="window")
-        a = []
-        for x_, y_ in zip(x, y):
-            a.append({'version': str(version[i]), 'Epoch': float(x_), 'Success Rate(%)': float(y_),
-                      'net': net[i]})
-        df = df.append(a, ignore_index=False)
-    sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="net")
-    plt.tight_layout()
-    plt.legend(fontsize=10, loc='lower right')
-    plt.savefig('saved_fig/her_dense_precise_effect_2', bbox_inches='tight')
-    plt.show()
-
-
+# ppo_6_distance
 def plot_gamma_effect(ylabel='Return'):
     df = pd.DataFrame(columns=('version', 'seed', 'Episodes', ylabel, 'gamma', 'space_type'))
     # version = [77, 78, 79, 80, 81, 82]  # ppo 24 joints distance
@@ -272,7 +156,7 @@ def plot_gamma_effect(ylabel='Return'):
     plt.savefig('saved_fig/ppo_6_distance.png', bbox_inches='tight')
     plt.show()
 
-
+# td3_reward_effect
 def plot_reward_effect(ylabel='Return'):
     df = pd.DataFrame(columns=('version', 'seed', 'Episodes', ylabel, 'reward_type', 'space_type'))
     version = [153, 156, 159, 162]  # td3 gamma=0.8
@@ -304,7 +188,7 @@ def plot_reward_effect(ylabel='Return'):
     plt.legend(fontsize=10, loc='lower right')
     plt.savefig('saved_fig/td3_reward_effect.png', bbox_inches='tight')
     plt.show()
-
+# td3_reward_effect2
 def plot_reward_effect2(ylabel='Return'):
     df = pd.DataFrame(columns=('version', 'seed', 'Episodes', ylabel, 'reward_type', 'space_type'))
     # version = [153, 156, 159, 162]  # gamma=0.8
@@ -335,7 +219,7 @@ def plot_reward_effect2(ylabel='Return'):
     plt.savefig('saved_fig/td3_reward_effect2.png', bbox_inches='tight')
     plt.show()
 
-
+# td3_random_6_12
 def plot_td3_random(ylabel='Return'):
     df = pd.DataFrame(columns=('version', 'seed', 'Episodes', ylabel, 'DOF'))
     # version = [69, 101]
@@ -379,6 +263,7 @@ def plot_td3_random(ylabel='Return'):
     plt.savefig('saved_fig/td3_random_6_12_2.png', bbox_inches='tight')
     plt.show()
 
+# td3_random_precise_6
 def plot_td3_random_precise(ylabel='Return'):
     df = pd.DataFrame(columns=('version', 'seed', 'Episodes', ylabel, 'accuracy'))
     version = [101, 105, 106]
@@ -407,48 +292,7 @@ def plot_td3_random_precise(ylabel='Return'):
     plt.savefig('saved_fig/td3_random_precise_6.png', bbox_inches='tight')
     plt.show()
 
-def plot_test(ylabel='Return'):
-    # df = pd.DataFrame(columns=('version', 'seed', 'Episodes', ylabel, 'accuracy'))
-
-    file_name = f'test_td3'
-    with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
-        t = json.load(f)
-    x = t['jsons']['window_396e19a570ed40']['content']['data'][1]['x']
-    y = t['jsons']['window_396e19a570ed40']['content']['data'][1]['y']
-    z = t['jsons']['window_396e19a570ed40']['content']['data'][1]['z']
-    data1 = np.array([x, y, z]).T
-    x = t['jsons']['window_396e19a570ed40']['content']['data'][0]['x']
-    y = t['jsons']['window_396e19a570ed40']['content']['data'][0]['y']
-    z = t['jsons']['window_396e19a570ed40']['content']['data'][0]['z']
-    data2 = np.array([x, y, z]).T
-
-    # a = []
-    # for x_, y_ in zip(x, y):
-    #     a.append({'version': str(version[i]), 'Episodes': float(x_), ylabel: float(y_),
-    #               'accuracy': accuracy[i]})
-    # df = df.append(a, ignore_index=False)
-    #
-    # sns.lineplot(x='Episodes', y=ylabel, data=df, hue='accuracy')
-    # plt.tight_layout()
-    # plt.legend(fontsize=10, loc='lower right')
-    # # plt.savefig('saved_fig/test.png', bbox_inches='tight')
-    # plt.show()
-
-    mpl.rcParams['legend.fontsize'] = 10
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-
-    ax.scatter(data1[:, 0], data1[:, 1], data1[:, 2], label='success')
-    ax.scatter(data2[:, 0], data2[:, 1], data2[:, 2], label='fail')
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    set_axes_equal(ax)
-    ax.legend()
-    plt.savefig('saved_fig/td3_eval_3.png', bbox_inches='tight')
-    plt.show()
-
-
+# her_6_12
 def plot_her(ylabel='Success Rate(%)'):
     df = pd.DataFrame(columns=('version', 'seed', 'Epochs', ylabel, 'DOF'))
     version = [6, 5]
@@ -474,6 +318,154 @@ def plot_her(ylabel='Success Rate(%)'):
     plt.savefig('saved_fig/her_6_12.png', bbox_inches='tight')
     plt.show()
 
+# her_dense_precise_effect
+def plot_dense_effect():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'net', 'accuracy'))
+    version = [27, 28, 29, 90, 93, 21, 22, 20]
+    net = ['DenseNet', 'DenseNet', 'DenseNet', 'SimpleDenseNet', 'SimpleDenseNet', 'MLP', 'MLP', 'MLP']
+    accuracy = ['0.02', '0.015', '0.01', '0.015', '0.01', '0.02', '0.015', '0.01']
+
+    for i in range(8):
+        file_name = f'her_{version[i]}'
+        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x']
+        y = d['y']
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'net': net[i], 'accuracy': accuracy[i]})
+        df = df.append(a, ignore_index=False)
+    sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="accuracy", style='net')
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/her_dense_precise_effect', bbox_inches='tight')
+    plt.show()
+
+# her_sample_effect
+def plot_sample_effect():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'sample method'))
+    version = [94, 95, 96, 97]
+    sample_method = ['U shape', 'Uniform', 'Normal_1', 'Normal_2']
+
+    for i in range(4):
+        file_name = f'her_{version[i]}'
+        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x']
+        y = d['y']
+        x = smoother(x, a=0.9, w=20, mode="window")
+        y = smoother(y, a=0.9, w=20, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'sample method': sample_method[i]})
+        df = df.append(a, ignore_index=False)
+    sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="sample method")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/her_sample_effect', bbox_inches='tight')
+    plt.show()
+
+# her_random_init_5
+def plot_random_init_10():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'DOF', 'with normalization',
+                               'space_type', 'gamma', 'joints', 'reward_type', 'alg', 'accuracy', 'Net', 'reset period',
+                               'start_point'))
+    version = [36, 38, 40, 42, 44, 46, 49, 50, 48]
+    space_type = (['plane'] * 3 + ['3D'] * 3) * 4
+    gamma = ['0.95', '0.8', '0.6'] * 8
+    reward_type = ['distance', 'potential', 'mix']
+    joints = [f'{i} DOF' for i in range(2, 7)] + ['8 DOF', '9 DOF', '10 DOF', '12 DOF']
+    alg = ['ppo', 'ppo', 'td3', 'td3']
+    accuracy = ['0.02', '0.015', '0.01'] * 2
+    # net = ['MLP'] * 3 + ['DenseNet'] * 3
+    net = ['MLP'] * 3 + ['DenseNet'] * 3
+    reset_period = ['reset every episode', 'reset every 10 episode']
+    start_point = ['100 epoch', '50 epoch', '20 epoch', '0 epoch']
+
+    for i in range(9):
+        file_name = f'her_{version[i]}'
+        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x']
+        y = d['y']
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'joints': joints[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="joints")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/her_random_init_5', bbox_inches='tight')
+    plt.show()
+
+# her_dense_precise_effect_2
+def plot_dense_effect2():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'net'))
+    version = [ 100, 80]
+    net = ['MLP', 'DenseNet']
+
+    for i in range(len(version)):
+        file_name = f'her_{version[i]}'
+        with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x']
+        y = d['y']
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'net': net[i]})
+        df = df.append(a, ignore_index=False)
+    sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="net")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/her_dense_precise_effect_2', bbox_inches='tight')
+    plt.show()
+
+
+# td3_eval_3
+def plot_test(ylabel='Return'):
+
+    file_name = f'test_td3'
+    with open(f'/home/cq/.visdom/{file_name}.json', 'r') as f:
+        t = json.load(f)
+    x = t['jsons']['window_396e19a570ed40']['content']['data'][1]['x']
+    y = t['jsons']['window_396e19a570ed40']['content']['data'][1]['y']
+    z = t['jsons']['window_396e19a570ed40']['content']['data'][1]['z']
+    data1 = np.array([x, y, z]).T
+    x = t['jsons']['window_396e19a570ed40']['content']['data'][0]['x']
+    y = t['jsons']['window_396e19a570ed40']['content']['data'][0]['y']
+    z = t['jsons']['window_396e19a570ed40']['content']['data'][0]['z']
+    data2 = np.array([x, y, z]).T
+
+    mpl.rcParams['legend.fontsize'] = 10
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    ax.scatter(data1[:, 0], data1[:, 1], data1[:, 2], label='success')
+    ax.scatter(data2[:, 0], data2[:, 1], data2[:, 2], label='fail')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    set_axes_equal(ax)
+    ax.legend()
+    plt.savefig('saved_fig/td3_eval_3.png', bbox_inches='tight')
+    plt.show()
+
+
+# her_random_init_6_2
 def plot_random_init():
     df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'DOF', 'with normalization',
                                'space_type', 'gamma', 'joints', 'reward_type', 'alg', 'accuracy', 'Net', 'reset period',
@@ -503,7 +495,6 @@ def plot_random_init():
     plt.savefig('saved_fig/her_random_init_6', bbox_inches='tight')
     plt.show()
 
-
 def plot_random_init_compare():
     df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'DOF', 'with normalization',
                                'space_type', 'gamma', 'joints', 'reward_type', 'alg', 'accuracy', 'Net', 'reset period',
@@ -512,7 +503,7 @@ def plot_random_init_compare():
     reset_period = ['DenseNet + variable reset period',
                     'DenseNet + reset every 10 episode',
                     'MLP + variable reset period',
-                    'DenseNet = reset every episode']
+                    'DenseNet + reset every episode']
 
 
     for i in range(len(version)):
@@ -535,6 +526,375 @@ def plot_random_init_compare():
     plt.savefig('saved_fig/her_random_init_7', bbox_inches='tight')
     plt.show()
 
+
+def plot_block_0():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index'))
+    version = [  9, 11, 12,  15,  86, 200]
+    # version = [8, 9, 10, 11, 13, 12, 14, 15, 87, 86, 200]
+    # if_block = [
+    #             'without block',
+    #             'with block',
+    #             'without block',
+    #             'with block',
+    #             'without block',
+    #             'with block',
+    #     'without block',
+    #     'with block',
+    #     'without block',
+    #     'with block',
+    #     # 'without block',
+    #     'with block',
+    #             ]
+    # block_index = ['12DOF & plane board', '12DOF & plane board', '12DOF & vertical board', '12DOF & vertical board',
+    #                '12DOF & hole', '12DOF & hole', '24DOF & hole', '24DOF & hole', '24DOF & plane board', '24DOF & plane board',
+    #                '24DOF & vertical board']
+    block_index = ['12DOF & plane board',  '12DOF & vertical board',
+                   '12DOF & hole',  '24DOF & hole',
+                   '24DOF & plane board',
+                   '24DOF & vertical board']
+    file_names = []
+    for i in range(len(version)-1):
+        file_name = f'her_{version[i]}'
+        file_names.append(file_name)
+    file_names.append('block_200')
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][:200]
+        y = d['y'][:200]
+        x = smoother(x, a=0.9, w=20, mode="window")
+        y = smoother(y, a=0.9, w=20, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'block_index': block_index[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="block_index")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/block_0', bbox_inches='tight')
+    plt.show()
+
+def plot_block_1():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'action_l2'))
+    version = [12, 18]
+    action_l2 = [
+                'action_l2=1',
+                'action_l2=0',
+
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][:200]
+        y = d['y'][:200]
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'action_l2': action_l2[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="action_l2", )
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/block_1', bbox_inches='tight')
+    plt.show()
+
+def plot_block_2():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'action_l2'))
+    version = [13, 14, 15]
+    action_l2 = [
+                '0.1m',
+                '0.15m',
+                '0.2m',
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    file_names[1] = 'block_15'
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][:200]
+        y = d['y'][:200]
+        x = smoother(x, a=0.9, w=20, mode="window")
+        y = smoother(y, a=0.9, w=20, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'action_l2': action_l2[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="action_l2", )
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/block_2', bbox_inches='tight')
+    plt.show()
+
+def plot_block_3():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'action_l2',
+                               'board distance'))
+    version = [44, 45, 49, 47, 51, 50]
+    action_l2 = [
+                'belta=0',
+                'belta=0.2',
+        'belta=0',
+        'belta=0.2',
+        'belta=0',
+        'belta=0.2',
+                ]
+    dist = [
+        '0.15m',
+        '0.15m',
+        '0.1m',
+        '0.1m',
+        '0.05m',
+        '0.05m',
+    ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][:200]
+        y = d['y'][:200]
+        x = smoother(x, a=0.9, w=20, mode="window")
+        y = smoother(y, a=0.9, w=20, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'action_l2': action_l2[i], 'board distance': dist[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="board distance", style='action_l2' )
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/block_3', bbox_inches='tight')
+    plt.show()
+# block_4 block_5
+def plot_block_4():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'action_l2',
+                               'board distance'))
+    # version = [104, 105, 106, 107, 108]
+    version = [109, 110, 111, 112, 113]
+    action_l2 = [
+                '1.0 0.0',
+                '0.8 0.2',
+        '0.5 0.5',
+        '1.0 0.25',
+        '1.0 1.0',
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][:200]
+        y = d['y'][:200]
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'action_l2': action_l2[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="action_l2")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/block_5', bbox_inches='tight')
+    plt.show()
+
+def plot_block_6():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'action_l2',
+                               'board distance', 'dynamic type'))
+    version = [77,74,  80]
+    dynamic_type = [
+            'MLP+Forward', 'DenseNet+Forward',  'DenseNet+RND'
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][:200]
+        y = d['y'][:200]
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'dynamic type': dynamic_type[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="dynamic type")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/block_6', bbox_inches='tight')
+    plt.show()
+
+def plot_block_7():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'action_l2',
+                               'board distance', 'dynamic type'))
+    version = [82, 86, 87]
+    action_l2 = [
+            'action_l2=0.1', 'action_l2=0.5', 'action_l2=1.0'
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][:200]
+        y = d['y'][:200]
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'action_l2': action_l2[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="action_l2")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/block_7', bbox_inches='tight')
+    plt.show()
+def plot_block_8():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'alpha',
+                               'board distance', 'dynamic type'))
+    version = [84, 90, 91, 92, 93, 94, 95]
+    alpha = [
+            '0',
+        '0.01',
+        '0.1',
+        '1',
+        '10',
+        '100',
+        '1000'
+
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][:200]
+        y = d['y'][:200]
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'alpha': alpha[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="alpha")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/block_8', bbox_inches='tight')
+    plt.show()
+
+def plot_block_9():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'alpha',
+                               'board distance', 'dynamic type'))
+    version = [152, 138, 141, 144, 147]
+    # version = [137, 140, 143, 146]
+    # version = [136, 139, 142, 145]
+    alpha = ['0',
+            '0.1',
+            '1.0',
+        '10',
+        '100'
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][:200]
+        y = d['y'][:200]
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'alpha': alpha[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="alpha")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/block_9', bbox_inches='tight')
+    plt.show()
+def plot_block_10(index):
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'alpha',
+                               'board distance', 'dynamic type'))
+    if index == 0:
+        version = [160, 161, 162, 163]
+        plt.title('action_l2=0')
+    elif index == 1:
+        version = list(range(156, 160))
+        plt.title('action_l2=0.01')
+    elif index == 2:
+        version = list(range(152, 156))
+        plt.title('action_l2=0.1')
+    else:
+        version = list(range(148, 152))
+        plt.title('action_l2=1')
+    alpha = ['alpha=0',
+            'alpha=0.1',
+            'alpha=1.0',
+        'alpha=10',
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][:200]
+        y = d['y'][:200]
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'alpha': alpha[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="alpha")
+    if index != 1:
+        g.legend_.remove()
+    else:
+        g.legend(loc=2, bbox_to_anchor=(1.05, 1),borderaxespad = 0.)
+    # plt.tight_layout()
+
+    # plt.legend(fontsize=10, loc='best')
+    # plt.savefig('saved_fig/block_10_3', bbox_inches='tight')
+    # plt.show()
 def plot_test_gamma():
     df = pd.DataFrame(columns=('version', 'seed', 'Episodes', 'Return', 'gamma'))
     version = [ 1, 2]
@@ -567,9 +927,9 @@ def plot_her_28(pleate):
     df = pd.DataFrame(columns=('version', 'seed', 'Success Rate(%)', 'Epochs', 'gamma'))
     version = [80, 98, 100, 32]
     label = ['DenseNet + variable reset period',
-                    'DenseNet + reset every 10 episode',
-                    'MLP + variable reset period',
-                    'DenseNet = reset every episode']
+            'DenseNet + reset every 10 episode',
+            'MLP + variable reset period',
+            'DenseNet + reset every episode']
     color = ['r', 'b']
     for i in range(4):
         file_name = f'her_{version[i]}'
@@ -590,16 +950,173 @@ def plot_her_28(pleate):
     plt.legend(fontsize=10, loc='lower right')
     plt.savefig('saved_fig/test.png', bbox_inches='tight')
     plt.show()
+def plot_block_11():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'alpha',
+                               'board distance', 'dynamic type'))
+    version = [148, 152, 156, 160]
+    # version = [137, 140, 143, 146]
+    # version = [136, 139, 142, 145]
+    alpha = ['action_l2=1',
+            'action_l2=0.1',
+            'action_l2=0.01',
+        'action_l2=0',
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][:200]
+        y = d['y'][:200]
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'alpha': alpha[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="alpha")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='best')
+    plt.savefig('saved_fig/block_11', bbox_inches='tight')
+    plt.show()
 
+def plot_block_12():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Value Loss', 'if block', 'block_index', 'alpha',
+                               'board distance', 'dynamic type', 'batch size'))
+    # version = [120, 123, 124, 131,  132,  133]
+    version = [128, 129, 130, 181, 183, 184]
+    batch_size = [
+        '1 worker / batch size 256',
+        '2 worker / batch size 512',
+        '4 worker / batch size 1024',
+        '8 worker / batch size 2048',
+        # '2048_16',
+        '16 worker / batch size 4096',
+        '16 worker / batch size 8192'
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['critic_reward_loss']['content']['data'][0]
+        x = d['x'][1:]
+        y = d['y'][1:]
+        # x = smoother(x, a=0.9, w=10, mode="window")
+        # y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Value Loss': float(y_),
+                      'batch size': batch_size[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Value Loss", data=df, hue="batch size")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='best')
+    plt.savefig('saved_fig/block_12_12', bbox_inches='tight')
+    plt.show()
+
+def plot_block_13():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'alpha',
+                               'board distance', 'dynamic type', 'batch size'))
+    # version = [120, 123, 124, 131,  132,  133]
+    version = [153, 185]
+    batch_size = [
+        '1 worker / batch size 256',
+        '8 worker / batch size 2048',
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][1:]
+        y = d['y'][1:]
+        if i == 1:
+            idx = x[-1]
+            for j in range(int(idx+1), 200):
+                x.append(j)
+                y.append(100)
+
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'batch size': batch_size[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="batch size")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='lower right')
+    plt.savefig('saved_fig/block_13', bbox_inches='tight')
+    plt.show()
+
+def plot_block_15():
+    df = pd.DataFrame(columns=('version', 'seed', 'Epoch', 'Success Rate(%)', 'if block', 'block_index', 'alpha',
+                               'board distance', 'dynamic type', 'block'))
+    # version = [120, 123, 124, 131,  132,  133]
+    version = [186, 202, 203]
+    batch_size = [
+        'target_0',
+        'target_1',
+        'target_2',
+                ]
+    file_names = []
+    for i in range(len(version)):
+        file_name = f'block_{version[i]}'
+        file_names.append(file_name)
+    for i in range(len(version)):
+        with open(f'/home/cq/.visdom/{file_names[i]}.json', 'r') as f:
+            t = json.load(f)
+        d = t['jsons']['eval success rate']['content']['data'][0]
+        x = d['x'][1:]
+        y = d['y'][1:]
+        if i == 1:
+            idx = x[-1]
+            for j in range(int(idx+1), 200):
+                x.append(j)
+                y.append(100)
+
+        x = smoother(x, a=0.9, w=10, mode="window")
+        y = smoother(y, a=0.9, w=10, mode="window")
+        a = []
+        for x_, y_ in zip(x, y):
+            a.append({'version': str(version[i]), 'seed': 1, 'Epoch': float(x_), 'Success Rate(%)': float(y_),
+                      'batch size': batch_size[i]})
+        df = df.append(a, ignore_index=False)
+    g = sns.lineplot(x='Epoch', y="Success Rate(%)", data=df, hue="batch size")
+    plt.tight_layout()
+    plt.legend(fontsize=10, loc='best')
+    plt.savefig('saved_fig/block_15', bbox_inches='tight')
+    plt.show()
 if __name__ == '__main__':
     os.makedirs('saved_fig', exist_ok=True)
     sns.set()
     fig, ax = plt.subplots(1, 1, figsize=(6, 4), dpi=500)
     ax.xaxis.get_major_formatter().set_powerlimits((0, 1))
-    # sns.set_palette(sns.color_palette('deep', 4))
-    pleate = sns.color_palette('deep', 4)
-    # plot_her()   # ylabel='Success Rate(%)'
-    # plot_td3_random_precise(ylabel='Success Rate(%)')
-    plot_her_28(pleate)
+    sns.set_palette(sns.color_palette('flare_r', 6))
+    plot_block_12()
+
+
+    # fig = plt.figure(figsize=(12,8), dpi=500)
+    #
+    # for i in range(4):
+    #     fig.add_subplot(2, 2, i+1)
+    #     sns.set_palette(sns.color_palette('deep', 4))
+    #     plot_block_10(i)
+    #
+    # # plt.legend(loc=2, bbox_to_anchor=(1.05,1.0),borderaxespad = 0.)
+    # plt.savefig('saved_fig/block_10_all', bbox_inches='tight')
+    # plt.show()
+
+
 
 

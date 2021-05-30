@@ -507,7 +507,7 @@ her_78 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(100--30-
 her_79 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(50--30-->10)  
 her_81 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(20--30-->10)  
 her_80 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(0--30-->10)  999.pth二校门 
-her_118 joints 24 3D random goal dt .02 dense action_l2 1 (random_initial0--30-->10)  the same as her_80
+her_118 joints 24 3D random goal dt .02 dense action_l2 1 random_initial(0--30-->10)  the same as her_80
 her_100 joints 24 3D random goal dt .02 mlp action_l2 1 random_initial(0--30-->10) 
 
 her_82 joints 24 3D random goal dt .02 dense action_l2 0.1 random_initial(50--30-->10)  
@@ -568,7 +568,7 @@ block_10 dt 0.02 block0   goal block-env block0_1_env_6    succeed at 80
 
 block_7  dt 0.02 block3 goal block-env plane    fail
 block_8  dt 0.02 block3 goal plane              succeed at 47 epoch
-block_9  dt 0.02 block3 goal plane actor MLP    succeed at 82 epoch
+~~block_9  dt 0.02 block3 goal plane actor MLP    succeed at 82 epoch~~
 
 block_11 dt 0.02 block0_1 goal block-env block0_1_env_6    
 block_12 dt 0.02 block0_2 goal block-env block0_1_env_6
@@ -655,7 +655,12 @@ block_111 pop-art block0_5 goal block0_5_env_6  [0.5, 0.5]
 block_112 pop-art block0_5 goal block0_5_env_6  [1.0, 0.25] succeed
 block_113 pop-art block0_5 goal block0_5_env_6  [1.0, 1.0]
 
-
+block_185 rms block0_5 block0_5_env_6 [1.0 0.1] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048 
+block_202 rms block0_6 block0_5_env_6 [1.0 0.1] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048 
+block_203 rms block0_7 block0_5_env_6 [1.0 0.1] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048 
+block_190 pop_art block0_5 block0_5_env_6 [0.8 0.2] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048  epoch 200 dense_simple
+block_191 pop_art block0_5 block0_5_env_6 [0.8 0.2] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048  epoch 200 dense
+block_192 pop_art block0_5 block0_5_env_6 [0.8 0.2] action_l2 0.1  --nenvs 1 --n-batches 40 --batch-size 256  epoch 200 dense
 
 #ratio is more important
 
@@ -664,6 +669,11 @@ block_61 block0_5 goal block-env block0_6_env_6 reward_weight 0.8 explore_weight
 block_63 block0_5 goal block-env block0_6_env_6 reward_weight 0.5 explore_weight 0.5 forward dynamic 和block_64差不多，向右但是速度很慢
 block_64 block0_5 goal block-env block0_6_env_6 reward_weight 0.5 explore_weight 0.5 RND  没学到， 有学到的迹象，向右转而不是向左转， 但是跑得很慢导致50步没出结果
 block_66 block0_5 goal block-env block0_6_env_6 reward_weight 0.2 explore_weight 0.8 RND  没学到
+
+block_186 rms     block0_5 block0_6_env_6 [1.0 0.1] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048 epoch 200
+block_187 rms     block0_5 block0_6_env_6 [1.0  10] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048 
+block_188 rms     block0_5 block0_6_env_6 [1.0 0.1] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048  epoch 500
+block_189 pop_art block0_5 block0_6_env_6 [0.8 0.2] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048  epoch 500
 
 #平面钻孔
 block_60 block3   goal block-env block3_env_12 reward_weight 0.8 explore_weight 0.2 stable 0.005 min_step 100000 plane
@@ -717,6 +727,7 @@ block_95 block2 mani_env_6 action_l2 1 rms  reward 1.0 explore 1000
 block_96 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 1
 block_97 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 10 
 block_98 block0_5 block0_5_env_6 action_l2 1 rms  reward 1.0 explore 100~~ 
+block_152 rms block0_5 block0_5_env_6 [1.0 0.0] lr_critic_explore 0.001 action_l2 0.1
 block_136 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 0.1 lr_critic_explore 0.0001
 block_137 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 0.1 lr_critic_explore 0.0005
 block_138 block0_5 block0_5_env_6 action_l2 0.1 rms reward 1.0 explore 0.1 lr_critic_explore 0.001
@@ -748,10 +759,10 @@ block_157 rms block0_5 block0_5_env_6 [1.0 0.1] lr_critic_explore 0.001 action_l
 block_158 rms block0_5 block0_5_env_6 [1.0 1]   lr_critic_explore 0.001 action_l2 0.01 
 block_159 rms block0_5 block0_5_env_6 [1.0 10]  lr_critic_explore 0.001 action_l2 0.01 
 
-block_160 rms block0_5 block0_5_env_6 [1.0 0.0] lr_critic_explore 0.001 action_l2 0.01
-block_161 rms block0_5 block0_5_env_6 [1.0 0.1] lr_critic_explore 0.001 action_l2 0.01 
-block_162 rms block0_5 block0_5_env_6 [1.0 1]   lr_critic_explore 0.001 action_l2 0.01 
-block_163 rms block0_5 block0_5_env_6 [1.0 10]  lr_critic_explore 0.001 action_l2 0.01 
+block_160 rms block0_5 block0_5_env_6 [1.0 0.0] lr_critic_explore 0.001 action_l2 0
+block_161 rms block0_5 block0_5_env_6 [1.0 0.1] lr_critic_explore 0.001 action_l2 0
+block_162 rms block0_5 block0_5_env_6 [1.0 1]   lr_critic_explore 0.001 action_l2 0
+block_163 rms block0_5 block0_5_env_6 [1.0 10]  lr_critic_explore 0.001 action_l2 0
 
 #-----------------------------HER_RND_MP------------------------------------------------
 block_119 random goal joints 12 --nenvs 1 --n-batches 40 --batch-size 256  
@@ -769,9 +780,17 @@ block_133 random goal joints 12 --nenvs 16 --n-batches 40 --batch-size 8192
 block_128 random goal joints 24 --nenvs 4 --n-batches 40 --batch-size 256  
 block_129 random goal joints 24 --nenvs 4 --n-batches 40 --batch-size 512 
 block_130 random goal joints 24 --nenvs 4 --n-batches 40 --batch-size 1024   
+block_181 random goal joints 24 --nenvs 8 --n-batches 40 --batch-size 2048 
+block_182 random goal joints 24 --nenvs 16 --n-batches 40 --batch-size 2048 
+block_183 random goal joints 24 --nenvs 16 --n-batches 40 --batch-size 4096 
+block_184 random goal joints 24 --nenvs 16 --n-batches 40 --batch-size 8192 
+
+block_193 rms block0_5 block0_5_env_6 [1.0 0.1] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048 epoch 200 no HER
+block_195 rms block0_5 block0_5_env_6 [1.0 1] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048 epoch 200 no HER
+block_194 rms block0_5 block0_5_env_6 [1.0 10] action_l2 0.1  --nenvs 8 --n-batches 40 --batch-size 2048 epoch 200 no HER
 
 tds_1 hard goal joint 12 
 tds_2 hard goal joint 12 --nenvs 1 --n-batches 1 --batch-size 64  dense distance 
-tds_3 hard goal joint 12 --nenvs 8 --n-batches 1 --batch-size 512 dense distance 
+~~tds_3 hard goal joint 12 --nenvs 8 --n-batches 1 --batch-size 512 dense distance~~ 
 tds_4 hard goal joint 12 --nenvs 8 --n-batches 1 --batch-size 512 dense distance 
-tds_4 hard goal joint 12 --nenvs 8 --n-batches 1 --batch-size 512 sparse 
+tds_5 hard goal joint 12 --nenvs 8 --n-batches 1 --batch-size 512 sparse 
